@@ -8,6 +8,43 @@ import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { createClient } from "@/lib/supabase/server"
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const supabase = await createClient()
+  const { id } = await params
+
+  let { data: product } = await supabase
+    .from("products")
+    .select("name, seo_title, seo_description, seo_keywords, featured_image_url")
+    .eq("id", id)
+    .single()
+
+  if (!product) {
+    const { data: slugProduct } = await supabase
+      .from("products")
+      .select("name, seo_title, seo_description, seo_keywords, featured_image_url")
+      .eq("slug", id)
+      .single()
+    product = slugProduct
+  }
+
+  if (!product) return {}
+
+  const title = product.seo_title || `${product.name} | Gulshan Modest`
+  const description = product.seo_description || `Shop ${product.name} online at Gulshan Modest.`
+  const keywords = product.seo_keywords ? product.seo_keywords.split(',').map((k: string) => k.trim()) : []
+
+  return {
+    title,
+    description,
+    keywords,
+    openGraph: {
+      title,
+      description,
+      images: product.featured_image_url ? [{ url: product.featured_image_url }] : [],
+    }
+  }
+}
+
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
   const { id } = await params;
@@ -166,19 +203,37 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <span className="text-ink font-semibold truncate max-w-[200px]">{productData.name}</span>
           </div>
 
-          <ProductViewSection
-            product={{
-              id: productData.id,
-              name: productData.name,
-              badge: productData.badge,
-              rating: productData.rating,
-              short_description: productData.short_description,
-            }}
-            images={images}
-            variants={variants}
-            information={information}
-            categoryName={categoryName}
-          />
+          {(() => {
+            const parseProductColors = (colorNameField: string | null) => {
+              if (!colorNameField) return []
+              try {
+                if (colorNameField.startsWith('[')) {
+                  const parsed = JSON.parse(colorNameField) as { name: string; hex: string }[]
+                  return parsed.map(c => ({ name: c.name.trim(), hex: c.hex || '#E6DAC4' })).filter(c => c.name)
+                }
+              } catch (e) {}
+              return colorNameField.split(',').map(c => ({ name: c.trim(), hex: '#E6DAC4' })).filter(c => c.name)
+            }
+
+            const colors = parseProductColors(productData.color_name)
+
+            return (
+              <ProductViewSection
+                product={{
+                  id: productData.id,
+                  name: productData.name,
+                  badge: productData.badge,
+                  rating: productData.rating,
+                  short_description: productData.short_description,
+                  colors: colors,
+                }}
+                images={images}
+                variants={variants}
+                information={information}
+                categoryName={categoryName}
+              />
+            )
+          })()}
 
           <div className="space-y-6 pt-6 border-t border-cream-line/50">
                 {productData.description && (

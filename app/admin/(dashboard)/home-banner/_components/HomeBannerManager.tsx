@@ -167,7 +167,7 @@ export function HomeBannerManager({
               >
                 <div className="flex items-center gap-4 p-4">
                   <div className="w-32 aspect-[3/1] shrink-0 rounded-lg overflow-hidden relative bg-stone-200 border border-stone-200">
-                    <Image src={img.image_url} alt={`Banner ${index + 1}`} fill className="object-cover" />
+                    <Image src={img.image_url} alt={`Banner ${index + 1}`} fill className="object-contain" />
                   </div>
 
                   <div className="flex-1 min-w-0 space-y-2">

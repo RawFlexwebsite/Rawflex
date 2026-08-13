@@ -51,7 +51,7 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
   }, [selectedCategory])
 
   const toggleCategory = (id: string) => {
-    setSelectedCategories(prev => 
+    setSelectedCategories(prev =>
       prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
     )
   }
@@ -72,18 +72,17 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
         <div className="space-y-3.5">
           {categories.map((cat) => (
             <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
-              <input 
-                type="checkbox" 
-                className="hidden" 
+              <input
+                type="checkbox"
+                className="hidden"
                 checked={selectedCategories.includes(cat.id)}
                 onChange={() => toggleCategory(cat.id)}
               />
-              <div 
-                className={`w-5 h-5 rounded border flex items-center justify-center transition-colors shadow-sm ${
-                  selectedCategories.includes(cat.id) 
-                    ? 'bg-emerald border-emerald' 
+              <div
+                className={`w-5 h-5 rounded border flex items-center justify-center transition-colors shadow-sm ${selectedCategories.includes(cat.id)
+                    ? 'bg-emerald border-emerald'
                     : 'bg-white border-cream-line group-hover:border-emerald'
-                }`}
+                  }`}
               >
                 {selectedCategories.includes(cat.id) && (
                   <svg className="w-3.5 h-3.5 text-cream" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -105,12 +104,12 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
           <h3 className="font-display font-bold text-xl text-ink">Max Price</h3>
           <span className="font-bold text-emerald">₹{maxPrice.toLocaleString('en-IN')}</span>
         </div>
-        <input 
-          type="range" 
-          min="500" 
-          max="15000" 
-          step="100" 
-          value={maxPrice} 
+        <input
+          type="range"
+          min="500"
+          max="15000"
+          step="100"
+          value={maxPrice}
           onChange={(e) => setMaxPrice(Number(e.target.value))}
           className="w-full cursor-pointer accent-emerald"
         />
@@ -141,7 +140,7 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        
+
         {/* Left Sidebar Filter (Desktop) */}
         <div className="hidden lg:block lg:col-span-1 bg-white p-6 rounded-[28px] border border-emerald/10 shadow-lg h-fit sticky top-[100px]">
           {FilterContent}
@@ -154,7 +153,7 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
               Showing <span className="text-emerald">{filteredProducts.length}</span> products
             </p>
             {/* Mobile Filter Toggle */}
-            <button 
+            <button
               onClick={() => setIsMobileFilterOpen(true)}
               className="lg:hidden px-4 py-2 bg-emerald text-cream rounded-full text-sm font-semibold flex items-center gap-2 shadow-sm"
             >
@@ -171,104 +170,104 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {filteredProducts.map((p) => {
-              const catName = categories.find(c => c.id === p.category_id)?.name || p.category_id
-              return (
-                <div key={p.id} className="lift group bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-cream-line/80 flex flex-col">
-                  <Link href={`/shop/${p.id}`} className="relative aspect-[4/5] overflow-hidden block bg-cream-deep/20">
-                    <Image
-                      src={p.image_url}
-                      alt={p.name}
-                      fill
-                      sizes="(max-width: 768px) 50vw, 320px"
-                      className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                    />
-                    {p.badge && (
-                      <span className="absolute top-3 left-3 bg-emerald text-cream text-[9px] md:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-sm">
-                        {p.badge}
-                      </span>
-                    )}
-                    <span className="absolute bottom-3 right-3 bg-gold text-cream text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded shadow-sm">
-                      {catName}
-                    </span>
-                  </Link>
-
-                  <div className="p-3 md:p-4 flex flex-col flex-1">
-                    <div className="flex-1">
-                      <Link href={`/shop/${p.id}`} className="hover:text-emerald transition-colors">
-                        <h3 className="font-display font-semibold text-ink text-[13px] md:text-[15px] leading-snug line-clamp-2">
-                          {p.name}
-                        </h3>
-                      </Link>
-                      {p.colors && p.colors.length > 0 ? (
-                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                          {p.colors.slice(0, 5).map((colorObj) => (
-                            <span
-                              key={colorObj.name}
-                              title={colorObj.name}
-                              className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0 shadow-sm"
-                              style={{ backgroundColor: colorObj.hex }}
-                            />
-                          ))}
-                          {p.colors.length > 5 && (
-                            <span className="text-[10px] text-ink/50 font-medium">
-                              +{p.colors.length - 5}
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        p.colorCount && p.colorCount > 1 && (
-                          <p className="mt-1 text-[11px] font-semibold text-emerald">
-                            {p.colorCount} colors available
-                          </p>
-                        )
-                      )}
-                    </div>
-
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="font-display font-bold text-ink text-[14px] md:text-base">
-                        ₹{p.price.toLocaleString('en-IN')}
-                      </span>
-                      {p.oldPrice && (
-                        <span className="text-ink/40 text-[12px] line-through">
-                          ₹{p.oldPrice.toLocaleString('en-IN')}
+              {filteredProducts.map((p) => {
+                const catName = categories.find(c => c.id === p.category_id)?.name || p.category_id
+                return (
+                  <div key={p.id} className="lift group bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-cream-line/80 flex flex-col">
+                    <Link href={`/shop/${p.id}`} className="relative aspect-[4/5] overflow-hidden block bg-cream-deep/20">
+                      <Image
+                        src={p.image_url}
+                        alt={p.name}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 320px"
+                        className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                      />
+                      {p.badge && (
+                        <span className="absolute top-3 left-3 bg-emerald text-cream text-[9px] md:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-sm">
+                          {p.badge}
                         </span>
                       )}
-                    </div>
+                      <span className="absolute bottom-3 right-3 bg-gold text-cream text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded shadow-sm">
+                        {catName}
+                      </span>
+                    </Link>
 
-                    <div className="mt-3 grid grid-cols-1 gap-2">
-                      <button
-                        onClick={() => addToCart({
-                          id: p.id,
-                          name: p.name,
-                          price: p.price,
-                          image_url: p.image_url,
-                          category_name: catName
-                        })}
-                        className="w-full text-center rounded-lg border border-emerald/50 text-emerald text-[13px] md:text-sm font-bold py-2.5 hover:bg-emerald hover:border-emerald hover:text-cream transition-colors flex items-center justify-center"
-                      >
-                        Add to cart
-                      </button>
-                      <button
-                        onClick={() => {
-                          addToCart({
+                    <div className="p-3 md:p-4 flex flex-col flex-1">
+                      <div className="flex-1">
+                        <Link href={`/shop/${p.id}`} className="hover:text-emerald transition-colors">
+                          <h3 className="font-display font-semibold text-ink text-[13px] md:text-[15px] leading-snug line-clamp-2">
+                            {p.name}
+                          </h3>
+                        </Link>
+                        {p.colors && p.colors.length > 0 ? (
+                          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                            {p.colors.slice(0, 5).map((colorObj) => (
+                              <span
+                                key={colorObj.name}
+                                title={colorObj.name}
+                                className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0 shadow-sm"
+                                style={{ backgroundColor: colorObj.hex }}
+                              />
+                            ))}
+                            {p.colors.length > 5 && (
+                              <span className="text-[10px] text-ink/50 font-medium">
+                                +{p.colors.length - 5}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          p.colorCount && p.colorCount > 1 && (
+                            <p className="mt-1 text-[11px] font-semibold text-emerald">
+                              {p.colorCount} colors available
+                            </p>
+                          )
+                        )}
+                      </div>
+
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="font-display font-bold text-ink text-[14px] md:text-base">
+                          ₹{p.price.toLocaleString('en-IN')}
+                        </span>
+                        {p.oldPrice && (
+                          <span className="text-ink/40 text-[12px] line-through">
+                            ₹{p.oldPrice.toLocaleString('en-IN')}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-1 gap-2">
+                        <button
+                          onClick={() => addToCart({
                             id: p.id,
                             name: p.name,
                             price: p.price,
                             image_url: p.image_url,
                             category_name: catName
-                          });
-                          router.push('/checkout');
-                        }}
-                        className="w-full text-center rounded-lg bg-emerald text-cream text-[13px] md:text-sm font-bold py-2.5 hover:bg-emerald-deep transition-colors flex items-center justify-center shadow-sm"
-                      >
-                        Buy now
-                      </button>
+                          })}
+                          className="w-full text-center rounded-lg border border-emerald/50 text-emerald text-[13px] md:text-sm font-bold py-2.5 hover:bg-emerald hover:border-emerald hover:text-cream transition-colors flex items-center justify-center"
+                        >
+                          Add to cart
+                        </button>
+                        <button
+                          onClick={() => {
+                            addToCart({
+                              id: p.id,
+                              name: p.name,
+                              price: p.price,
+                              image_url: p.image_url,
+                              category_name: catName
+                            });
+                            router.push('/checkout');
+                          }}
+                          className="w-full text-center rounded-lg bg-emerald text-cream text-[13px] md:text-sm font-bold py-2.5 hover:bg-emerald-deep transition-colors flex items-center justify-center shadow-sm"
+                        >
+                          Buy now
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
             </div>
           )}
         </div>

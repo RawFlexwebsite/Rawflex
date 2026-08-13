@@ -24,47 +24,12 @@ type ProductViewSectionProps = {
     badge: string | null
     rating: number | null
     short_description: string | null
+    colors: { name: string; hex: string }[]
   }
   images: ProductImage[]
   variants: ProductVariant[]
   information: { label: string; value: string }[]
   categoryName: string
-}
-
-const COLOR_MAP: Record<string, string> = {
-  black: '#1A1A1A',
-  white: '#FFFFFF',
-  red: '#DC2626',
-  blue: '#2563EB',
-  green: '#16A34A',
-  yellow: '#FACC15',
-  purple: '#9333EA',
-  pink: '#EC4899',
-  orange: '#F97316',
-  gray: '#6B7280',
-  grey: '#6B7280',
-  brown: '#78350F',
-  olive: '#556B2F',
-  cream: '#FFFDD0',
-  sage: '#8FBC8F',
-  maroon: '#800000',
-  gold: '#D4AF37',
-  beige: '#F5F5DC',
-  navy: '#1E3A8A',
-  teal: '#0D9488',
-  lavender: '#E6E6FA',
-  mustard: '#E1AD01',
-  peach: '#FFDAB9',
-  mint: '#AAF0D1',
-  rust: '#B7410E',
-  coral: '#FF7F50',
-  emerald: '#059669',
-  charcoal: '#374151',
-}
-
-function getColorHex(name: string): string {
-  const clean = name.toLowerCase().trim()
-  return COLOR_MAP[clean] || '#E6DAC4'
 }
 
 export default function ProductViewSection({
@@ -74,13 +39,10 @@ export default function ProductViewSection({
   information,
   categoryName,
 }: ProductViewSectionProps) {
-  // Extract all unique color names assigned to images
-  const uniqueColors = Array.from(
-    new Set(images.map((img) => img.color_name).filter(Boolean))
-  ) as string[]
+  const uniqueColors = product.colors || []
 
   const [selectedColor, setSelectedColor] = useState<string | null>(
-    uniqueColors.length > 0 ? uniqueColors[0] : null
+    uniqueColors.length > 0 ? uniqueColors[0].name : null
   )
 
   // Filter gallery images:
@@ -128,22 +90,22 @@ export default function ProductViewSection({
               </span>
             </p>
             <div className="flex flex-wrap gap-3">
-              {uniqueColors.map((color) => {
-                const isSelected = selectedColor?.toLowerCase().trim() === color.toLowerCase().trim()
+              {uniqueColors.map((colorObj) => {
+                const isSelected = selectedColor?.toLowerCase().trim() === colorObj.name.toLowerCase().trim()
                 return (
                   <button
-                    key={color}
+                    key={colorObj.name}
                     type="button"
-                    onClick={() => setSelectedColor(color)}
-                    title={color}
+                    onClick={() => setSelectedColor(colorObj.name)}
+                    title={colorObj.name}
                     className={`relative w-11 h-11 rounded-full border-2 overflow-hidden shrink-0 transition-all ${
                       isSelected
                         ? 'border-emerald scale-110 shadow-md ring-2 ring-emerald/20'
                         : 'border-cream-line hover:border-emerald/50'
                     }`}
-                    style={{ backgroundColor: getColorHex(color) }}
+                    style={{ backgroundColor: colorObj.hex }}
                   >
-                    <span className="sr-only">{color}</span>
+                    <span className="sr-only">{colorObj.name}</span>
                   </button>
                 )
               })}

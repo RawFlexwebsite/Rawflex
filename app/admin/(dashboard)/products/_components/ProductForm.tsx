@@ -222,7 +222,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 id="seo-title"
                 name="seo_title"
                 type="text"
-                maxLength={60}
+                maxLength={200}
                 defaultValue={product?.seo_title || ''}
                 placeholder="Custom title for search engines"
                 className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
@@ -240,10 +240,27 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 id="seo-description"
                 name="seo_description"
                 rows={5}
-                maxLength={160}
+                maxLength={500}
                 defaultValue={product?.seo_description || ''}
                 placeholder="Meta description for search results"
                 className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200 resize-y"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="seo-keywords"
+                className="block text-sm font-medium text-stone-700 mb-1.5"
+              >
+                SEO Keywords (comma separated)
+              </label>
+              <input
+                id="seo-keywords"
+                name="seo_keywords"
+                type="text"
+                defaultValue={product?.seo_keywords || ''}
+                placeholder="e.g. abaya, modest fashion, premium hijab"
+                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
               />
             </div>
           </div>

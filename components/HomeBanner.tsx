@@ -83,7 +83,7 @@ export default function HomeBanner({ images }: { images: BannerImage[] }) {
                 alt={`Banner ${i + 1}`}
                 fill
                 sizes="(max-width: 768px) 100vw, 1400px"
-                className="object-cover"
+                className="object-contain"
                 priority={i === 0}
               />
             );

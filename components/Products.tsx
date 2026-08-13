@@ -30,13 +30,13 @@ function formatINR(n: number) {
   return `₹${n.toLocaleString("en-IN")}`;
 }
 
-export default function Products({ 
-  products = [], 
+export default function Products({
+  products = [],
   categories = [],
   title = "This season's favourites",
   subtitle = "A curated edit from our latest drop — message us on WhatsApp for sizing, fabric notes or a custom order."
-}: { 
-  products?: Product[], 
+}: {
+  products?: Product[],
   categories?: Category[],
   title?: string,
   subtitle?: string
@@ -58,7 +58,7 @@ export default function Products({
             {subtitle}
           </p>
         </Reveal>
- 
+
         <div className="mt-12 flex flex-wrap justify-center gap-4 md:gap-6">
           {products.slice(0, 10).map((p, i) => {
             const categoryName = categories.find(c => c.id === p.category_id)?.name || p.category_id || "Uncategorized";
@@ -113,49 +113,49 @@ export default function Products({
                         )
                       )}
                     </div>
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="font-display font-bold text-ink text-[14px] md:text-base">
-                      {formatINR(p.price)}
-                    </span>
-                    {p.oldPrice && (
-                      <span className="text-ink/40 text-[12px] line-through">
-                        {formatINR(p.oldPrice)}
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="font-display font-bold text-ink text-[14px] md:text-base">
+                        {formatINR(p.price)}
                       </span>
-                    )}
-                  </div>
-                  <div className="mt-3 grid grid-cols-1 gap-2">
-                    <button
-                      onClick={() => addToCart({
-                        id: p.id,
-                        name: p.name,
-                        price: p.price,
-                        image_url: p.image_url,
-                        category_name: categoryName
-                      })}
-                      className="w-full text-center rounded-lg border border-emerald/50 text-emerald text-[13px] md:text-sm font-bold py-2.5 hover:bg-emerald hover:border-emerald hover:text-cream transition-colors flex items-center justify-center"
-                    >
-                      Add to cart
-                    </button>
-                    <button
-                      onClick={() => {
-                        addToCart({
+                      {p.oldPrice && (
+                        <span className="text-ink/40 text-[12px] line-through">
+                          {formatINR(p.oldPrice)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-3 grid grid-cols-1 gap-2">
+                      <button
+                        onClick={() => addToCart({
                           id: p.id,
                           name: p.name,
                           price: p.price,
                           image_url: p.image_url,
                           category_name: categoryName
-                        });
-                        router.push('/checkout');
-                      }}
-                      className="w-full text-center rounded-lg bg-emerald text-cream text-[13px] md:text-sm font-bold py-2.5 hover:bg-emerald-deep transition-colors flex items-center justify-center shadow-sm"
-                    >
-                      Buy now
-                    </button>
+                        })}
+                        className="w-full text-center rounded-lg border border-emerald/50 text-emerald text-[13px] md:text-sm font-bold py-2.5 hover:bg-emerald hover:border-emerald hover:text-cream transition-colors flex items-center justify-center"
+                      >
+                        Add to cart
+                      </button>
+                      <button
+                        onClick={() => {
+                          addToCart({
+                            id: p.id,
+                            name: p.name,
+                            price: p.price,
+                            image_url: p.image_url,
+                            category_name: categoryName
+                          });
+                          router.push('/checkout');
+                        }}
+                        className="w-full text-center rounded-lg bg-emerald text-cream text-[13px] md:text-sm font-bold py-2.5 hover:bg-emerald-deep transition-colors flex items-center justify-center shadow-sm"
+                      >
+                        Buy now
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Reveal>
-          );
+              </Reveal>
+            );
           })}
         </div>
 

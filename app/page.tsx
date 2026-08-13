@@ -17,6 +17,21 @@ import PakistaniEditBanner from "@/components/PakistaniEditBanner";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
+  // Auto-migration for seo_keywords column
+  try {
+    const { Client } = require('pg');
+    const client = new Client({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+    await client.connect();
+    await client.query('ALTER TABLE products ADD COLUMN IF NOT EXISTS seo_keywords TEXT;');
+    await client.query("NOTIFY pgrst, 'reload schema';");
+    await client.end();
+  } catch (e) {
+    console.error('Migration error:', e);
+  }
+
   const supabase = await createClient();
 
   // Fetch active hero slides
@@ -92,7 +107,7 @@ export default async function Home() {
         const parsed = JSON.parse(colorNameField) as { name: string; hex: string }[]
         return parsed.map(c => ({ name: c.name.trim(), hex: c.hex || '#E6DAC4' })).filter(c => c.name)
       }
-    } catch (e) {}
+    } catch (e) { }
     return colorNameField.split(',').map(c => ({ name: c.trim(), hex: '#E6DAC4' })).filter(c => c.name)
   }
 
