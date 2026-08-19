@@ -28,14 +28,14 @@ export default function NewDrops({
 
   return (
     <section id="new-drops" className="relative pt-4 pb-10 md:pt-5 md:pb-14 bg-[#0a0909]">
-      <div className="max-w-wrap mx-auto px-5 md:px-8">
-        <div className="grid lg:grid-cols-[220px_1fr] xl:grid-cols-[260px_1fr] gap-8 lg:gap-10 items-center">
+      <div className="max-w-wrap mx-auto px-4 sm:px-5 md:px-8">
+        <div className="grid lg:grid-cols-[220px_1fr] xl:grid-cols-[260px_1fr] gap-6 lg:gap-8 xl:gap-10 items-center">
           {/* Left copy */}
-          <div>
-            <h2 className="font-display font-black text-3xl md:text-4xl text-white uppercase leading-[1.05]">
+          <div className="lg:sticky lg:top-28">
+            <h2 className="font-display font-black text-2xl sm:text-3xl md:text-4xl text-white uppercase leading-[1.05]">
               New Drops
             </h2>
-            <p className="mt-4 text-white/50 text-sm leading-relaxed">
+            <p className="mt-3 sm:mt-4 text-white/50 text-sm sm:text-base leading-relaxed">
               Fresh styles.
               <br />
               Limited pieces.
@@ -46,7 +46,7 @@ export default function NewDrops({
             </p>
             <Link
               href="/shop?category=new-drops"
-              className="mt-6 inline-flex items-center gap-2 text-[#D4A82C] font-bold text-[13px] tracking-[0.12em] uppercase hover:gap-3 transition-all"
+              className="mt-5 sm:mt-6 inline-flex items-center gap-2 text-[#D4A82C] font-bold text-[12px] sm:text-[13px] tracking-[0.12em] uppercase hover:gap-3 transition-all"
             >
               View all drops
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -56,7 +56,7 @@ export default function NewDrops({
           </div>
 
           {/* Product cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
             {items.map((p) => {
               const price = p.sale_price && p.sale_price < p.price ? p.sale_price : p.price;
               return (

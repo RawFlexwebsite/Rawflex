@@ -169,7 +169,7 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
               No products match your filters.
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {filteredProducts.map((p) => {
                 const catName = categories.find(c => c.id === p.category_id)?.name || p.category_id
                 return (
@@ -179,7 +179,7 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
                         src={p.image_url}
                         alt={p.name}
                         fill
-                        sizes="(max-width: 768px) 50vw, 320px"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                       />
                       {p.badge && (

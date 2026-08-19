@@ -39,18 +39,18 @@ const payments = ["VISA", "MC", "UPI", "Paytm"];
 export default function Footer() {
   return (
     <footer className="relative bg-[#0a0909] pb-8 pt-3">
-      <div className="max-w-wrap mx-auto px-5 md:px-8">
-        <section className="border border-[#D4A82C]/30 bg-[#090a09] px-5 py-5 shadow-[0_0_0_1px_rgba(212,168,44,0.08)] md:px-8 lg:px-10">
-          <div className="grid items-center gap-6 lg:grid-cols-[1fr_1.08fr]">
-            <div className="flex items-center gap-5">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center text-[#D4A82C] md:h-16 md:w-16">
-                <Mail className="h-11 w-11 stroke-[1.6] md:h-12 md:w-12" />
+      <div className="max-w-wrap mx-auto px-4 sm:px-5 md:px-8">
+        <section className="border border-[#D4A82C]/30 bg-[#090a09] px-4 sm:px-5 py-4 sm:py-5 md:px-8 md:py-5 lg:px-10 shadow-[0_0_0_1px_rgba(212,168,44,0.08)]">
+          <div className="grid items-center gap-4 sm:gap-6 lg:grid-cols-[1fr_1.08fr]">
+            <div className="flex items-center gap-4 sm:gap-5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center text-[#D4A82C] md:h-14 md:w-14">
+                <Mail className="h-10 w-10 stroke-[1.6] md:h-11 md:w-11" />
               </div>
               <div>
-                <h2 className="font-display text-2xl font-black uppercase leading-none text-white md:text-3xl">
+                <h2 className="font-display text-xl sm:text-2xl md:text-3xl font-black uppercase leading-none text-white">
                   Be the first to know
                 </h2>
-                <p className="mt-2 text-sm font-semibold text-white/55">
+                <p className="mt-2 text-xs sm:text-sm font-semibold text-white/55">
                   New drops, exclusive offers & more.
                 </p>
               </div>
@@ -62,11 +62,11 @@ export default function Footer() {
                 name="email"
                 placeholder="Enter your email"
                 aria-label="Email address"
-                className="h-12 min-w-0 flex-1 border border-[#D4A82C]/35 bg-[#070807] px-5 text-sm font-semibold text-white outline-none placeholder:text-white/45 focus:border-[#D4A82C] md:h-14"
+                className="h-10 sm:h-12 min-w-0 flex-1 border border-[#D4A82C]/35 bg-[#070807] px-4 sm:px-5 text-xs sm:text-sm font-semibold text-white outline-none placeholder:text-white/45 focus:border-[#D4A82C] md:h-14"
               />
               <button
                 type="submit"
-                className="h-12 shrink-0 bg-[#D4A82C] px-7 text-xs font-black uppercase text-[#0a0909] transition-colors hover:bg-[#e2bd50] md:h-14 lg:px-10"
+                className="h-10 sm:h-12 shrink-0 bg-[#D4A82C] px-5 sm:px-7 lg:px-10 text-[10px] sm:text-xs font-black uppercase text-[#0a0909] transition-colors hover:bg-[#e2bd50] md:h-14"
               >
                 Join the List
               </button>
@@ -74,20 +74,20 @@ export default function Footer() {
           </div>
         </section>
 
-        <div className="grid gap-10 px-2 pt-9 md:grid-cols-2 lg:grid-cols-[1.5fr_0.85fr_0.85fr_1fr_0.85fr_1.25fr] lg:gap-8">
+        <div className="grid gap-6 sm:gap-8 md:gap-10 px-2 pt-8 md:grid-cols-2 lg:grid-cols-[1.5fr_repeat(4,1fr)_1.25fr] lg:gap-8">
           <div>
             <Link
               href="/"
-              className="font-display text-3xl font-black uppercase leading-none text-[#D4A82C]"
+              className="font-display text-2xl sm:text-3xl font-black uppercase leading-none text-[#D4A82C]"
             >
               RAWFLEX.
             </Link>
-            <p className="mt-5 max-w-[210px] text-sm font-semibold leading-relaxed text-white/55">
+            <p className="mt-4 sm:mt-5 max-w-[210px] text-xs sm:text-sm font-semibold leading-relaxed text-white/55">
               Built for the streets.
               <br />
               Worn by the culture.
             </p>
-            <div className="mt-6 flex items-center gap-5 text-white">
+            <div className="mt-4 sm:mt-6 flex items-center gap-4 sm:gap-5 text-white">
               <a
                 href={`https://www.instagram.com/${SITE.instagram.replace("@", "")}`}
                 target="_blank"
@@ -95,31 +95,31 @@ export default function Footer() {
                 aria-label="Instagram"
                 className="transition-colors hover:text-[#D4A82C]"
               >
-                <Instagram className="h-6 w-6" />
+                <Instagram className="h-5 sm:h-6 w-5 sm:w-6" />
               </a>
               <a
                 href="/"
                 aria-label="TikTok"
                 className="transition-colors hover:text-[#D4A82C]"
               >
-                <Music2 className="h-6 w-6" />
+                <Music2 className="h-5 sm:h-6 w-5 sm:w-6" />
               </a>
               <a
                 href="/"
                 aria-label="YouTube"
                 className="transition-colors hover:text-[#D4A82C]"
               >
-                <Youtube className="h-7 w-7" />
+                <Youtube className="h-6 sm:h-7 w-6 sm:w-7" />
               </a>
               <a
                 href="/"
                 aria-label="Pinterest"
-                className="font-display text-2xl font-black leading-none transition-colors hover:text-[#D4A82C]"
+                className="font-display text-xl sm:text-2xl font-black leading-none transition-colors hover:text-[#D4A82C]"
               >
                 P
               </a>
             </div>
-            <p className="mt-7 text-xs font-semibold text-white/45">
+            <p className="mt-5 sm:mt-7 text-[10px] sm:text-xs font-semibold text-white/45">
               (c) {new Date().getFullYear()} RAWFLEX. All rights reserved.
             </p>
           </div>
@@ -129,7 +129,7 @@ export default function Footer() {
           <FooterColumn title="Company" links={companyLinks} />
           <FooterColumn title="Info" links={infoLinks} />
 
-          <div className="lg:pt-10">
+          <div className="lg:pt-8">
             <h3 className="text-sm font-black uppercase text-[#D4A82C]">We Accept</h3>
             <div className="mt-7 flex flex-nowrap items-center gap-5 overflow-x-auto no-scrollbar">
               {payments.map((payment) => (

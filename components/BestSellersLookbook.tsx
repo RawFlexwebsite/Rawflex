@@ -98,7 +98,7 @@ export default function BestSellersLookbook() {
         <SectionTitle title="Best Sellers" href="/shop?category=best-sellers" label="View All" />
 
         <div className="relative">
-          <div className="grid grid-flow-col auto-cols-[72%] gap-3 overflow-x-auto pb-2 no-scrollbar sm:auto-cols-[36%] lg:grid-flow-row lg:grid-cols-6 lg:overflow-visible lg:pb-0">
+          <div className="grid grid-flow-col auto-cols-[72%] gap-3 overflow-x-auto pb-2 no-scrollbar sm:auto-cols-[48%] md:auto-cols-[30%] lg:grid-flow-row lg:grid-cols-6 lg:overflow-visible lg:pb-0">
             {bestSellers.map((item, index) => {
               const zoomOutImage = [0, 2, 3, 4].includes(index);
               const isSmallCard = [0, 2, 3, 4].includes(index);
@@ -114,7 +114,7 @@ export default function BestSellersLookbook() {
                     src={item.image}
                     alt={item.name}
                     fill
-                    sizes="(max-width: 640px) 72vw, (max-width: 1024px) 36vw, 220px"
+                    sizes="(max-width: 640px) 72vw, (max-width: 1024px) 48vw, (max-width: 1280px) 30vw, 220px"
                     className={
                       isSmallCard
                         ? "object-cover object-center transition-transform duration-700 group-hover:scale-105"
@@ -124,11 +124,11 @@ export default function BestSellersLookbook() {
                     }
                   />
                 </div>
-                <div className="pt-4">
-                  <h3 className="line-clamp-1 text-[13px] font-black uppercase leading-none text-white/70 transition-colors group-hover:text-[#D4A82C] md:text-[15px]">
+                <div className="pt-3 sm:pt-4">
+                  <h3 className="line-clamp-1 text-[12px] sm:text-[13px] font-black uppercase leading-none text-white/70 transition-colors group-hover:text-[#D4A82C] md:text-[15px]">
                     {item.name}
                   </h3>
-                  <p className="mt-3 text-sm font-black text-white md:text-base">
+                  <p className="mt-2 sm:mt-3 text-xs sm:text-sm font-black text-white md:text-base">
                     {formatINR(item.price)}
                   </p>
                   <Rating reviews={item.reviews} />
@@ -147,10 +147,10 @@ export default function BestSellersLookbook() {
           </Link>
         </div>
 
-        <div className="mt-12 md:mt-14">
+        <div className="mt-10 md:mt-12 lg:mt-14">
           <SectionTitle title="Lookbook" href="/shop" label="View All Looks" />
 
-          <div className="grid grid-flow-col auto-cols-[78%] gap-0 overflow-x-auto no-scrollbar border border-white/10 sm:auto-cols-[48%] lg:grid-flow-row lg:grid-cols-5 lg:overflow-hidden">
+          <div className="grid grid-flow-col auto-cols-[78%] gap-0 overflow-x-auto no-scrollbar border border-white/10 sm:auto-cols-[48%] md:auto-cols-[30%] lg:grid-flow-row lg:grid-cols-5 lg:overflow-hidden">
             {lookbook.map((src, index) => (
               <Link
                 key={src}
@@ -161,7 +161,7 @@ export default function BestSellersLookbook() {
                   src={src}
                   alt={`RAWFLEX lookbook style ${index + 1}`}
                   fill
-                  sizes="(max-width: 640px) 78vw, (max-width: 1024px) 48vw, 280px"
+                  sizes="(max-width: 640px) 78vw, (max-width: 1024px) 48vw, (max-width: 1280px) 30vw, 280px"
                   className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/20 transition-colors group-hover:bg-black/5" />

@@ -108,7 +108,23 @@ export default function Header() {
               : "bg-transparent"
           }`}
       >
-        <div className="max-w-wrap mx-auto px-4 md:px-7 flex items-center justify-between h-[64px] md:h-[74px]">
+        <div className="relative max-w-wrap mx-auto px-4 md:px-7 flex items-center justify-between h-[64px] md:h-[74px]">
+          {/* Mobile logo — absolutely centered in navbar on mobile only */}
+          <a
+            href="/"
+            className="lg:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center shrink-0 overflow-hidden"
+            aria-label="RAWFLEX Home"
+          >
+            <Image
+              src="/rawflex_logo.png"
+              alt="RAWFLEX Logo"
+              width={72}
+              height={72}
+              className="object-contain w-[64px] h-[64px]"
+              priority
+            />
+          </a>
+
           {/* Mobile hamburger — left side on mobile only */}
           <button
             aria-label={open ? "Close menu" : "Open menu"}
@@ -133,13 +149,13 @@ export default function Header() {
             )}
           </button>
 
-<a href="/" className="flex items-center gap-2 shrink-0 overflow-hidden" aria-label="RAWFLEX Home" style={{ height: '100%' }}>
+<a href="/" className="hidden lg:flex items-center gap-2 shrink-0 overflow-hidden" aria-label="RAWFLEX Home" style={{ height: '100%' }}>
             <Image
               src="/rawflex_logo.png"
               alt="RAWFLEX Logo"
-              width={120}
-              height={120}
-              className="object-contain"
+              width={96}
+              height={96}
+              className="object-contain md:w-[80px] md:h-[80px] lg:w-[96px] lg:h-[96px]"
               priority
             />
           </a>
@@ -360,9 +376,9 @@ export default function Header() {
           </div>
         )}
 
-        {/* Mobile menu panel */}
+{/* Mobile menu panel */}
         <div
-          className={`lg:hidden fixed inset-x-0 top-[100px] bottom-0 bg-[#080909] z-[9999] transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] ${open ? "block opacity-100 pointer-events-auto" : "hidden opacity-0 pointer-events-none"
+          className={`lg:hidden fixed inset-x-0 top-[100px] bottom-0 bg-[#080909] z-[9999] overflow-y-auto transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] ${open ? "block opacity-100 pointer-events-auto" : "hidden opacity-0 pointer-events-none"
             }`}
         >
           <nav className="flex flex-col px-6 pt-8 gap-1">

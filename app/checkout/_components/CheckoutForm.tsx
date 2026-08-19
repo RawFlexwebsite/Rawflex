@@ -390,11 +390,11 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       {/* Left Column: Shipping Address & Payment Form */}
       <div className="lg:col-span-7 space-y-6">
-        <div className="bg-panel rounded-3xl p-6 md:p-8 border border-cream-line shadow-card space-y-6">
+        <div className="bg-panel rounded-3xl p-4 sm:p-6 md:p-8 border border-cream-line shadow-card space-y-6">
           <h2 className="text-lg font-bold text-ink uppercase tracking-wider flex items-center gap-2">
             <Truck className="w-5 h-5 text-gold" /> Shipping Details
           </h2>
@@ -577,9 +577,9 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
       </div>
 
       {/* Right Column: Order Summary & Coupon Codes (sticky so the order + Place Order button stay in view) */}
-      <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28 lg:self-start">
+      <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24 lg:self-start">
         {/* Order Summary */}
-        <div className="bg-panel rounded-3xl p-6 border border-cream-line shadow-card space-y-6">
+        <div className="bg-panel rounded-3xl p-4 sm:p-6 border border-cream-line shadow-card space-y-6">
           <h2 className="text-lg font-bold text-ink uppercase tracking-wider flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-gold" /> Order Summary
           </h2>

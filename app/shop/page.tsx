@@ -108,14 +108,7 @@ export default async function ShopPage({
       <main className="min-h-screen bg-cream pt-[108px] md:pt-[120px]">
         
         {/* Shop Hero Banner */}
-        <section className="relative w-full h-[250px] md:h-[340px] bg-emerald-deep flex items-center justify-center overflow-hidden border-b border-cream-line">
-          <Image
-            src="/shop-banner.png"
-            alt="RAWFLEX Streetwear Collection"
-            fill
-            className="object-cover opacity-80 mix-blend-luminosity"
-            priority
-          />
+        <section className="relative w-full h-[160px] md:h-[200px] bg-emerald-deep flex items-center justify-center overflow-hidden border-b border-cream-line">
           <div className="absolute inset-0 bg-gradient-to-tr from-black/85 via-black/60 to-black/85" />
           
           <div className="relative z-10 text-center px-5">

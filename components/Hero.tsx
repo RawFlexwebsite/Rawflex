@@ -93,15 +93,15 @@ export default function Hero({
 
       {/* ── Main content grid ── */}
       <div
-        className="relative z-10 max-w-wrap mx-auto px-5 md:px-10 flex items-center"
-        style={{ minHeight: "100vh", paddingTop: "120px", paddingBottom: "60px" }}
+        className="relative z-10 max-w-wrap mx-auto px-5 md:px-10 flex items-start lg:items-center pt-[124px] pb-8 lg:pt-[120px] lg:pb-[60px]"
+        style={{ minHeight: "100vh" }}
       >
-        <div className="w-full grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-10 lg:gap-16 items-center">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 lg:gap-16 items-center">
 
           {/* ── LEFT: Copy ── */}
           <div>
             {/* Season tag */}
-            <div className="flex items-center gap-3 mb-5">
+            <div className="flex items-center gap-3 mb-3">
               <span className="text-[#D4A82C] text-xs font-bold tracking-[0.22em] uppercase">
                 {slide.tag}
               </span>
@@ -112,14 +112,14 @@ export default function Hero({
             <h1 className="font-black uppercase leading-[0.92] tracking-tight whitespace-nowrap">
               <span
                 className="block text-white"
-                style={{ fontSize: "clamp(2.75rem, 6vw, 5.25rem)" }}
+                style={{ fontSize: "clamp(1.85rem, 6vw, 5.25rem)" }}
               >
                 {slide.headline1}
               </span>
               <span
                 className="block normal-case"
                 style={{
-                  fontSize: "clamp(2.5rem, 5.5vw, 4.75rem)",
+                  fontSize: "clamp(1.65rem, 5.5vw, 4.75rem)",
                   color: "#D4A82C",
                   fontFamily: "var(--font-marker)",
                   fontWeight: 400,
@@ -133,28 +133,44 @@ export default function Hero({
 
             {/* Sub */}
             <p
-              className="mt-6 max-w-[440px] text-sm md:text-base leading-relaxed whitespace-pre-line"
+              className="mt-3 max-w-[440px] text-[11px] md:text-base leading-relaxed whitespace-pre-line"
               style={{ color: "rgba(220,215,210,0.65)" }}
             >
               {slide.sub}
             </p>
 
             {/* CTA */}
-            <a
-              href={slide.ctaHref}
-              className="mt-9 inline-flex items-center gap-3 border border-[#D4A82C] text-[#D4A82C] font-bold text-xs md:text-sm tracking-[0.18em] uppercase px-7 py-4 hover:bg-[#D4A82C] hover:text-[#0a0909] transition-all duration-300"
-            >
-              {slide.cta}
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                viewBox="0 0 24 24"
+            <div className="flex justify-start mt-5 lg:mt-9">
+              <a
+                href={slide.ctaHref}
+                className="inline-flex items-center gap-2 border border-[#D4A82C] text-[#D4A82C] font-bold text-[10px] md:text-sm tracking-[0.18em] uppercase px-5 py-3 md:px-7 md:py-4 hover:bg-[#D4A82C] hover:text-[#0a0909] transition-all duration-300"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 12h15" />
-              </svg>
-            </a>
+                {slide.cta}
+                <svg
+                  className="w-3 h-3 md:w-4 md:h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 12h15" />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          {/* ── Mobile model image ── */}
+          <div className="lg:hidden w-screen -mx-5 mt-4 pointer-events-none relative overflow-hidden">
+            <Image
+              src="/hero-parts.png"
+              alt="Model wearing RAWFLEX oversized tee"
+              width={800}
+              height={1060}
+              priority
+              sizes="100vw"
+              style={{ width: "100%", height: "auto", display: "block", transform: "translateX(12%)" }}
+            />
+            <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#0a0909] to-transparent" />
           </div>
 
           {/* ── RIGHT: Product cards + nav ── */}
@@ -273,7 +289,7 @@ export default function Hero({
       </div>
 
       {/* ── Mobile product strip ── */}
-      <div className="lg:hidden relative z-10 px-5 pb-10 grid grid-cols-2 gap-3">
+      <div className="lg:hidden relative z-10 px-4 sm:px-5 pb-8 grid grid-cols-2 gap-3 sm:gap-4">
         {(featured.length > 0 ? featured : [
           { id: "1", name: "CHAOS BLOOM TEE", price: 1299, image_url: "/lookbook-1.jpg" },
           { id: "2", name: "LIMITED EDITION 001", price: 1499, image_url: "/lookbook-2.jpg" },
@@ -296,10 +312,10 @@ export default function Hero({
               </span>
             </div>
             <div className="p-3">
-              <p className="text-white text-[12px] font-bold uppercase leading-snug line-clamp-2">
+              <p className="text-white text-[11px] sm:text-[12px] font-bold uppercase leading-snug line-clamp-2">
                 {p.name}
               </p>
-              <p className="mt-1 text-[#D4A82C] font-bold text-[14px]">
+              <p className="mt-1 text-[#D4A82C] font-bold text-[13px] sm:text-[14px]">
                 {p.sale_price && p.sale_price < p.price
                   ? formatINR(p.sale_price)
                   : formatINR(p.price)}
@@ -309,16 +325,16 @@ export default function Hero({
         ))}
 
         {/* Mobile nav */}
-        <div className="col-span-2 flex items-center justify-center gap-4 pt-3">
-          <button onClick={prev} className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-white">
+        <div className="col-span-2 flex items-center justify-center gap-3 sm:gap-4 pt-3">
+          <button onClick={prev} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-white/20 flex items-center justify-center text-white">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <span className="text-white/50 text-xs tracking-widest font-bold">
+          <span className="text-white/50 text-xs sm:text-sm tracking-widest font-bold">
             {String(current + 1).padStart(2, "0")} — {String(total).padStart(2, "0")}
           </span>
-          <button onClick={next} className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-white">
+          <button onClick={next} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-white/20 flex items-center justify-center text-white">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
