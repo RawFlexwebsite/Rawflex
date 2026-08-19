@@ -7,6 +7,106 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { createClient } from "@/lib/supabase/server"
+import { getSampleImages } from '@/lib/samples'
+
+const SAMPLE_CATEGORIES: Record<string, { name: string; description: string; price: number; originalPrice?: number }> = {
+  'new-drops': {
+    name: 'New Drop Tee',
+    description: 'Fresh from the studio. Limited run, heavyweight cotton, bold graphics. Each piece tells a story.',
+    price: 1299,
+    originalPrice: 1599
+  },
+  'best-sellers': {
+    name: 'Bestseller Tee',
+    description: "The one everyone's talking about. Proven fit, premium fabric, restocked by demand.",
+    price: 1199,
+    originalPrice: 1399
+  },
+  'streetwear-collection': {
+    name: 'Streetwear Essential',
+    description: 'Core collection piece. Oversized fit, heavyweight fabric, built for the streets.',
+    price: 1499,
+    originalPrice: 1799
+  },
+  'acid-wash': {
+    name: 'Acid Wash Tee',
+    description: 'One-of-one acid wash. No two pieces are identical. Distressed finish, premium cotton.',
+    price: 1599,
+    originalPrice: 1899
+  },
+  'gym-collection': {
+    name: 'Gym Performance Tee',
+    description: 'Moisture-wicking, anti-odor, built for the grind. Technical fabric meets street style.',
+    price: 999,
+    originalPrice: 1299
+  },
+  'limited-edition': {
+    name: 'Limited Edition Drop',
+    description: "Numbered release. Once it's gone, it's gone forever. Collector's grade quality.",
+    price: 2499,
+    originalPrice: 2999
+  }
+}
+
+function isSampleId(id: string): boolean {
+  return id.startsWith('sample-')
+}
+
+function parseSampleId(id: string): { categoryId: string; index: number } | null {
+  const match = id.match(/^sample-(.+)-\d+$/)
+  if (!match) return null
+  const parts = id.split('-')
+  const index = parseInt(parts[parts.length - 1], 10)
+  const categoryId = parts.slice(1, -1).join('-')
+  return { categoryId, index }
+}
+
+function getSampleProductData(id: string) {
+  const parsed = parseSampleId(id)
+  if (!parsed) return null
+
+  const { categoryId, index } = parsed
+  const images = getSampleImages(categoryId)
+  const categoryInfo = SAMPLE_CATEGORIES[categoryId]
+
+  if (!categoryInfo || index >= images.length) return null
+
+  return {
+    id,
+    name: `${categoryInfo.name} ${index + 1}`,
+    slug: id,
+    category_id: categoryId,
+    is_active: true,
+    badge: index === 0 ? 'New' : undefined,
+    rating: 4.5 + (index % 5) * 0.1,
+    short_description: categoryInfo.description,
+    description: `${categoryInfo.description} This is a sample product showcasing the ${categoryInfo.name.toLowerCase()} collection. Heavyweight fabric, premium construction, and RAWFLEX signature styling.`,
+    fabric: '240 GSM Heavyweight Cotton',
+    stitching: 'Double-needle stitching for durability',
+    featured_image_url: images[index],
+    color_group_id: null,
+    color_name: 'Black',
+    color_hex: '#000000',
+    product_images: images.slice(0, 4).map((img, i) => ({ image_url: img, color_name: i === 0 ? 'Black' : `Color ${i + 1}` })),
+    product_variants: [
+      { id: `${id}-m`, variant_name: 'M', price: categoryInfo.price, original_price: categoryInfo.originalPrice, stock_quantity: 10 },
+      { id: `${id}-l`, variant_name: 'L', price: categoryInfo.price, original_price: categoryInfo.originalPrice, stock_quantity: 15 },
+      { id: `${id}-xl`, variant_name: 'XL', price: categoryInfo.price, original_price: categoryInfo.originalPrice, stock_quantity: 8 },
+      { id: `${id}-xxl`, variant_name: 'XXL', price: categoryInfo.price, original_price: categoryInfo.originalPrice, stock_quantity: 5 }
+    ],
+    product_information: [
+      { label: 'Fabric', value: '240 GSM 100% Cotton', display_order: 1 },
+      { label: 'Fit', value: 'Oversized / Boxy', display_order: 2 },
+      { label: 'Care', value: 'Machine wash cold, tumble dry low', display_order: 3 },
+      { label: 'Origin', value: 'Made in India', display_order: 4 }
+    ],
+    product_faqs: [
+      { question: 'How does the sizing run?', answer: 'Our oversized tees run true to size for an oversized fit. Size down for a more fitted look.', display_order: 1 },
+      { question: 'Is the print durable?', answer: 'Yes, we use high-quality screen printing that withstands 50+ washes without cracking.', display_order: 2 },
+      { question: 'What is your return policy?', answer: '7-day return policy for unworn items with original tags.', display_order: 3 }
+    ]
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -45,49 +145,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   }
 }
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient();
-  const { id } = await params;
-
-  // Try fetching by ID first, then fallback to slug if the URL uses a slug
-  let { data: productData } = await supabase
-    .from("products")
-    .select(`
-      id, name, slug, category_id, is_active, badge, rating, short_description, description, fabric, stitching, featured_image_url, color_group_id, color_name, color_hex,
-      product_images ( image_url, color_name ),
-      product_variants ( id, variant_name, price, original_price, stock_quantity ),
-      product_information ( label, value, display_order ),
-      product_faqs ( question, answer, display_order )
-    `)
-    .eq("id", id)
-    .single();
-
-  if (!productData) {
-    const { data: slugProduct } = await supabase
-      .from("products")
-      .select(`
-        id, name, slug, category_id, is_active, badge, rating, short_description, description, fabric, stitching, featured_image_url, color_group_id, color_name, color_hex,
-        product_images ( image_url, color_name ),
-        product_variants ( id, variant_name, price, original_price, stock_quantity ),
-        product_information ( label, value, display_order ),
-        product_faqs ( question, answer, display_order )
-      `)
-      .eq("slug", id)
-      .single();
-
-    productData = slugProduct;
-  }
-
-  if (!productData || !productData.is_active) notFound();
-
-  const { data: category } = await supabase
-    .from("categories")
-    .select("name")
-    .eq("id", productData.category_id)
-    .single();
-
-  const categoryName = category?.name || productData.category_id;
-
+function renderProductPage(
+  productData: any,
+  categoryName: string,
+  similarProducts: any[],
+  reviews: any[]
+) {
   // Compile image array
   let images: { image_url: string; color_name?: string | null }[] = []
   if (productData.product_images && productData.product_images.length > 0) {
@@ -107,7 +170,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   information.sort((a: any, b: any) => a.display_order - b.display_order)
 
   let faqs = productData.product_faqs || []
-  // Add a default FAQ if none exist just to populate the section as requested
   if (faqs.length === 0) {
     faqs.push({
       question: "How long does shipping take?",
@@ -122,67 +184,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   }
   faqs.sort((a: any, b: any) => a.display_order - b.display_order)
 
-  // Filter out inactive or out-of-stock variants if we want to be strict,
-  // but let's just pass them down and disable out-of-stock ones
   const variants = productData.product_variants || []
-
-  // Fetch other colors of this same design (color group)
-  let colorOptions: any[] = []
-  if (productData.color_group_id) {
-    const { data: colorGroupProducts } = await supabase
-      .from("products")
-      .select(`
-        id, name, color_name, color_hex, featured_image_url,
-        product_images ( image_url )
-      `)
-      .eq("color_group_id", productData.color_group_id)
-      .eq("is_active", true)
-      .order("created_at", { ascending: true })
-
-    colorOptions = (colorGroupProducts || []).map((p: any) => ({
-      id: p.id,
-      name: p.name,
-      color_name: p.color_name,
-      color_hex: p.color_hex,
-      image_url: p.product_images?.[0]?.image_url || p.featured_image_url || "/image.png",
-    }))
-  }
-
-  // Fetch similar products
-  const { data: similarProductsData } = await supabase
-    .from("products")
-    .select(`
-      id, name, slug, category_id, is_active, badge, rating, featured_image_url,
-      product_images ( image_url ),
-      product_variants ( price, original_price )
-    `)
-    .eq("is_active", true)
-    .eq("category_id", productData.category_id)
-    .neq("id", productData.id)
-    .limit(4);
-
-  const similarProducts = similarProductsData?.map((p: any) => ({
-    id: p.id,
-    name: p.name,
-    category_id: p.category_id,
-    image_url: p.featured_image_url || (p.product_images?.[0]?.image_url) || "/image.png",
-    badge: p.badge,
-    price: p.product_variants?.[0]?.price || 0,
-    oldPrice: p.product_variants?.[0]?.original_price || undefined
-  })) || [];
-
-  // Fetch Reviews
-  const { data: reviewsData } = await supabase
-    .from('reviews')
-    .select(`
-      id, rating, comment, created_at,
-      profiles:user_id ( full_name )
-    `)
-    .eq('product_id', productData.id)
-    .eq('is_approved', true)
-    .order('created_at', { ascending: false });
-
-  const reviews = reviewsData || [];
 
   return (
     <>
@@ -290,7 +292,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 Customer Voices
                 <span className="h-px w-6 bg-gold" />
               </div>
-              <h2 className="section-heading mt-4">Ratings &amp; Reviews</h2>
+              <h2 className="section-heading mt-4">Ratings & Reviews</h2>
             </div>
             <ProductReviews productId={productData.id} initialReviews={reviews} />
           </div>
@@ -299,4 +301,93 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       <Footer />
     </>
   )
+}
+
+export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const supabase = await createClient();
+  const { id } = await params;
+
+  // Handle sample products (dummy data for categories without real DB entries)
+  if (isSampleId(id)) {
+    const sampleProduct = getSampleProductData(id)
+    if (!sampleProduct) notFound()
+    return renderProductPage(sampleProduct, sampleProduct.category_id, [], [])
+  }
+
+  // Try fetching by ID first, then fallback to slug if the URL uses a slug
+  let { data: productData } = await supabase
+    .from("products")
+    .select(`
+      id, name, slug, category_id, is_active, badge, rating, short_description, description, fabric, stitching, featured_image_url, color_group_id, color_name, color_hex,
+      product_images ( image_url, color_name ),
+      product_variants ( id, variant_name, price, original_price, stock_quantity ),
+      product_information ( label, value, display_order ),
+      product_faqs ( question, answer, display_order )
+    `)
+    .eq("id", id)
+    .single();
+
+  if (!productData) {
+    const { data: slugProduct } = await supabase
+      .from("products")
+      .select(`
+        id, name, slug, category_id, is_active, badge, rating, short_description, description, fabric, stitching, featured_image_url, color_group_id, color_name, color_hex,
+        product_images ( image_url, color_name ),
+        product_variants ( id, variant_name, price, original_price, stock_quantity ),
+        product_information ( label, value, display_order ),
+        product_faqs ( question, answer, display_order )
+      `)
+      .eq("slug", id)
+      .single();
+
+    productData = slugProduct;
+  }
+
+  if (!productData || !productData.is_active) notFound();
+
+  const { data: category } = await supabase
+    .from("categories")
+    .select("name")
+    .eq("id", productData.category_id)
+    .single();
+
+  const categoryName = category?.name || productData.category_id;
+
+  // Fetch similar products
+  const { data: similarProductsData } = await supabase
+    .from("products")
+    .select(`
+      id, name, slug, category_id, is_active, badge, rating, featured_image_url,
+      product_images ( image_url ),
+      product_variants ( price, original_price )
+    `)
+    .eq("is_active", true)
+    .eq("category_id", productData.category_id)
+    .neq("id", productData.id)
+    .limit(4);
+
+  const similarProducts = similarProductsData?.map((p: any) => ({
+    id: p.id,
+    name: p.name,
+    category_id: p.category_id,
+    image_url: p.featured_image_url || (p.product_images?.[0]?.image_url) || "/image.png",
+    badge: p.badge,
+    price: p.product_variants?.[0]?.price || 0,
+    oldPrice: p.product_variants?.[0]?.original_price || undefined
+  })) || [];
+
+  // Fetch Reviews
+  const { data: reviewsData } = await supabase
+    .from('reviews')
+    .select(`
+      id, rating, comment, created_at,
+      profiles:user_id ( full_name )
+    `)
+    .eq('product_id', productData.id)
+    .eq('is_approved', true)
+    .order('created_at', { ascending: false });
+
+  const reviews = reviewsData || [];
+
+  return renderProductPage(productData, categoryName, similarProducts, reviews)
 }
