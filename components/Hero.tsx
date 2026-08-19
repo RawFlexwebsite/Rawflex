@@ -180,7 +180,7 @@ export default function Hero({
               featured.map((p) => (
                 <a
                   key={p.id}
-                  href={`/shop/${p.id}`}
+                  href="/shop?category=new-drops"
                   className="group flex items-center gap-5 rounded-sm border border-white/15 bg-white/5 backdrop-blur-sm hover:border-[#D4A82C]/60 hover:bg-white/10 transition-all duration-300 overflow-hidden p-4"
                 >
                   {/* Image */}
@@ -224,7 +224,7 @@ export default function Hero({
                 ].map((p, i) => (
                   <a
                     key={i}
-                    href="/shop"
+                    href="/shop?category=new-drops"
                     className="group flex items-center gap-5 rounded-sm border border-white/15 bg-white/5 backdrop-blur-sm hover:border-[#D4A82C]/60 hover:bg-white/10 transition-all duration-300 overflow-hidden p-4"
                   >
                     <div className="relative w-[112px] h-[112px] shrink-0 overflow-hidden bg-[#1a1a1a] rounded-sm">
@@ -296,7 +296,7 @@ export default function Hero({
         ] as FeaturedProduct[]).map((p) => (
           <a
             key={p.id}
-            href={`/shop/${p.id}`}
+            href="/shop?category=new-drops"
             className="group block rounded-sm border border-white/10 bg-[#111]/80 overflow-hidden"
           >
             <div className="relative aspect-[4/5] overflow-hidden bg-[#1a1a1a]">
