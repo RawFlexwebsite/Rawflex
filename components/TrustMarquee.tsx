@@ -1,10 +1,10 @@
 const items = [
-  "Premium Fabric",
-  "Handcrafted Detail",
+  "Heavyweight Fabric",
+  "One-of-One Washes",
   "Pan-India Shipping",
   "Easy Size Exchange",
-  "Botanical Embroidery",
-  "Made With Care in Delhi NCR",
+  "Limited Drops",
+  "Made With Care in Kanpur",
 ];
 
 export default function TrustMarquee() {

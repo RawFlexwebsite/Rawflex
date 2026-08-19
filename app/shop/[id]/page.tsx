@@ -29,8 +29,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   if (!product) return {}
 
-  const title = product.seo_title || `${product.name} | Gulshan Modest`
-  const description = product.seo_description || `Shop ${product.name} online at Gulshan Modest.`
+  const title = product.seo_title || `${product.name} | RAWFLEX`
+  const description = product.seo_description || `Shop ${product.name} online at RAWFLEX.`
   const keywords = product.seo_keywords ? product.seo_keywords.split(',').map((k: string) => k.trim()) : []
 
   return {
@@ -250,7 +250,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                     <h3 className="font-display font-semibold text-xl text-ink mb-4">Common Questions</h3>
                     <div className="space-y-3">
                       {faqs.map((faq: any, idx: number) => (
-                        <details key={idx} className="group bg-white rounded-2xl border border-cream-line shadow-sm overflow-hidden open:bg-cream-deep/30 transition-colors">
+                        <details key={idx} className="group bg-panel rounded-2xl border border-cream-line shadow-sm overflow-hidden open:bg-cream-deep/30 transition-colors">
                           <summary className="font-display font-semibold text-ink text-[15px] px-5 py-4 cursor-pointer flex justify-between items-center outline-none list-none hover:text-emerald transition-colors">
                             {faq.question}
                             <span className="text-ink/50 transition-transform group-open:rotate-180 group-open:text-emerald">

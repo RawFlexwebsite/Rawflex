@@ -1,14 +1,13 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 
 export const metadata = {
-  title: 'Privacy Policy | Gulshan Modest',
+  title: 'Privacy Policy | RAWFLEX',
 }
 
 export default function PrivacyPolicy() {
   return (
-    <main className="overflow-x-hidden pt-[72px] md:pt-[84px] bg-cream min-h-screen flex flex-col">
+    <main className="overflow-x-hidden pt-[108px] md:pt-[120px] bg-cream min-h-screen flex flex-col">
       <Header />
       
       <div className="flex-1 max-w-3xl mx-auto w-full px-5 py-16 md:py-24">
@@ -18,7 +17,7 @@ export default function PrivacyPolicy() {
           <p>Last updated: {new Date().toLocaleDateString('en-IN')}</p>
           
           <p>
-            Gulshan Modest ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how your personal information is collected, used, and disclosed by Gulshan Modest.
+            RAWFLEX ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how your personal information is collected, used, and disclosed by RAWFLEX.
           </p>
 
           <h3 className="font-display font-semibold text-xl text-ink mt-8 mb-4">1. Information We Collect</h3>
@@ -38,13 +37,12 @@ export default function PrivacyPolicy() {
 
           <h3 className="font-display font-semibold text-xl text-ink mt-8 mb-4">4. Contact Us</h3>
           <p>
-            For more information about our privacy practices, if you have questions, or if you would like to make a complaint, please contact us by e-mail at contact@gulshanmodest.com.
+            For more information about our privacy practices, if you have questions, or if you would like to make a complaint, please contact us by e-mail at rawflexinfo@gmail.com.
           </p>
         </div>
       </div>
 
       <Footer />
-      <FloatingWhatsApp />
     </main>
   );
 }

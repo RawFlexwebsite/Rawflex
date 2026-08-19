@@ -12,8 +12,8 @@ html {
 }
 
 body {
-  background-color: #fbf7f0;
-  color: #211d19;
+  background-color: #080909;
+  color: #eae6e2;
   font-family: var(--font-body);
 }
 
@@ -22,12 +22,12 @@ body {
 }
 
 ::selection {
-  background-color: #b9893f;
-  color: #fbf7f0;
+  background-color: #c7b79e;
+  color: #080909;
 }
 
 :focus-visible {
-  outline: 2px solid #1e3b2e;
+  outline: 2px solid #f2efea;
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -67,7 +67,7 @@ body {
   font-size: 0.78rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #b9893f;
+  color: #c7b79e;
 }
 
 /* ---- Section heading uniform scale ---- */
@@ -76,13 +76,13 @@ body {
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.08;
-  color: #1a1714;
+  color: #eae6e2;
   font-size: clamp(2rem, 4.6vw, 3.1rem);
 }
 
 .section-sub {
   font-family: var(--font-body);
-  color: #4d4640;
+  color: #a39d95;
   font-size: clamp(1rem, 1.3vw, 1.125rem);
   line-height: 1.7;
 }
@@ -100,7 +100,7 @@ body {
   100% { background-position: 100% 50%; }
 }
 .gradient-gold-text {
-  background-image: linear-gradient(95deg, #8a6326, #e3bc7e 45%, #b9893f 75%, #8a6326);
+  background-image: linear-gradient(95deg, #8a7f6c, #e4d8c4 45%, #c7b79e 75%, #8a7f6c);
   background-size: 220% 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -155,10 +155,10 @@ body {
   width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #f3eadc;
+  background: #121412;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c8aa78;
+  background: #3a3d3a;
   border-radius: 8px;
 }
 
@@ -171,3 +171,57 @@ body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* ============================================================
+   Admin dashboard dark-theme overrides (scoped to .admin-shell)
+   ============================================================ */
+.admin-shell .bg-white { background-color: #141614 !important; }
+.admin-shell .bg-stone-50 { background-color: #0d0f0e !important; }
+.admin-shell .bg-stone-100 { background-color: #171917 !important; }
+.admin-shell .bg-stone-200 { background-color: #232624 !important; }
+.admin-shell .bg-gray-50 { background-color: #0d0f0e !important; }
+.admin-shell .bg-gray-100 { background-color: #171917 !important; }
+
+.admin-shell .text-stone-900 { color: #eae6e2 !important; }
+.admin-shell .text-stone-800 { color: #dcd7d0 !important; }
+.admin-shell .text-stone-700 { color: #cfcac3 !important; }
+.admin-shell .text-stone-600 { color: #b5b0a8 !important; }
+.admin-shell .text-stone-500 { color: #98938b !important; }
+.admin-shell .text-stone-400 { color: #7c776f !important; }
+.admin-shell .text-stone-300 { color: #63605a !important; }
+.admin-shell .text-gray-900 { color: #eae6e2 !important; }
+.admin-shell .text-gray-800 { color: #dcd7d0 !important; }
+.admin-shell .text-gray-700 { color: #cfcac3 !important; }
+.admin-shell .text-gray-600 { color: #b5b0a8 !important; }
+.admin-shell .text-gray-500 { color: #98938b !important; }
+.admin-shell .text-gray-400 { color: #7c776f !important; }
+
+.admin-shell .border-stone-200 { border-color: #262926 !important; }
+.admin-shell .border-stone-100 { border-color: #1e211f !important; }
+.admin-shell .border-stone-300 { border-color: #333633 !important; }
+.admin-shell .border-gray-200 { border-color: #262926 !important; }
+.admin-shell .border-gray-300 { border-color: #333633 !important; }
+.admin-shell .divide-stone-100 > :not([hidden]) ~ :not([hidden]) { border-color: #1e211f !important; }
+.admin-shell .divide-stone-200 > :not([hidden]) ~ :not([hidden]) { border-color: #262926 !important; }
+
+.admin-shell .hover\:bg-stone-50:hover { background-color: #171917 !important; }
+.admin-shell .hover\:bg-stone-100:hover { background-color: #1e211f !important; }
+.admin-shell .hover\:bg-gray-50:hover { background-color: #171917 !important; }
+.admin-shell .hover\:text-stone-900:hover { color: #eae6e2 !important; }
+
+/* Light primary buttons in admin -> high-contrast light buttons */
+.admin-shell .bg-stone-900 { background-color: #f2efea !important; }
+.admin-shell .bg-stone-900.text-white,
+.admin-shell .bg-stone-900 .text-white { color: #080909 !important; }
+.admin-shell .hover\:bg-stone-800:hover { background-color: #dcd7d0 !important; }
+
+/* Form controls */
+.admin-shell input, .admin-shell select, .admin-shell textarea {
+  color: #eae6e2;
+}
+.admin-shell input::placeholder,
+.admin-shell textarea::placeholder {
+  color: #6b675f;
+}
+.admin-shell .bg-white\/60 { background-color: rgba(20, 22, 20, 0.6) !important; }
+.admin-shell .bg-black\/5 { background-color: rgba(242, 239, 234, 0.08) !important; }

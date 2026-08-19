@@ -1,16 +1,15 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Contact from "@/components/Contact";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 
 export const metadata = {
-  title: 'Contact Us | Gulshan Modest',
-  description: 'Get in touch with Gulshan Modest for any queries, custom orders, or feedback.',
+  title: 'Contact Us | RAWFLEX',
+  description: 'Get in touch with RAWFLEX for any queries, custom orders, or feedback.',
 }
 
 export default function ContactPage() {
   return (
-    <main className="overflow-x-hidden pt-[72px] md:pt-[84px] bg-cream min-h-screen flex flex-col">
+    <main className="overflow-x-hidden pt-[108px] md:pt-[120px] bg-cream min-h-screen flex flex-col">
       <Header />
       
       {/* Hero Banner for Contact Page */}
@@ -36,7 +35,6 @@ export default function ContactPage() {
         <Contact />
       </div>
       <Footer />
-      <FloatingWhatsApp />
     </main>
   );
 }

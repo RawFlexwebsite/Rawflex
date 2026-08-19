@@ -150,8 +150,8 @@ export async function sendEmailOtp(
   }
 
   const brevoApiKey = process.env.BREVO_API_KEY
-  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'noreply@gulshanmodest.com'
-  const senderName = process.env.BREVO_SENDER_NAME || 'Gulshan Modest'
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'noreply@rawflex.in'
+  const senderName = process.env.BREVO_SENDER_NAME || 'RAWFLEX'
 
   if (!brevoApiKey) {
     console.log(`[DEV MODE OTP] Email: ${email}, OTP: ${otp}`)
@@ -169,40 +169,40 @@ export async function sendEmailOtp(
       body: JSON.stringify({
         sender: { name: senderName, email: senderEmail },
         to: [{ email }],
-        subject: 'Your Verification Code - Gulshan Modest',
+        subject: 'Your Verification Code - RAWFLEX',
         htmlContent: `
-          <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 32px; border: 1px solid #E6DAC4; border-radius: 24px; background-color: #FBF7F0; text-align: center; box-shadow: 0 4px 20px rgba(33,29,25,0.025);">
+          <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 32px; border: 1px solid #262926; border-radius: 12px; background-color: #0a0909; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
             <!-- Logo Header -->
             <div style="margin-bottom: 24px;">
-              <h1 style="color: #1E3B2E; font-size: 26px; font-weight: bold; letter-spacing: 2px; margin: 0; font-family: Georgia, serif;">GULSHAN MODEST</h1>
+              <h1 style="color: #EAE6E2; font-size: 26px; font-weight: 800; letter-spacing: 2px; margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">RAWFLEX</h1>
             </div>
-            
-            <hr style="border: 0; border-top: 1px solid #E6DAC4; margin: 24px 0;" />
-            
+
+            <hr style="border: 0; border-top: 1px solid #262926; margin: 24px 0;" />
+
             <!-- Message Heading -->
-            <h2 style="color: #211D19; font-size: 20px; font-weight: bold; margin-bottom: 8px;">Verification Code</h2>
-            <p style="color: #211D19; opacity: 0.8; font-size: 14px; line-height: 1.6; margin-top: 0; max-width: 380px; margin-left: auto; margin-right: auto;">
+            <h2 style="color: #EAE6E2; font-size: 20px; font-weight: bold; margin-bottom: 8px;">Verification Code</h2>
+            <p style="color: #EAE6E2; opacity: 0.7; font-size: 14px; line-height: 1.6; margin-top: 0; max-width: 380px; margin-left: auto; margin-right: auto;">
               Please enter the 6-digit OTP code below to secure your login session.
             </p>
-            
+
             <!-- OTP Block -->
             <div style="margin: 32px 0;">
-              <div style="display: inline-block; font-size: 34px; font-weight: bold; letter-spacing: 8px; color: #1E3B2E; padding: 16px 32px; border: 1.5px solid #B9893F; border-radius: 16px; background-color: #F3EADC; text-shadow: 0 1px 0 #fff; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
+              <div style="display: inline-block; font-size: 34px; font-weight: bold; letter-spacing: 8px; color: #D4A82C; padding: 16px 32px; border: 1.5px solid #D4A82C; border-radius: 10px; background-color: #141614;">
                 ${otp}
               </div>
             </div>
-            
+
             <!-- Expiry notice -->
-            <p style="color: #211D19; opacity: 0.6; font-size: 12px; line-height: 1.5; margin: 24px 0;">
-              This verification code is valid for <strong style="color: #211D19;">10 minutes</strong>.<br />
+            <p style="color: #EAE6E2; opacity: 0.55; font-size: 12px; line-height: 1.5; margin: 24px 0;">
+              This verification code is valid for <strong style="color: #EAE6E2;">10 minutes</strong>.<br />
               If you did not request this verification, please ignore this email.
             </p>
-            
-            <hr style="border: 0; border-top: 1px solid #E6DAC4; margin: 24px 0;" />
-            
+
+            <hr style="border: 0; border-top: 1px solid #262926; margin: 24px 0;" />
+
             <!-- Footer -->
-            <p style="color: #B9893F; opacity: 0.7; font-size: 11px; margin: 0;">
-              &copy; ${new Date().getFullYear()} Gulshan Modest. All rights reserved.
+            <p style="color: #D4A82C; opacity: 0.8; font-size: 11px; margin: 0;">
+              &copy; ${new Date().getFullYear()} RAWFLEX. All rights reserved.
             </p>
           </div>
         `
@@ -370,7 +370,7 @@ export async function verifyEmailOtp(
   }
 
   const cookieStore = await cookies()
-  cookieStore.set('gulshan-user-session', JSON.stringify({
+  cookieStore.set('rawflex-user-session', JSON.stringify({
     id: finalProfile.id,
     email: finalProfile.email,
     full_name: finalProfile.full_name,
@@ -402,7 +402,7 @@ export async function adminLogin(
     return { error: 'Email and password are required' }
   }
 
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@gulshanmodest.com'
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@rawflex.in'
   const adminPassword = process.env.ADMIN_PASSWORD || 'GmC6BfKfeCgH5!7'
 
   let signInRes = await supabase.auth.signInWithPassword({
@@ -482,7 +482,7 @@ export async function adminLogin(
   }
 
   const cookieStore = await cookies()
-  cookieStore.set('gulshan-user-session', JSON.stringify({
+  cookieStore.set('rawflex-user-session', JSON.stringify({
     id: data.user.id,
     email: data.user.email,
     full_name: profile.full_name || 'Admin',

@@ -15,7 +15,7 @@ export default function BotanicalDivider({
 }) {
   const ref = useRef<SVGSVGElement>(null);
   const [visible, setVisible] = useState(false);
-  const stroke = tone === "gold" ? "#B9893F" : "#1E3B2E";
+  const stroke = tone === "gold" ? "#C7B79E" : "#EAE6E2";
 
   useEffect(() => {
     const node = ref.current;

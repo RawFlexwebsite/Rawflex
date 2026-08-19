@@ -61,24 +61,24 @@ export default function AdminSidebar() {
           collapsed ? 'md:w-[72px]' : 'md:w-64'
         } ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        } fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#FBF7F0] border-r border-[#E6DAC4] flex flex-col shrink-0 transition-all duration-300 ease-in-out md:translate-x-0`}
+        } fixed md:static inset-y-0 left-0 z-50 w-64 bg-panel border-r border-cream-line flex flex-col shrink-0 transition-all duration-300 ease-in-out md:translate-x-0`}
       >
         {/* Brand */}
-        <div className="h-16 flex items-center px-4 border-b border-[#E6DAC4] gap-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-teal-700 to-teal-800 rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-teal-700/20">
-            <span className="text-white font-bold text-sm">G</span>
+        <div className="h-16 flex items-center px-4 border-b border-cream-line gap-3">
+          <div className="w-9 h-9 bg-gradient-to-br from-gold to-gold-light rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-gold/20">
+            <span className="text-black font-bold text-sm">R</span>
           </div>
           {!collapsed && (
             <div className="overflow-hidden flex-1">
               <p className="text-ink font-semibold text-sm leading-tight truncate">
-                Gulshan Modest
+                RAWFLEX
               </p>
               <p className="text-ink/50 text-xs truncate">Admin Panel</p>
             </div>
           )}
           <button
             onClick={() => setMobileOpen(false)}
-            className="md:hidden p-1.5 rounded-lg text-ink/50 hover:text-teal-800 hover:bg-cream-deep/60 transition-colors"
+            className="md:hidden p-1.5 rounded-lg text-ink/50 hover:text-gold-light hover:bg-cream-deep/60 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -101,15 +101,15 @@ export default function AdminSidebar() {
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
                   isActive
-                    ? 'bg-teal-700/10 text-teal-800 font-semibold'
-                    : 'text-ink/75 hover:text-teal-800 hover:bg-cream-deep/60'
+                    ? 'bg-gold/15 text-gold-light font-semibold'
+                    : 'text-ink/75 hover:text-gold-light hover:bg-cream-deep/60'
                 }`}
               >
                 <Icon
                   className={`w-5 h-5 shrink-0 ${
                     isActive
-                      ? 'text-teal-800'
-                      : 'text-ink/40 group-hover:text-teal-700'
+                      ? 'text-gold-light'
+                      : 'text-ink/40 group-hover:text-gold'
                   }`}
                 />
                 {!collapsed && <span className="truncate">{item.label}</span>}
@@ -119,10 +119,10 @@ export default function AdminSidebar() {
         </nav>
 
         {/* Collapse toggle (desktop only) */}
-        <div className="p-3 border-t border-[#E6DAC4] hidden md:block">
+        <div className="p-3 border-t border-cream-line hidden md:block">
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-ink/50 hover:text-teal-800 hover:bg-cream-deep/60 transition-all duration-200 text-sm"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-ink/50 hover:text-gold-light hover:bg-cream-deep/60 transition-all duration-200 text-sm"
           >
             {collapsed ? (
               <ChevronRight className="w-4 h-4" />

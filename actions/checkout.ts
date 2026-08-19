@@ -5,6 +5,25 @@ import { revalidatePath } from 'next/cache'
 import Razorpay from 'razorpay'
 import crypto from 'crypto'
 
+type CheckoutResult =
+  | {
+      success: false
+      error: string
+    }
+  | {
+      success: true
+      isRazorpay: true
+      razorpayOrderId: string
+      orderId: string
+      orderNumber: string
+      amount: number
+    }
+  | {
+      success: true
+      isRazorpay: false
+      order_number: string
+      orderId: string
+    }
 
 // Initialize Razorpay
 // We wrap this in a try-catch or check to avoid crashing if keys are missing
@@ -20,7 +39,7 @@ try {
   console.warn("Razorpay credentials missing or invalid")
 }
 
-export async function createOrder(addressId: string, paymentMethod: string, cartItemsFromFrontend: any[]) {
+export async function createOrder(addressId: string, paymentMethod: string, cartItemsFromFrontend: any[]): Promise<CheckoutResult> {
   const supabase = await createClient()
 
   // 1. Get user
@@ -267,7 +286,7 @@ export async function processCheckout(
   profile: { fullName: string, email: string, phone: string, alternatePhone?: string, street: string, city: string, state: string, zipCode: string },
   items: any[],
   paymentMethod: 'COD' | 'RAZORPAY'
-) {
+): Promise<CheckoutResult> {
   const supabase = await createClient()
   let { data: { user } } = await supabase.auth.getUser()
 

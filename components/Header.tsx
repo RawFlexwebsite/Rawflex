@@ -1,15 +1,16 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { navLinks, SITE } from "@/lib/data";
 import { createClient } from "@/lib/supabase/client";
 import { useCart } from "@/context/CartContext";
 import CartDrawer from "./CartDrawer";
 import dbData from "@/lib/db.json";
-import { Search } from "lucide-react";
+import { Search, User, ShoppingBag, LogOut, LayoutDashboard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getShippingSettings } from "@/actions/admin/shipping";
+import AnnouncementBar from "./AnnouncementBar";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -18,9 +19,10 @@ export default function Header() {
   const [cartOpen, setCartOpen] = useState(false);
   const { cartCount } = useCart();
   const [user, setUser] = useState<any>(null);
-  const isAdmin = user && (user.email === 'admin@gulshanmodest.com' || user.user_metadata?.role === 'admin');
+  const isAdmin = user && (user.email === 'admin@rawflex.in' || user.user_metadata?.role === 'admin');
   const [searchQuery, setSearchQuery] = useState("");
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [showDesktopSearch, setShowDesktopSearch] = useState(false);
   const router = useRouter();
   const [shipping, setShipping] = useState<any>(null);
 
@@ -55,7 +57,7 @@ export default function Header() {
   useEffect(() => {
     const checkUserSession = () => {
       const value = `; ${document.cookie}`
-      const parts = value.split(`; gulshan-user-session=`)
+      const parts = value.split(`; rawflex-user-session=`)
       if (parts.length === 2) {
         const val = parts.pop()?.split(';').shift()
         if (val) {
@@ -69,7 +71,7 @@ export default function Header() {
 
       const mockAdmin = document.cookie.includes('mock-admin-logged-in=true')
       if (mockAdmin) {
-        setUser({ id: 'mock-admin-id', email: 'admin@gulshanmodest.com', user_metadata: { role: 'admin' } })
+        setUser({ id: 'mock-admin-id', email: 'admin@rawflex.in', user_metadata: { role: 'admin' } })
         return
       }
 
@@ -85,9 +87,9 @@ export default function Header() {
       }).catch(() => { });
     }
 
-    window.addEventListener('gulshan-login-status-change', checkUserSession)
+    window.addEventListener('rawflex-login-status-change', checkUserSession)
     return () => {
-      window.removeEventListener('gulshan-login-status-change', checkUserSession)
+      window.removeEventListener('rawflex-login-status-change', checkUserSession)
     }
   }, []);
 
@@ -97,15 +99,16 @@ export default function Header() {
 
   return (
     <>
+      <AnnouncementBar />
       <header
-        className={`fixed top-0 inset-x-0 z-[99999] transition-all duration-300 ${open
-            ? "bg-[#FBF7F0]"
+        className={`fixed top-9 inset-x-0 z-[99999] border-b border-[#D4A82C] transition-all duration-300 ${open
+            ? "bg-[#080909]"
             : scrolled
-              ? "bg-cream/90 backdrop-blur-md shadow-[0_4px_24px_-8px_rgba(33,29,25,0.15)]"
+              ? "bg-cream/90 backdrop-blur-md shadow-[0_4px_24px_-8px_rgba(0,0,0,0.6)]"
               : "bg-transparent"
           }`}
       >
-        <div className="max-w-wrap mx-auto px-5 md:px-8 flex items-center justify-between h-[72px] md:h-[84px]">
+        <div className="max-w-wrap mx-auto px-4 md:px-7 flex items-center justify-between h-[64px] md:h-[74px]">
           {/* Mobile hamburger — left side on mobile only */}
           <button
             aria-label={open ? "Close menu" : "Open menu"}
@@ -113,54 +116,51 @@ export default function Header() {
               setOpen((v) => !v);
               setShowMobileSearch(false);
             }}
-            className={`lg:hidden relative h-10 w-10 flex items-center justify-center text-[#211D19] shrink-0 transition-all ${scrolled
+            className={`lg:hidden relative h-9 w-9 flex items-center justify-center text-ink shrink-0 transition-all ${scrolled
                 ? "bg-transparent border-transparent shadow-none"
-                : "bg-white/95 border border-cream-line/60 rounded-full shadow-sm hover:bg-cream"
+                : "bg-white/10 border border-cream-line/60 rounded-full shadow-sm hover:bg-cream-deep"
               }`}
           >
             <span className="sr-only">Menu</span>
             {open ? (
-              <svg className="w-[22px] h-[22px] text-[#211D19]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-ink" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             ) : (
-              <svg className="w-[22px] h-[22px] text-[#211D19]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-ink" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             )}
           </button>
 
-          <a href="/" className="flex items-center gap-2.5 shrink-0">
+<a href="/" className="flex items-center gap-2 shrink-0 overflow-hidden" aria-label="RAWFLEX Home" style={{ height: '100%' }}>
             <Image
-              src="/logo-dark.webp"
-              alt="Gulshan Modest logo"
-              width={64}
-              height={64}
-              className="h-12 w-12 md:h-16 md:w-16 object-contain"
+              src="/rawflex_logo.png"
+              alt="RAWFLEX Logo"
+              width={120}
+              height={120}
+              className="object-contain"
               priority
             />
-            <span className="font-display font-semibold text-lg md:text-xl tracking-tight text-ink">
-              Gulshan Modest
-            </span>
           </a>
 
-          <nav className="hidden lg:flex items-center gap-9">
+          <nav className="hidden lg:flex items-center gap-7">
             {navLinks.map((link) => {
-              if (link.label === "Shop") {
+              if (link.label === "Collections") {
                 return (
                   <div key={link.href} className="relative group py-2">
                     <a
                       href={link.href}
-                      className="font-body text-[16px] font-semibold text-ink hover:text-emerald transition-colors flex items-center gap-1"
+                      className="font-body text-[12px] font-bold uppercase tracking-wider text-ink hover:text-gold transition-colors flex items-center gap-1"
                     >
                       {link.label}
-                      <svg className="w-4 h-4 text-ink/40 group-hover:text-emerald transition-transform group-hover:rotate-180 duration-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 text-ink/40 group-hover:text-gold transition-transform group-hover:rotate-180 duration-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                       </svg>
                     </a>
 
                     {/* Dropdown Menu */}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[540px] bg-white border border-cream-line rounded-2xl shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 p-6 z-50">
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[540px] bg-panel border border-cream-line rounded-2xl shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 p-6 z-50">
                       <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                         <div>
                           <p className="px-1 mb-2 text-[11px] font-bold uppercase tracking-wider text-ink/40">Categories</p>
@@ -212,7 +212,7 @@ export default function Header() {
                 <a
                   key={link.href}
                   href={link.href}
-                  className="font-body text-[16px] font-semibold text-ink hover:text-emerald transition-colors relative group"
+                  className="font-body text-[12px] font-bold uppercase tracking-wider text-ink hover:text-gold transition-colors relative group"
                 >
                   {link.label}
                   <span className="absolute left-0 -bottom-1.5 h-[1.5px] w-0 bg-gold group-hover:w-full transition-all duration-300" />
@@ -221,83 +221,93 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="hidden lg:flex items-center gap-6">
-            <form onSubmit={handleSearch} className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-48 bg-[#FBF7F0] border border-[#e6e2db] rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-gold transition-all"
-              />
-              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/50 hover:text-gold transition-colors">
-                <Search className="w-4 h-4" />
+          <div className="hidden lg:flex items-center gap-5">
+            {/* Search */}
+            <div className="relative">
+              <button
+                onClick={() => setShowDesktopSearch((v) => !v)}
+                aria-label="Search"
+                title="Search"
+                className="text-ink hover:text-gold transition-colors"
+              >
+                <Search className="w-[19px] h-[19px]" />
               </button>
-            </form>
-
-            <button
-              onClick={() => setCartOpen(true)}
-              className={`relative flex items-center justify-center h-11 w-11 rounded-full bg-gold text-white shadow-md hover:bg-emerald hover:scale-105 transition-all shrink-0`}
-              title="Shopping Cart"
-            >
-              <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-emerald text-cream text-[9px] font-bold rounded-full flex items-center justify-center shadow-sm animate-scale-up">
-                  {cartCount}
-                </span>
+              {showDesktopSearch && (
+                <form
+                  onSubmit={(e) => {
+                    handleSearch(e);
+                    setShowDesktopSearch(false);
+                  }}
+                  className="absolute right-0 top-full mt-4 w-64 z-50"
+                >
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    autoFocus
+                    className="w-full bg-cream-deep border border-cream-line rounded-full py-2.5 pl-4 pr-10 text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-1 focus:ring-gold transition-all shadow-card"
+                  />
+                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/50 hover:text-gold transition-colors">
+                    <Search className="w-4 h-4" />
+                  </button>
+                </form>
               )}
-            </button>
+            </div>
 
-            {user && (
-              <div className="flex items-center gap-4 shrink-0">
+            {/* User */}
+            {user ? (
+              <div className="flex items-center gap-5 shrink-0">
                 {isAdmin && (
                   <a
                     href="/admin"
                     title="Admin Dashboard"
-                    className="text-gold hover:text-emerald transition-colors p-1 shrink-0"
+                    className="text-ink hover:text-gold transition-colors"
                   >
-                    <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <rect x="3" y="3" width="7" height="9" rx="1" />
-                      <rect x="14" y="3" width="7" height="5" rx="1" />
-                      <rect x="14" y="12" width="7" height="9" rx="1" />
-                      <rect x="3" y="16" width="7" height="5" rx="1" />
-                    </svg>
+                    <LayoutDashboard className="w-[19px] h-[19px]" />
                   </a>
                 )}
                 <a
                   href="/profile"
                   title="Manage Profile"
-                  className="text-gold hover:text-emerald transition-colors p-1 shrink-0"
+                  className="text-ink hover:text-gold transition-colors"
                 >
-                  <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
+                  <User className="w-[19px] h-[19px]" />
                 </a>
+                <button
+                  onClick={async () => {
+                    const supabase = createClient();
+                    await supabase.auth.signOut();
+                    localStorage.removeItem('rawflex-customer-profile');
+                    setUser(null);
+                    window.location.reload();
+                  }}
+                  title="Logout"
+                  className="text-ink hover:text-gold transition-colors"
+                >
+                  <LogOut className="w-[19px] h-[19px]" />
+                </button>
               </div>
-            )}
-            {user ? (
-              <button
-                onClick={async () => {
-                  const supabase = createClient();
-                  await supabase.auth.signOut();
-                  localStorage.removeItem('gulshan-customer-profile');
-                  setUser(null);
-                  window.location.reload();
-                }}
-                className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-emerald text-cream font-body font-semibold text-sm tracking-wide hover:bg-emerald-deep transition-colors shadow-card"
-              >
-                Logout
-              </button>
             ) : (
-              <a
-                href="/login"
-                className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-emerald text-cream font-body font-semibold text-sm tracking-wide hover:bg-emerald-deep transition-colors shadow-card"
-              >
-                Login/Register
+              <a href="/login" title="Login / Register" className="text-ink hover:text-gold transition-colors">
+                <User className="w-[19px] h-[19px]" />
               </a>
             )}
+
+            {/* Cart */}
+            <button
+              onClick={() => setCartOpen(true)}
+              aria-label="Shopping Cart"
+              title="Shopping Cart"
+              className="relative text-ink hover:text-gold transition-colors shrink-0"
+            >
+              <ShoppingBag className="w-[19px] h-[19px]" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 w-4 h-4 bg-gold text-cream text-[9px] font-bold rounded-full flex items-center justify-center shadow-sm animate-scale-up">
+                  {cartCount}
+                </span>
+              )}
+            </button>
           </div>
 
           {/* Mobile search & cart — right side on mobile only */}
@@ -307,19 +317,19 @@ export default function Header() {
                 setShowMobileSearch((v) => !v);
                 setOpen(false);
               }}
-              className={`relative h-10 w-10 flex items-center justify-center rounded-full text-ink hover:text-emerald hover:scale-105 transition-all shrink-0 ${
-                showMobileSearch ? "bg-emerald text-cream" : scrolled ? "bg-transparent" : "bg-white/95 border border-cream-line/60 shadow-sm"
+              className={`relative h-9 w-9 flex items-center justify-center rounded-full text-ink hover:text-emerald hover:scale-105 transition-all shrink-0 ${
+                showMobileSearch ? "bg-emerald text-cream" : scrolled ? "bg-transparent" : "bg-white/10 border border-cream-line/60 shadow-sm"
               }`}
               title="Search Products"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-[18px] h-[18px]" />
             </button>
             <button
               onClick={() => setCartOpen(true)}
-              className="relative h-10 w-10 flex items-center justify-center rounded-full bg-gold text-white shadow-md hover:bg-emerald transition-all shrink-0"
+              className="relative h-9 w-9 flex items-center justify-center rounded-full bg-gold text-white shadow-md hover:bg-emerald transition-all shrink-0"
               title="Shopping Cart"
             >
-              <svg className="w-[20px] h-[20px]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
               {cartCount > 0 && (
@@ -340,7 +350,7 @@ export default function Header() {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-[#e6e2db] rounded-full py-2.5 pl-4 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-gold transition-all"
+                className="w-full bg-panel border border-cream-line rounded-full py-2.5 pl-4 pr-10 text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-1 focus:ring-gold transition-all"
                 autoFocus
               />
               <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/50 hover:text-emerald transition-colors">
@@ -352,7 +362,7 @@ export default function Header() {
 
         {/* Mobile menu panel */}
         <div
-          className={`lg:hidden fixed inset-x-0 top-[72px] bottom-0 bg-[#FBF7F0] z-[9999] transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] ${open ? "block opacity-100 pointer-events-auto" : "hidden opacity-0 pointer-events-none"
+          className={`lg:hidden fixed inset-x-0 top-[100px] bottom-0 bg-[#080909] z-[9999] transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] ${open ? "block opacity-100 pointer-events-auto" : "hidden opacity-0 pointer-events-none"
             }`}
         >
           <nav className="flex flex-col px-6 pt-8 gap-1">
@@ -363,7 +373,7 @@ export default function Header() {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-[#e6e2db] rounded-full py-2.5 pl-4 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-gold transition-all"
+                className="w-full bg-panel border border-cream-line rounded-full py-2.5 pl-4 pr-10 text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-1 focus:ring-gold transition-all"
               />
               <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/50 hover:text-gold transition-colors">
                 <Search className="w-4 h-4" />
@@ -371,7 +381,7 @@ export default function Header() {
             </form>
 
             {navLinks.map((link, i) => {
-              if (link.label === "Shop") {
+              if (link.label === "Collections") {
                 return (
                   <div key={link.href} className="border-b border-cream-line py-3.5">
                     <button
@@ -472,7 +482,7 @@ export default function Header() {
                 onClick={async () => {
                   const supabase = createClient();
                   await supabase.auth.signOut();
-                  localStorage.removeItem('gulshan-customer-profile');
+                  localStorage.removeItem('rawflex-customer-profile');
                   setUser(null);
                   setOpen(false);
                   window.location.reload();

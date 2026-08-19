@@ -1,0 +1,23 @@
+{
+  "name": "RAWFLEX",
+  "short_name": "RAWFLEX",
+  "description": "RAWFLEX crafts oversized tees, acid wash fits, gym wear and limited edition drops from Kanpur, India. Heavyweight fabric, one-of-one finishes, shipped pan-India.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D0F0E",
+  "theme_color": "#D4A82C",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,229 +1,330 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Image from "next/image";
-import { SITE } from "@/lib/data";
-import HeroLineArt from "./HeroLineArt";
+import { useState } from "react";
 
-interface Slide {
+interface FeaturedProduct {
+  id: string;
+  name: string;
+  price: number;
+  sale_price?: number | null;
   image_url: string;
-  is_active: boolean;
-  text_mode?: string;
-  title?: string;
-  subtitle?: string;
 }
 
-export default function Hero({ slides = [] }: { slides?: Slide[] }) {
-  // Load active hero slides from props
-  const activeSlides = slides.filter((slide: any) => slide.is_active);
-  
-  const rightActiveSlides = activeSlides.filter((slide: any) => !slide.position || slide.position === 'right');
-  const leftActiveSlides = activeSlides.filter((slide: any) => slide.position === 'left');
+function formatINR(n: number) {
+  return `₹${n.toLocaleString("en-IN")}`;
+}
 
-  const rightImages = rightActiveSlides.length > 0 
-    ? rightActiveSlides.map((slide: any) => slide.image_url)
-    : [
-        "/model-cream-hijab.png",
-        "/abaya-double-layer.png",
-        "/khimar-handwork.png",
-        "/jilbab-blue.png",
-      ];
+const slides = [
+  {
+    tag: "NEW SEASON '24",
+    headline1: "MADE FOR",
+    headline2: "THE STREETS",
+    sub: "Oversized silhouettes. Premium fabrics.\nDesigned to move with you.",
+    cta: "SHOP NEW DROPS",
+    ctaHref: "/shop?category=new-drops",
+  },
+  {
+    tag: "LIMITED DROP '24",
+    headline1: "BORN FOR",
+    headline2: "THE GRIND",
+    sub: "Heavyweight washes. One-of-one designs.\nBuilt different, shipped pan-India.",
+    cta: "EXPLORE COLLECTION",
+    ctaHref: "/shop",
+  },
+  {
+    tag: "EXCLUSIVE DROP",
+    headline1: "DEFINE",
+    headline2: "YOUR STYLE",
+    sub: "Raw. Bold. Unapologetic.\nSmall batch drops that sell out fast.",
+    cta: "SHOP NOW",
+    ctaHref: "/shop?featured=true",
+  },
+];
 
-  const leftImages = leftActiveSlides.length > 0
-    ? leftActiveSlides.map((slide: any) => slide.image_url)
-    : ["/khimar-handwork-1.png"];
+export default function Hero({
+  featuredProducts = [],
+}: {
+  featuredProducts?: FeaturedProduct[];
+}) {
+  const [current, setCurrent] = useState(0);
+  const featured = featuredProducts.slice(0, 2);
+  const slide = slides[current];
+  const total = slides.length;
 
-  const [activeRightIndex, setActiveRightIndex] = useState(0);
-  const [activeLeftIndex, setActiveLeftIndex] = useState(0);
-
-  useEffect(() => {
-    const intervalRight = setInterval(() => {
-      setActiveRightIndex((prev) => (prev + 1) % rightImages.length);
-    }, 4000);
-    return () => clearInterval(intervalRight);
-  }, [rightImages.length]);
-
-  useEffect(() => {
-    // Slightly offset the left animation so they don't change at exactly the same millisecond
-    const intervalLeft = setInterval(() => {
-      setActiveLeftIndex((prev) => (prev + 1) % leftImages.length);
-    }, 4500);
-    return () => clearInterval(intervalLeft);
-  }, [leftImages.length]);
+  const prev = () => setCurrent((c) => (c - 1 + total) % total);
+  const next = () => setCurrent((c) => (c + 1) % total);
 
   return (
     <section
       id="home"
-      className="relative overflow-hidden pt-[72px] md:pt-[84px] pb-16 md:pb-24 bg-[#FCF8F2]"
+      className="relative w-full overflow-hidden bg-[#0a0909]"
+      style={{ minHeight: "100vh" }}
     >
+      {/* ── Full-bleed environment background ── */}
+      <div className="absolute inset-x-0 z-0" style={{ top: "13%", height: "100%" }}>
+        <Image
+          src="/hero-img.png"
+          alt="Hero background"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        {/* gradient overlays for text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0909] via-[#0a0909]/50 to-[#0a0909]/5" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0909]/90 via-transparent to-[#0a0909]/40" />
+      </div>
 
-      {/* ambient gradient blobs */}
-      <div className="pointer-events-none absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full bg-gradient-to-br from-gold-pale via-gold-light/40 to-transparent blur-3xl opacity-50 z-0" />
-      <div className="pointer-events-none absolute top-1/3 -left-40 w-[420px] h-[420px] rounded-full bg-gradient-to-tr from-rose-soft/30 via-cream to-transparent blur-3xl opacity-55 z-0" />
+      {/* ── Model cutout ── */}
+      <div
+        className="hidden md:block absolute z-[5] bottom-0 pointer-events-none"
+        style={{ right: "27%", top: "120px", width: "40%" }}
+      >
+        <Image
+          src="/hero-parts.png"
+          alt="Model wearing RAWFLEX oversized tee"
+          fill
+          priority
+          sizes="40vw"
+          className="object-contain object-bottom"
+        />
+      </div>
 
-      <div className="max-w-wrap mx-auto px-5 md:px-8 relative z-10 w-full min-h-[580px] flex items-center justify-center">
-        <div className="grid lg:grid-cols-[1fr_1.8fr_1fr] gap-6 items-center w-full">
-          
-          {/* Left Column: Slideshow of High-Quality Images (Desktop only, framed) */}
-          <div className="hidden lg:block relative w-[340px] h-[520px] mx-auto rounded-[28px] overflow-hidden shadow-soft border border-gold/15 bg-cream-deep self-start mt-6">
-            {leftImages.map((src, index) => (
-              <div
-                key={src + "-left-desktop"}
-                className={`absolute inset-0 transition-opacity duration-1000 ${
-                  index === activeLeftIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-                }`}
-              >
-                <Image
-                  src={src}
-                  alt="Gulshan Modest Collection"
-                  fill
-                  sizes="340px"
-                  className="object-cover object-center"
-                  priority={index === 0}
-                />
-              </div>
-            ))}
-          </div>
+      {/* ── Main content grid ── */}
+      <div
+        className="relative z-10 max-w-wrap mx-auto px-5 md:px-10 flex items-center"
+        style={{ minHeight: "100vh", paddingTop: "120px", paddingBottom: "60px" }}
+      >
+        <div className="w-full grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-10 lg:gap-16 items-center">
 
-          {/* Center Column: Logo, Brand Text, and Actions (Centered) */}
-          <div className="relative z-10 flex flex-col items-center text-center px-2 py-4">
-            
-            {/* Monogram Logo Icon (Black boundary / transparent bg) */}
-            <div className="hidden md:block relative w-24 h-24 md:w-28 md:h-28 -mt-6 md:mt-0 mb-4 mix-blend-multiply">
-              <Image
-                src="/logo-dark.webp"
-                alt="Gulshan Modest Logo"
-                fill
-                className="object-contain"
-                priority
-              />
+          {/* ── LEFT: Copy ── */}
+          <div>
+            {/* Season tag */}
+            <div className="flex items-center gap-3 mb-5">
+              <span className="text-[#D4A82C] text-xs font-bold tracking-[0.22em] uppercase">
+                {slide.tag}
+              </span>
+              <span className="w-10 h-[1.5px] bg-[#D4A82C]" />
             </div>
 
-            {/* Brand Typography */}
-            <span className="hidden md:inline-block font-display font-semibold text-base md:text-lg tracking-[0.25em] text-gold uppercase">
-              Gulshan Modest
-            </span>
-            <div className="hidden md:block w-16 h-[1px] bg-gold/50 my-2" />
-
-            <h1 className="mt-3 font-display font-bold leading-[1.1] text-[2.8rem] sm:text-5xl md:text-6xl text-emerald">
-              Modesty. <br />
-              <span className="text-gold">Elegance.</span> You.
+            {/* Headline */}
+            <h1 className="font-black uppercase leading-[0.92] tracking-tight whitespace-nowrap">
+              <span
+                className="block text-white"
+                style={{ fontSize: "clamp(2.75rem, 6vw, 5.25rem)" }}
+              >
+                {slide.headline1}
+              </span>
+              <span
+                className="block normal-case"
+                style={{
+                  fontSize: "clamp(2.5rem, 5.5vw, 4.75rem)",
+                  color: "#D4A82C",
+                  fontFamily: "var(--font-marker)",
+                  fontWeight: 400,
+                  transform: "rotate(-2deg)",
+                  transformOrigin: "left center",
+                }}
+              >
+                {slide.headline2}
+              </span>
             </h1>
 
-            <p className="mt-5 text-base md:text-lg text-emerald/80 font-body max-w-[480px] leading-relaxed">
-              Premium Quality Modest Fashion for Every Occasion — crafted with botanical detailing and premium fabric.
+            {/* Sub */}
+            <p
+              className="mt-6 max-w-[440px] text-sm md:text-base leading-relaxed whitespace-pre-line"
+              style={{ color: "rgba(220,215,210,0.65)" }}
+            >
+              {slide.sub}
             </p>
 
-            {/* Mobile/Tablet Model Showcase (Just below hero text, above buttons) */}
-            <div className="lg:hidden my-8 grid grid-cols-2 gap-4 w-full max-w-[360px] mx-auto">
-              <div className="relative aspect-[3/4.5] rounded-2xl overflow-hidden shadow-soft border border-gold/15 bg-cream-deep">
-                {leftImages.map((src, index) => (
-                  <div
-                    key={src + "-left-mobile"}
-                    className={`absolute inset-0 transition-opacity duration-700 ${
-                      index === activeLeftIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-                    }`}
-                  >
-                    <Image
-                      src={src}
-                      alt="Model"
-                      fill
-                      className="object-cover object-center"
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="relative aspect-[3/4.5] rounded-2xl overflow-hidden shadow-soft border border-gold/15 bg-cream-deep">
-                {rightImages.map((src, index) => (
-                  <div
-                    key={src + "-mobile"}
-                    className={`absolute inset-0 transition-opacity duration-700 ${
-                      index === activeRightIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-                    }`}
-                  >
-                    <Image
-                      src={src}
-                      alt="Model"
-                      fill
-                      className="object-cover object-center"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="mt-8 lg:mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-              <a
-                href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
-                  SITE.whatsappMessage
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-emerald text-cream font-body font-semibold text-[15px] tracking-wide shadow-card hover:bg-emerald-deep transition-all hover:scale-[1.02]"
+            {/* CTA */}
+            <a
+              href={slide.ctaHref}
+              className="mt-9 inline-flex items-center gap-3 border border-[#D4A82C] text-[#D4A82C] font-bold text-xs md:text-sm tracking-[0.18em] uppercase px-7 py-4 hover:bg-[#D4A82C] hover:text-[#0a0909] transition-all duration-300"
+            >
+              {slide.cta}
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                viewBox="0 0 24 24"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.665.989 3.3 1.49 4.975 1.491 5.474 0 9.932-4.457 9.935-9.931a9.885 9.885 0 0 0-2.883-7.054A9.882 9.882 0 0 0 11.758 1.15c-5.483 0-9.94 4.458-9.944 9.934-.002 1.936.507 3.82 1.476 5.489L2.247 20.89l4.4-.736z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 12h15" />
+              </svg>
+            </a>
+          </div>
+
+          {/* ── RIGHT: Product cards + nav ── */}
+          <div className="hidden lg:flex flex-col gap-5 w-[290px] xl:w-[320px]">
+            {/* Product Cards */}
+            {featured.length > 0 ? (
+              featured.map((p) => (
+                <a
+                  key={p.id}
+                  href={`/shop/${p.id}`}
+                  className="group flex items-center gap-5 rounded-sm border border-white/15 bg-white/5 backdrop-blur-sm hover:border-[#D4A82C]/60 hover:bg-white/10 transition-all duration-300 overflow-hidden p-4"
+                >
+                  {/* Image */}
+                  <div className="relative w-[112px] h-[112px] shrink-0 overflow-hidden bg-[#1a1a1a] rounded-sm">
+                    <Image
+                      src={p.image_url}
+                      alt={p.name}
+                      fill
+                      sizes="112px"
+                      className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <span className="inline-block px-2.5 py-1 bg-[#D4A82C] text-[#0a0909] text-[10px] font-bold uppercase tracking-widest mb-2">
+                      NEW DROP
+                    </span>
+                    <h3 className="text-white font-bold text-[15px] uppercase leading-snug line-clamp-2">
+                      {p.name}
+                    </h3>
+                    <p className="mt-2 text-[#D4A82C] font-bold text-[17px]">
+                      {p.sale_price && p.sale_price < p.price
+                        ? formatINR(p.sale_price)
+                        : formatINR(p.price)}
+                    </p>
+                    <span className="mt-1.5 inline-flex items-center gap-1 text-[#D4A82C] text-[12px] font-bold uppercase tracking-wider group-hover:gap-2 transition-all">
+                      SHOP NOW
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 12h15" />
+                      </svg>
+                    </span>
+                  </div>
+                </a>
+              ))
+            ) : (
+              <>
+                {[
+                  { name: "CHAOS BLOOM TEE", price: 1299 },
+                  { name: "LIMITED EDITION 001 TEE", price: 1499 },
+                ].map((p, i) => (
+                  <a
+                    key={i}
+                    href="/shop"
+                    className="group flex items-center gap-5 rounded-sm border border-white/15 bg-white/5 backdrop-blur-sm hover:border-[#D4A82C]/60 hover:bg-white/10 transition-all duration-300 overflow-hidden p-4"
+                  >
+                    <div className="relative w-[112px] h-[112px] shrink-0 overflow-hidden bg-[#1a1a1a] rounded-sm">
+                      <Image
+                        src={i === 0 ? "/lookbook-1.jpg" : "/lookbook-2.jpg"}
+                        alt={p.name}
+                        fill
+                        sizes="112px"
+                        className="object-cover object-center"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="inline-block px-2.5 py-1 bg-[#D4A82C] text-[#0a0909] text-[10px] font-bold uppercase tracking-widest mb-2">
+                        NEW DROP
+                      </span>
+                      <h3 className="text-white font-bold text-[15px] uppercase leading-snug">
+                        {p.name}
+                      </h3>
+                      <p className="mt-2 text-[#D4A82C] font-bold text-[17px]">
+                        {formatINR(p.price)}
+                      </p>
+                      <span className="mt-1.5 inline-flex items-center gap-1 text-[#D4A82C] text-[12px] font-bold uppercase tracking-wider group-hover:gap-2 transition-all">
+                        SHOP NOW
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 12h15" />
+                        </svg>
+                      </span>
+                    </div>
+                  </a>
+                ))}
+              </>
+            )}
+
+            {/* Slide counter + nav */}
+            <div className="flex items-center justify-end gap-4 mt-1">
+              <span className="text-white/60 text-xs font-bold tracking-widest">
+                {String(current + 1).padStart(2, "0")}
+                <span className="mx-2 text-white/30">——</span>
+                {String(total).padStart(2, "0")}
+              </span>
+              <button
+                onClick={prev}
+                aria-label="Previous slide"
+                className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-white hover:border-[#D4A82C] hover:text-[#D4A82C] transition-all"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
-                Shop on WhatsApp
-              </a>
-              <a
-                href="/shop"
-                className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-full border-2 border-emerald text-emerald font-body font-semibold text-[15px] tracking-wide hover:bg-emerald hover:text-cream transition-all hover:scale-[1.02]"
+              </button>
+              <button
+                onClick={next}
+                aria-label="Next slide"
+                className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-white hover:border-[#D4A82C] hover:text-[#D4A82C] transition-all"
               >
-                Shop the Collection
-              </a>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
-
-            {/* Sub-Features */}
-            <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 border-t border-gold/20 pt-6 w-full max-w-[500px]">
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-[11px] font-bold tracking-wider text-ink/50 uppercase">Fabric</span>
-                <span className="text-xs sm:text-[13px] font-semibold text-emerald">Premium Quality</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-[11px] font-bold tracking-wider text-ink/50 uppercase">Designs</span>
-                <span className="text-xs sm:text-[13px] font-semibold text-emerald">Elegant Cuts</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-[11px] font-bold tracking-wider text-ink/50 uppercase">Fit</span>
-                <span className="text-xs sm:text-[13px] font-semibold text-emerald">Comfortable</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-[11px] font-bold tracking-wider text-ink/50 uppercase">Pricing</span>
-                <span className="text-xs sm:text-[13px] font-semibold text-emerald">Affordable</span>
-              </div>
-            </div>
-
-
           </div>
-
-          {/* Right Column: Slideshow of High-Quality Images (Desktop only, framed, same height and distance from top) */}
-          <div className="hidden lg:block relative w-[340px] h-[520px] mx-auto rounded-[28px] overflow-hidden shadow-soft border border-gold/15 bg-cream-deep self-start mt-6">
-            {rightImages.map((src, index) => (
-              <div
-                key={src}
-                className={`absolute inset-0 transition-opacity duration-1000 ${
-                  index === activeRightIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-                }`}
-              >
-                <Image
-                  src={src}
-                  alt="Gulshan Modest Collection"
-                  fill
-                  sizes="340px"
-                  className="object-cover object-center"
-                  priority={index === 0}
-                />
-              </div>
-            ))}
-          </div>
-
         </div>
       </div>
 
-      {/* Hero Line Art Animation (Small, located at bottom-right corner, desktop only) */}
-      <HeroLineArt className="hidden lg:block absolute bottom-3 right-3 w-[100px] h-[100px] sm:w-[130px] sm:h-[130px] opacity-75 z-0 pointer-events-none" />
+      {/* ── Mobile product strip ── */}
+      <div className="lg:hidden relative z-10 px-5 pb-10 grid grid-cols-2 gap-3">
+        {(featured.length > 0 ? featured : [
+          { id: "1", name: "CHAOS BLOOM TEE", price: 1299, image_url: "/lookbook-1.jpg" },
+          { id: "2", name: "LIMITED EDITION 001", price: 1499, image_url: "/lookbook-2.jpg" },
+        ] as FeaturedProduct[]).map((p) => (
+          <a
+            key={p.id}
+            href={`/shop/${p.id}`}
+            className="group block rounded-sm border border-white/10 bg-[#111]/80 overflow-hidden"
+          >
+            <div className="relative aspect-[4/5] overflow-hidden bg-[#1a1a1a]">
+              <Image
+                src={p.image_url}
+                alt={p.name}
+                fill
+                sizes="50vw"
+                className="object-cover object-center"
+              />
+              <span className="absolute top-2 left-2 px-2 py-0.5 bg-[#D4A82C] text-[#0a0909] text-[9px] font-bold uppercase tracking-widest">
+                NEW
+              </span>
+            </div>
+            <div className="p-3">
+              <p className="text-white text-[12px] font-bold uppercase leading-snug line-clamp-2">
+                {p.name}
+              </p>
+              <p className="mt-1 text-[#D4A82C] font-bold text-[14px]">
+                {p.sale_price && p.sale_price < p.price
+                  ? formatINR(p.sale_price)
+                  : formatINR(p.price)}
+              </p>
+            </div>
+          </a>
+        ))}
+
+        {/* Mobile nav */}
+        <div className="col-span-2 flex items-center justify-center gap-4 pt-3">
+          <button onClick={prev} className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-white">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <span className="text-white/50 text-xs tracking-widest font-bold">
+            {String(current + 1).padStart(2, "0")} — {String(total).padStart(2, "0")}
+          </span>
+          <button onClick={next} className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-white">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </section>
   );
 }

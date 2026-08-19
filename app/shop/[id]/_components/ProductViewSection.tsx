@@ -135,7 +135,7 @@ export default function ProductViewSection({
         {information.length > 0 && (
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-cream-line/50">
             {information.map((info, idx) => (
-              <div key={idx} className="p-4 bg-white rounded-2xl border border-cream-line shadow-sm">
+              <div key={idx} className="p-4 bg-panel rounded-2xl border border-cream-line shadow-sm">
                 <p className="text-[11px] font-bold text-ink/50 uppercase tracking-wider">{info.label}</p>
                 <p className="text-sm font-semibold text-emerald mt-1">{info.value}</p>
               </div>

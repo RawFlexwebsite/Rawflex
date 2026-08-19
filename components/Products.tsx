@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 import Image from "next/image";
 import Reveal from "./Reveal";
-import { SITE } from "@/lib/data";
 import { useCart } from "@/context/CartContext";
 
 interface Product {
@@ -33,8 +32,8 @@ function formatINR(n: number) {
 export default function Products({
   products = [],
   categories = [],
-  title = "This season's favourites",
-  subtitle = "A curated edit from our latest drop — message us on WhatsApp for sizing, fabric notes or a custom order."
+  title = "Fresh from the drop",
+  subtitle = "A curated edit from our latest collection — message us on WhatsApp for sizing, fabric notes or a custom piece."
 }: {
   products?: Product[],
   categories?: Category[],
@@ -45,16 +44,18 @@ export default function Products({
   const router = useRouter();
 
   return (
-    <section id="products" className="relative py-12 md:py-16 bg-cream">
+    <section id="products" className="relative py-12 md:py-16 bg-[#E4E0DD]">
       <div className="max-w-wrap mx-auto px-5 md:px-8">
         <Reveal className="text-center max-w-xl mx-auto">
-          <div className="eyebrow justify-center inline-flex items-center gap-2">
-            <span className="h-px w-6 bg-gold" />
+          <div className="inline-flex items-center gap-2 text-[13px] md:text-sm font-bold tracking-[0.25em] uppercase text-[#8A6A26]">
+            <span className="h-px w-8 bg-[#D2A546]" />
             Featured Pieces
-            <span className="h-px w-6 bg-gold" />
+            <span className="h-px w-8 bg-[#D2A546]" />
           </div>
-          <h2 className="section-heading mt-4">{title}</h2>
-          <p className="section-sub mt-4">
+          <h2 className="mt-4 font-display font-bold text-3xl md:text-4xl text-[#0B0C0B] uppercase tracking-wide">
+            {title}
+          </h2>
+          <p className="mt-4 text-[#5A5550] font-body text-sm md:text-base max-w-lg mx-auto leading-relaxed">
             {subtitle}
           </p>
         </Reveal>
@@ -64,8 +65,8 @@ export default function Products({
             const categoryName = categories.find(c => c.id === p.category_id)?.name || p.category_id || "Uncategorized";
             return (
               <Reveal key={p.id} delay={(i % 5) as any} className="flex-none w-[calc(50%-0.5rem)] md:w-[calc(33.333%-1rem)] lg:w-[calc(20%-1.2rem)]">
-                <div className="lift group bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-cream-line/80 h-full flex flex-col">
-                  <div className="relative aspect-[4/5] overflow-hidden bg-cream-deep/20">
+                <div className="lift group bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-md hover:shadow-lg border border-[#E6DAC4] h-full flex flex-col">
+                  <div className="relative aspect-[4/5] overflow-hidden bg-[#F0EAE0]">
                     <Image
                       src={p.image_url}
                       alt={p.name}
@@ -74,18 +75,18 @@ export default function Products({
                       className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                     />
                     {p.badge && (
-                      <span className="absolute top-3 left-3 bg-emerald text-cream text-[9px] md:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-sm">
+                      <span className="absolute top-3 left-3 bg-[#D2A546] text-[#080909] text-[9px] md:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-sm">
                         {p.badge}
                       </span>
                     )}
-                    <span className="absolute bottom-3 right-3 bg-gold text-cream text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded shadow-sm">
+                    <span className="absolute bottom-3 right-3 bg-[#1E1B17] text-[#E4E0DD] text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded shadow-sm">
                       {categoryName}
                     </span>
                   </div>
                   <div className="p-3 md:p-4 flex flex-col flex-1">
                     <div className="flex-1">
-                      <Link href={`/shop/${p.id}`} className="hover:text-emerald transition-colors">
-                        <h3 className="font-display font-semibold text-ink text-[13px] md:text-[15px] leading-snug line-clamp-2">
+                      <Link href={`/shop/${p.id}`} className="hover:text-[#B9893F] transition-colors">
+                        <h3 className="font-display font-semibold text-[#1A1A1A] text-[13px] md:text-[15px] leading-snug line-clamp-2">
                           {p.name}
                         </h3>
                       </Link>
@@ -100,25 +101,25 @@ export default function Products({
                             />
                           ))}
                           {p.colors.length > 5 && (
-                            <span className="text-[10px] text-ink/50 font-medium">
+                            <span className="text-[10px] text-[#8A857E] font-medium">
                               +{p.colors.length - 5}
                             </span>
                           )}
                         </div>
                       ) : (
                         p.colorCount && p.colorCount > 1 && (
-                          <p className="mt-1 text-[11px] font-semibold text-emerald">
+                          <p className="mt-1 text-[11px] font-semibold text-[#B9893F]">
                             {p.colorCount} colors available
                           </p>
                         )
                       )}
                     </div>
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="font-display font-bold text-ink text-[14px] md:text-base">
+                      <span className="font-display font-bold text-[#0B0C0B] text-[14px] md:text-base">
                         {formatINR(p.price)}
                       </span>
                       {p.oldPrice && (
-                        <span className="text-ink/40 text-[12px] line-through">
+                        <span className="text-[#9A958D] text-[12px] line-through">
                           {formatINR(p.oldPrice)}
                         </span>
                       )}
@@ -132,7 +133,7 @@ export default function Products({
                           image_url: p.image_url,
                           category_name: categoryName
                         })}
-                        className="w-full text-center rounded-lg border border-emerald/50 text-emerald text-[13px] md:text-sm font-bold py-2.5 hover:bg-emerald hover:border-emerald hover:text-cream transition-colors flex items-center justify-center"
+                        className="w-full text-center rounded-lg border border-[#0C0E0D]/40 text-[#0C0E0D] text-[13px] md:text-sm font-bold py-2.5 hover:bg-[#0C0E0D] hover:border-[#0C0E0D] hover:text-[#F2EFEA] transition-colors flex items-center justify-center"
                       >
                         Add to cart
                       </button>
@@ -147,7 +148,7 @@ export default function Products({
                           });
                           router.push('/checkout');
                         }}
-                        className="w-full text-center rounded-lg bg-emerald text-cream text-[13px] md:text-sm font-bold py-2.5 hover:bg-emerald-deep transition-colors flex items-center justify-center shadow-sm"
+                        className="w-full text-center rounded-lg bg-[#0C0E0D] text-[#F2EFEA] text-[13px] md:text-sm font-bold py-2.5 hover:bg-[#2A2D2B] transition-colors flex items-center justify-center shadow-sm"
                       >
                         Buy now
                       </button>
@@ -162,7 +163,7 @@ export default function Products({
         <Reveal className="mt-12 text-center">
           <Link
             href="/shop"
-            className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-emerald text-cream font-body font-semibold text-[15px] tracking-wide shadow-card hover:bg-emerald-deep transition-colors"
+            className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[#0C0E0D] text-[#F2EFEA] font-body font-semibold text-[15px] tracking-wide shadow-card hover:bg-[#2A2D2B] transition-colors"
           >
             View Full Catalogue
           </Link>

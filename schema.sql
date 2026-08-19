@@ -1,4 +1,4 @@
--- Gulshan Modest Supabase Schema
+-- RAWFLEX Supabase Schema
 
 -- 1. Profiles Table
 CREATE TABLE profiles (

@@ -20,7 +20,7 @@ export async function getAdminProfile() {
 
   return admin || {
     id: 'mock-admin-id',
-    email: 'admin@gulshanmodest.com',
+    email: 'admin@rawflex.in',
     full_name: 'Admin',
     phone: '+91 87964 59447'
   }

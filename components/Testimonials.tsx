@@ -12,7 +12,7 @@ export default function Testimonials() {
             Customer Love
             <span className="h-px w-6 bg-gold" />
           </div>
-          <h2 className="section-heading mt-4">Words from our Gulshan family</h2>
+          <h2 className="section-heading mt-4">Words from the flexers</h2>
         </Reveal>
 
         <div className="mt-12 flex overflow-x-auto snap-x snap-mandatory no-scrollbar gap-5 md:gap-6 pb-6 w-full">

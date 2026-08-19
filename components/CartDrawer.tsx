@@ -32,7 +32,7 @@ export default function CartDrawer({ isOpen, onClose, shipping }: CartDrawerProp
 
       <div className="absolute inset-y-0 right-0 max-w-full flex">
         {/* Drawer Content */}
-        <div className="w-screen max-w-md bg-white flex flex-col shadow-2xl border-l border-cream-line animate-slide-left">
+        <div className="w-screen max-w-md bg-panel flex flex-col shadow-2xl border-l border-cream-line animate-slide-left">
           {/* Header */}
           <div className="h-16 border-b border-cream-line px-5 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2 text-emerald">
@@ -89,7 +89,7 @@ export default function CartDrawer({ isOpen, onClose, shipping }: CartDrawerProp
 
                     <div className="flex items-center justify-between">
                       {/* Quantity Selector */}
-                      <div className="flex items-center border border-cream-line bg-white rounded-lg">
+                      <div className="flex items-center border border-cream-line bg-cream-deep rounded-lg">
                         <button
                           onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
                           className="p-1 hover:text-emerald transition-colors"
@@ -141,7 +141,7 @@ export default function CartDrawer({ isOpen, onClose, shipping }: CartDrawerProp
                 <Link
                   href="/checkout"
                   onClick={onClose}
-                  className="w-full text-center py-3.5 bg-emerald text-cream font-body font-semibold rounded-full shadow-card hover:bg-emerald-deep transition-colors flex items-center justify-center gap-1.5"
+                  className="w-full text-center py-3.5 bg-emerald text-cream font-body font-semibold rounded-full shadow-card hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-1.5"
                 >
                   Proceed to Checkout
                 </Link>

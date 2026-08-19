@@ -41,7 +41,7 @@ export default function ProfileManager({ adminProfile, orders = [] }: { adminPro
         zipCode: adminProfile.zipCode || '',
       })
     } else if (typeof window !== 'undefined') {
-      const savedData = localStorage.getItem('gulshan-customer-profile')
+      const savedData = localStorage.getItem('rawflex-customer-profile')
       if (savedData) {
         try {
           setProfile(JSON.parse(savedData))
@@ -64,7 +64,7 @@ export default function ProfileManager({ adminProfile, orders = [] }: { adminPro
     }
 
     if (typeof window !== 'undefined') {
-      localStorage.setItem('gulshan-customer-profile', JSON.stringify(profile))
+      localStorage.setItem('rawflex-customer-profile', JSON.stringify(profile))
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     }
@@ -77,7 +77,7 @@ export default function ProfileManager({ adminProfile, orders = [] }: { adminPro
   return (
     <div className="space-y-8">
       {/* Form Card */}
-      <div className="bg-white rounded-2xl p-6 md:p-8 shadow-card border border-cream-line/75">
+      <div className="bg-panel rounded-2xl p-6 md:p-8 shadow-card border border-cream-line/75">
         <form onSubmit={handleSave} className="space-y-6">
           {saved && (
             <div className="p-3.5 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm flex items-center gap-2 animate-fade-in">
@@ -228,7 +228,7 @@ export default function ProfileManager({ adminProfile, orders = [] }: { adminPro
       </div>
 
       {/* Orders Card */}
-      <div className="bg-white rounded-2xl p-6 md:p-8 shadow-card border border-cream-line/75 space-y-4">
+      <div className="bg-panel rounded-2xl p-6 md:p-8 shadow-card border border-cream-line/75 space-y-4">
         <h3 className="text-base font-semibold text-ink flex items-center gap-2">
           <Package className="w-5 h-5 text-gold" /> Order History
         </h3>

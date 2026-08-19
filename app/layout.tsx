@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Bricolage_Grotesque } from "next/font/google";
+import { Plus_Jakarta_Sans, Bricolage_Grotesque, Permanent_Marker } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
@@ -19,25 +19,40 @@ const bricolage = Bricolage_Grotesque({
   display: "swap",
 });
 
+const marker = Permanent_Marker({
+  subsets: ["latin"],
+  variable: "--font-marker",
+  weight: ["400"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Gulshan Modest | Modest Fashion, Quietly Elevated",
+  title: "RAWFLEX | Streetwear, Built Different",
   description:
-    "Gulshan Modest crafts abayas, hijabs and modest essentials with botanical detailing, premium fabric and timeless silhouettes. Shop the new collection online, across Delhi NCR and pan-India.",
+    "RAWFLEX crafts oversized tees, acid wash fits, gym wear and limited edition drops from Kanpur, India. Heavyweight fabric, one-of-one finishes, shipped pan-India.",
   keywords: [
-    "Gulshan Modest",
-    "modest fashion",
-    "abaya",
-    "hijab",
-    "modest wear India",
+    "RAWFLEX",
+    "streetwear",
+    "oversized tees",
+    "acid wash",
+    "gym collection",
+    "men's clothing India",
   ],
   icons: {
-    icon: '/logo-dark.webp',
-    apple: '/logo-dark.webp',
+    icon: '/favicon.ico',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png',
+    other: [
+      { rel: 'icon', type: 'image/png', sizes: '32x32', url: '/favicon-32x32.png' },
+      { rel: 'icon', type: 'image/png', sizes: '48x48', url: '/favicon-48x48.png' },
+      { rel: 'icon', type: 'image/svg+xml', url: '/favicon.svg' },
+      { rel: 'manifest', url: '/site.webmanifest' },
+    ],
   },
   openGraph: {
-    title: "Gulshan Modest | Modest Fashion, Quietly Elevated",
+    title: "RAWFLEX | Streetwear, Built Different",
     description:
-      "Abayas, hijabs and modest essentials crafted with botanical detailing and premium fabric.",
+      "Oversized tees, acid wash fits and limited edition drops. Heavyweight fabric, one-of-one finishes.",
     type: "website",
   },
 };
@@ -48,7 +63,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${bricolage.variable}`}>
+    <html lang="en" className={`${jakarta.variable} ${bricolage.variable} ${marker.variable}`}>
       <head>
         <Script id="facebook-pixel" strategy="afterInteractive">
           {`
@@ -65,7 +80,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className="font-body bg-cream text-ink antialiased">
+      <body className="font-body bg-cream text-ink antialiased" suppressHydrationWarning>
         <noscript>
           <img 
             height="1" 

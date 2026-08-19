@@ -1,4 +1,4 @@
-// Database type definitions for Gulshan Modest
+// Database type definitions for RAWFLEX
 // These types mirror the Supabase database schema
 
 export type UserRole = 'customer' | 'admin'

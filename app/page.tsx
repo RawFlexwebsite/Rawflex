@@ -1,45 +1,20 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import TrustMarquee from "@/components/TrustMarquee";
-import Story from "@/components/Story";
-import HomeBanner from "@/components/HomeBanner";
 import Categories from "@/components/Categories";
-import Products from "@/components/Products";
-import LuxeSalwarKameez from "@/components/LuxeSalwarKameez";
-import WhyUs from "@/components/WhyUs";
-import BrandBanner from "@/components/BrandBanner";
-import Lookbook from "@/components/Lookbook";
-import Testimonials from "@/components/Testimonials";
-import Contact from "@/components/Contact";
+import OversizedPromo from "@/components/OversizedPromo";
+import NewDrops from "@/components/NewDrops";
+import BestSellersLookbook from "@/components/BestSellersLookbook";
 import Footer from "@/components/Footer";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import PakistaniEditBanner from "@/components/PakistaniEditBanner";
 import { createClient } from "@/lib/supabase/server";
 
+const PRODUCT_SELECT = `
+  id, name, slug, category_id, is_featured, is_active, badge, rating, color_name,
+  product_images ( image_url ),
+  product_variants ( price, original_price )
+`;
+
 export default async function Home() {
-  // Auto-migration for seo_keywords column
-  try {
-    const { Client } = require('pg');
-    const client = new Client({
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-    });
-    await client.connect();
-    await client.query('ALTER TABLE products ADD COLUMN IF NOT EXISTS seo_keywords TEXT;');
-    await client.query("NOTIFY pgrst, 'reload schema';");
-    await client.end();
-  } catch (e) {
-    console.error('Migration error:', e);
-  }
-
   const supabase = await createClient();
-
-  // Fetch active hero slides
-  const { data: heroSlides } = await supabase
-    .from("hero_slides")
-    .select("*")
-    .eq("is_active", true)
-    .order("created_at", { ascending: false });
 
   // Fetch active categories
   const { data: categoriesData } = await supabase
@@ -47,126 +22,62 @@ export default async function Home() {
     .select("*")
     .eq("is_active", true);
 
-  // Fetch home banner (only shown if the admin toggle is enabled)
-  const { data: bannerSettings } = await supabase
-    .from("settings")
-    .select("home_banner_enabled")
-    .single();
-
-  let homeBannerImages: { id: string; image_url: string; link_url: string | null }[] = [];
-  if (bannerSettings?.home_banner_enabled) {
-    const { data: bannerImages } = await supabase
-      .from("home_banner_images")
-      .select("id, image_url, link_url")
-      .eq("is_active", true)
-      .order("display_order", { ascending: true })
-      .order("created_at", { ascending: true });
-    homeBannerImages = bannerImages || [];
-  }
-
-  // Fetch product counts per category, and color-group sizes for "N colors available" badges
+  // Fetch all active products (mock: category filters return empty, so we
+  // select broadly and derive the homepage sections with fallbacks)
   const { data: allProducts } = await supabase
     .from("products")
-    .select("category_id, color_group_id")
-    .eq("is_active", true);
+    .select(PRODUCT_SELECT)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
 
+  // Product counts per category
   const productCounts = (allProducts || []).reduce((acc: any, p: any) => {
     acc[p.category_id] = (acc[p.category_id] || 0) + 1;
     return acc;
   }, {});
 
-  const colorGroupCounts = (allProducts || []).reduce((acc: any, p: any) => {
-    if (p.color_group_id) acc[p.color_group_id] = (acc[p.color_group_id] || 0) + 1;
-    return acc;
-  }, {});
-
   const categories = (categoriesData || []).map((c: any) => ({
     ...c,
-    count: `${productCounts[c.id] || 0} styles`
+    count: `${productCounts[c.id] || 0} styles`,
   }));
 
-  // Fetch featured products (is_featured = true or just active)
-  // For now, let's fetch active products. If is_featured exists, filter by it.
-  const { data: products } = await supabase
-    .from("products")
-    .select(`
-      id, name, slug, category_id, is_featured, is_active, color_group_id, color_name,
-      product_images ( image_url ),
-      product_variants ( price, original_price )
-    `)
-    .eq("is_active", true)
-    .eq("is_featured", true)
-    .order("created_at", { ascending: false })
-    .limit(10);
+  const categoryName = (id: string) =>
+    (categoriesData || []).find((c: any) => c.id === id)?.name || id;
 
-  // Helper to parse colors list
-  const parseProductColors = (colorNameField: string | null) => {
-    if (!colorNameField) return []
-    try {
-      if (colorNameField.startsWith('[')) {
-        const parsed = JSON.parse(colorNameField) as { name: string; hex: string }[]
-        return parsed.map(c => ({ name: c.name.trim(), hex: c.hex || '#E6DAC4' })).filter(c => c.name)
-      }
-    } catch (e) { }
-    return colorNameField.split(',').map(c => ({ name: c.trim(), hex: '#E6DAC4' })).filter(c => c.name)
-  }
+  const formatProducts = (rows: any[]) =>
+    (rows || []).map((p: any) => {
+      const variant = p.product_variants?.[0];
+      const price = variant?.price || p.price || 0;
+      const original = variant?.original_price || p.oldPrice || null;
+      return {
+        id: p.id,
+        name: p.name,
+        price,
+        sale_price: original && original > price ? original : null,
+        image_url: p.product_images?.[0]?.image_url || p.featured_image_url || "/image.png",
+        badge: p.badge || "New",
+        rating: p.rating || 4.9,
+        review_count: p.review_count || 24,
+        category_name: categoryName(p.category_id),
+      };
+    });
 
-  // Format products for the frontend component
-  const formattedProducts = (products || []).map((p: any) => ({
-    id: p.id,
-    name: p.name,
-    category_id: p.category_id,
-    image_url: p.product_images?.[0]?.image_url || p.featured_image_url || "/image.png",
-    price: p.product_variants?.[0]?.price || p.price || 0,
-    oldPrice: p.product_variants?.[0]?.original_price || p.oldPrice || undefined,
-    badge: p.badge,
-    rating: p.rating || 5,
-    colors: parseProductColors(p.color_name),
-    colorCount: p.color_group_id ? colorGroupCounts[p.color_group_id] || 1 : 1,
-  }));
+  const products = formatProducts(allProducts || []);
 
-  // Fetch Luxe Salwar Kameez products for the dedicated homepage highlight
-  const { data: salwarKameezProducts } = await supabase
-    .from("products")
-    .select(`
-      id, name, price, oldPrice, badge, rating, featured_image_url, color_group_id, color_name,
-      product_images ( image_url ),
-      product_variants ( price, original_price )
-    `)
-    .eq("category_id", "salwar_kameez")
-    .eq("is_active", true)
-    .order("created_at", { ascending: false })
-    .limit(10);
+  // Derive section products with fallbacks
+  const heroFeatured = products.slice(0, 2);
 
-  const formattedSalwarKameez = (salwarKameezProducts || []).map((p: any) => ({
-    id: p.id,
-    name: p.name,
-    image_url: p.product_images?.[0]?.image_url || p.featured_image_url || "/image.png",
-    price: p.product_variants?.[0]?.price || p.price || 0,
-    oldPrice: p.product_variants?.[0]?.original_price || p.oldPrice || undefined,
-    badge: p.badge,
-    rating: p.rating || 5,
-    colors: parseProductColors(p.color_name),
-    colorCount: p.color_group_id ? colorGroupCounts[p.color_group_id] || 1 : 1,
-  }));
+  const newDrops = products.filter((p) => p.category_name === "New Drops");
 
   return (
     <main className="overflow-x-hidden">
       <Header />
-      <Hero slides={heroSlides || []} />
-      <TrustMarquee />
-      <HomeBanner images={homeBannerImages} />
+      <Hero featuredProducts={heroFeatured} />
       <Categories categories={categories || []} />
-      <Products products={formattedProducts} categories={categories || []} />
-      <PakistaniEditBanner />
-      <LuxeSalwarKameez products={formattedSalwarKameez} />
-      <WhyUs />
-      <BrandBanner />
-      <Story />
-      <Lookbook />
-      <Testimonials />
+      <NewDrops products={(newDrops.length >= 4 ? newDrops : products).slice(0, 4)} />
+      <OversizedPromo />
+      <BestSellersLookbook />
       <Footer />
-      <FloatingWhatsApp />
     </main>
   );
 }

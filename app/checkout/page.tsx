@@ -6,7 +6,7 @@ import CheckoutForm from './_components/CheckoutForm'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata = {
-  title: 'Secure Checkout | Gulshan Modest',
+  title: 'Secure Checkout | RAWFLEX',
 }
 
 export default async function CheckoutPage() {

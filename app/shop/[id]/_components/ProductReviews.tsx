@@ -55,7 +55,7 @@ export default function ProductReviews({
     : 0
 
   return (
-    <div className="bg-white rounded-2xl border border-cream-line shadow-sm p-6 md:p-8">
+    <div className="bg-panel rounded-2xl border border-cream-line shadow-sm p-6 md:p-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 border-b border-cream-line/50 pb-8">
         <div>
           <h3 className="font-display font-semibold text-2xl text-ink">Customer Reviews</h3>
@@ -64,7 +64,7 @@ export default function ProductReviews({
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star 
                   key={star} 
-                  className={`w-5 h-5 ${star <= Number(avgRating) ? 'fill-gold' : 'fill-stone-100 text-stone-200'}`} 
+                  className={`w-5 h-5 ${star <= Number(avgRating) ? 'fill-gold' : 'fill-cream-deep text-cream-line'}`} 
                 />
               ))}
             </div>
@@ -77,7 +77,7 @@ export default function ProductReviews({
       <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
         <div className="md:col-span-7 space-y-6">
           {initialReviews.length === 0 ? (
-            <div className="text-center py-10 bg-cream/50 rounded-xl border border-dashed border-stone-200">
+            <div className="text-center py-10 bg-cream-deep/40 rounded-xl border border-dashed border-cream-line">
               <MessageCircle className="w-8 h-8 text-ink/20 mx-auto mb-3" />
               <p className="text-ink/50 text-sm">No reviews yet. Be the first to review this product!</p>
             </div>
@@ -87,7 +87,7 @@ export default function ProductReviews({
                 <div className="flex items-center gap-2 mb-2">
                   <div className="flex text-gold">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <Star key={star} className={`w-3.5 h-3.5 ${star <= review.rating ? 'fill-gold' : 'fill-stone-100 text-stone-200'}`} />
+                      <Star key={star} className={`w-3.5 h-3.5 ${star <= review.rating ? 'fill-gold' : 'fill-cream-deep text-cream-line'}`} />
                     ))}
                   </div>
                   <span className="text-sm font-semibold text-ink ml-1">{review.profiles?.full_name || 'Anonymous'}</span>
@@ -102,7 +102,7 @@ export default function ProductReviews({
         </div>
 
         <div className="md:col-span-5">
-          <div className="bg-cream/30 p-6 rounded-xl border border-cream-line">
+          <div className="bg-cream-deep/50 p-6 rounded-xl border border-cream-line">
             <h4 className="font-semibold text-ink mb-4">Write a Review</h4>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -118,7 +118,7 @@ export default function ProductReviews({
                       className="focus:outline-none transition-transform hover:scale-110"
                     >
                       <Star 
-                        className={`w-6 h-6 ${(hoveredRating || rating) >= star ? 'fill-gold text-gold' : 'fill-stone-100 text-stone-300'}`} 
+                        className={`w-6 h-6 ${(hoveredRating || rating) >= star ? 'fill-gold text-gold' : 'fill-cream-deep text-cream-line'}`} 
                       />
                     </button>
                   ))}
@@ -132,12 +132,12 @@ export default function ProductReviews({
                   onChange={(e) => setComment(e.target.value)}
                   rows={4}
                   placeholder="What did you like or dislike?"
-                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-sm focus:outline-none focus:ring-1 focus:ring-gold resize-none"
+                  className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-cream-deep text-sm text-ink focus:outline-none focus:ring-1 focus:ring-gold resize-none"
                 />
               </div>
 
               {message && (
-                <div className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                <div className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-emerald/10 text-emerald' : 'bg-red-950/50 text-red-400'}`}>
                   {message.text}
                 </div>
               )}
@@ -145,7 +145,7 @@ export default function ProductReviews({
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full py-2.5 bg-ink text-white text-sm font-medium rounded-xl hover:bg-gold transition-colors disabled:opacity-50"
+                className="w-full py-2.5 bg-emerald text-cream text-sm font-medium rounded-xl hover:bg-emerald-deep transition-colors disabled:opacity-50"
               >
                 {isPending ? 'Submitting...' : 'Submit Review'}
               </button>

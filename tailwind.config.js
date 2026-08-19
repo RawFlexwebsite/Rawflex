@@ -7,32 +7,34 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        cream: "#FBF7F0",
-        "cream-deep": "#F3EADC",
-        "cream-line": "#E6DAC4",
-        ink: "#211D19",
+        cream: "#080909",
+        "cream-deep": "#121412",
+        "cream-line": "#262926",
+        ink: "#EAE6E2",
         emerald: {
-          DEFAULT: "#1E3B2E",
-          soft: "#2E5642",
-          deep: "#142A20",
+          DEFAULT: "#F2EFEA",
+          soft: "#9A958D",
+          deep: "#0C0E0D",
         },
         gold: {
-          DEFAULT: "#B9893F",
-          light: "#E3BC7E",
-          pale: "#F1DDB2",
+          DEFAULT: "#C7B79E",
+          light: "#E4D8C4",
+          pale: "#F0E9DC",
         },
         rose: {
-          DEFAULT: "#C0816C",
-          soft: "#DCAE9C",
+          DEFAULT: "#D09A84",
+          soft: "#E2B9A8",
         },
+        panel: "#141614",
+        panel2: "#1A1D1B",
         orange: {
-          50: "#F1EBE1",   // Creamy pale
-          100: "#E6DAC4",  // cream line
-          200: "#F1DDB2",  // Gold pale
-          400: "#B9893F",  // Gold DEFAULT
-          500: "#1E3B2E",  // Emerald DEFAULT
-          600: "#142A20",  // Emerald deep
-          700: "#0D1E16",  // Dark forest
+          50: "#141614",   // dark panel
+          100: "#262926",  // dark line
+          200: "#C7B79E",  // gold DEFAULT
+          400: "#E4D8C4",  // gold light
+          500: "#F2EFEA",  // emerald DEFAULT
+          600: "#C9C4BC",  // muted accent
+          700: "#8E8981",  // dim accent
         },
       },
       fontFamily: {
@@ -43,8 +45,8 @@ module.exports = {
         wrap: "1400px",
       },
       boxShadow: {
-        soft: "0 20px 50px -20px rgba(33, 29, 25, 0.25)",
-        card: "0 14px 34px -16px rgba(30, 59, 46, 0.28)",
+        soft: "0 20px 50px -20px rgba(0, 0, 0, 0.6)",
+        card: "0 14px 34px -16px rgba(0, 0, 0, 0.7)",
       },
       keyframes: {
         fadeUp: {

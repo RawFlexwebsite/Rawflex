@@ -1,14 +1,13 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 
 export const metadata = {
-  title: 'Shipping & Delivery Policy | Gulshan Modest',
+  title: 'Shipping & Delivery Policy | RAWFLEX',
 }
 
 export default function ShippingPolicy() {
   return (
-    <main className="overflow-x-hidden pt-[72px] md:pt-[84px] bg-cream min-h-screen flex flex-col">
+    <main className="overflow-x-hidden pt-[108px] md:pt-[120px] bg-cream min-h-screen flex flex-col">
       <Header />
       
       <div className="flex-1 max-w-3xl mx-auto w-full px-5 py-16 md:py-24">
@@ -45,7 +44,6 @@ export default function ShippingPolicy() {
       </div>
 
       <Footer />
-      <FloatingWhatsApp />
     </main>
   );
 }

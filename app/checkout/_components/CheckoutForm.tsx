@@ -97,7 +97,7 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
   // Prefill from localStorage on mount (Only if logged in)
   useEffect(() => {
     if (typeof window !== 'undefined' && isLoggedIn) {
-      const savedData = localStorage.getItem('gulshan-customer-profile')
+      const savedData = localStorage.getItem('rawflex-customer-profile')
       if (savedData) {
         try {
           const parsed = JSON.parse(savedData)
@@ -247,14 +247,14 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
     const method = paymentMethod === 'Online Payment (Razorpay)' ? 'RAZORPAY' : 'COD'
 
     // Save profile to localstorage on order place
-    localStorage.setItem('gulshan-customer-profile', JSON.stringify(profile))
+    localStorage.setItem('rawflex-customer-profile', JSON.stringify(profile))
 
     const res = await processCheckout(profile, cart, method)
 
-    if (!res.success) {
+    if (res.success === false) {
       showToast(res.error || 'Failed to place order.', 'error')
     } else {
-      if (res.isRazorpay) {
+      if (res.isRazorpay === true) {
         handleRazorpayPayment(res, addressString)
       } else {
         setPlacedOrder({
@@ -310,7 +310,7 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
             showToast(res.error, 'error')
           } else if (res?.success) {
             try {
-              window.dispatchEvent(new Event('gulshan-login-status-change'))
+              window.dispatchEvent(new Event('rawflex-login-status-change'))
               await executeOrderPlacement()
               setOtpSent(false)
             } catch (e: any) {
@@ -335,19 +335,19 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
   const getWhatsappLink = () => {
     if (!placedOrder) return ''
     const itemsText = placedOrder.items.map((i: any) => `- ${i.name} (x${i.quantity})`).join('\n')
-    const message = `Hi Gulshan Modest!\n\nI just placed an order:\nOrder Number: *${placedOrder.order_number}*\nItems:\n${itemsText}\nTotal Amount: *₹${placedOrder.total.toLocaleString('en-IN')}*\nPayment Method: *${paymentMethod}*\n\nShipping Address: ${placedOrder.shippingAddress}\n\nPlease confirm my order. Thank you!`
+    const message = `Hi RAWFLEX!\n\nI just placed an order:\nOrder Number: *${placedOrder.order_number}*\nItems:\n${itemsText}\nTotal Amount: *₹${placedOrder.total.toLocaleString('en-IN')}*\nPayment Method: *${paymentMethod}*\n\nShipping Address: ${placedOrder.shippingAddress}\n\nPlease confirm my order. Thank you!`
     return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(message)}`
   }
 
   if (placedOrder) {
     return (
-      <div className="max-w-md mx-auto bg-white rounded-3xl p-8 border border-cream-line shadow-card text-center space-y-6 animate-fade-in mt-6">
+      <div className="max-w-md mx-auto bg-panel rounded-3xl p-8 border border-cream-line shadow-card text-center space-y-6 animate-fade-in mt-6">
         <div className="w-16 h-16 bg-emerald/10 text-emerald rounded-full flex items-center justify-center mx-auto">
           <CheckCircle2 className="w-10 h-10" />
         </div>
         <div>
           <h2 className="font-display font-bold text-2xl text-ink">Order Placed Successfully!</h2>
-          <p className="text-sm text-ink/60 mt-1">Thank you for shopping with Gulshan Modest.</p>
+          <p className="text-sm text-ink/60 mt-1">Thank you for shopping with RAWFLEX.</p>
         </div>
 
         <div className="p-4 bg-cream/40 rounded-2xl border border-cream-line/50 text-left space-y-3">
@@ -394,7 +394,7 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       {/* Left Column: Shipping Address & Payment Form */}
       <div className="lg:col-span-7 space-y-6">
-        <div className="bg-white rounded-3xl p-6 md:p-8 border border-cream-line shadow-card space-y-6">
+        <div className="bg-panel rounded-3xl p-6 md:p-8 border border-cream-line shadow-card space-y-6">
           <h2 className="text-lg font-bold text-ink uppercase tracking-wider flex items-center gap-2">
             <Truck className="w-5 h-5 text-gold" /> Shipping Details
           </h2>
@@ -533,16 +533,16 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
 
 
 
-        <div className="bg-white rounded-3xl p-6 md:p-8 border border-cream-line shadow-card space-y-6">
+        <div className="bg-panel rounded-3xl p-6 md:p-8 border border-cream-line shadow-card space-y-6">
           <h2 className="text-lg font-bold text-ink uppercase tracking-wider flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-gold" /> Payment Option
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className={`flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label className={`flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
               paymentMethod === 'Cash on Delivery'
-                ? 'border-emerald bg-emerald/5'
-                : 'border-cream-line bg-white hover:border-cream-line-dark'
+                ? 'border-emerald bg-black text-white hover:bg-white hover:text-black'
+                : 'border-cream-line bg-black text-white hover:bg-white hover:text-black'
             }`}>
               <input
                 type="radio"
@@ -551,14 +551,14 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
                 onChange={() => setPaymentMethod('Cash on Delivery')}
                 className="sr-only"
               />
-              <span className="font-bold text-ink text-sm">Cash on Delivery (+₹{shipping.cod_charge ?? 50})</span>
-              <span className="text-xs text-ink/50 mt-1">Pay COD charge & product value at your doorstep.</span>
+              <span className="font-semibold text-sm">Cash on Delivery (+₹{shipping.cod_charge ?? 50})</span>
+              <span className="text-xs mt-1">Pay COD charge & product value at your doorstep.</span>
             </label>
 
-            <label className={`flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+            <label className={`flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
               paymentMethod === 'Online Payment (Razorpay)'
-                ? 'border-emerald bg-emerald/5'
-                : 'border-cream-line bg-white hover:border-cream-line-dark'
+                ? 'border-emerald bg-white text-black hover:bg-black hover:text-white'
+                : 'border-cream-line bg-white text-black hover:bg-black hover:text-white'
             }`}>
               <input
                 type="radio"
@@ -567,10 +567,10 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
                 onChange={() => setPaymentMethod('Online Payment (Razorpay)')}
                 className="sr-only"
               />
-              <span className="font-bold text-ink text-sm">
+              <span className="font-semibold text-sm">
                 Online Payment {shipping.online_discount ? `(${shipping.online_discount}% Off)` : ''}
               </span>
-              <span className="text-xs text-ink/50 mt-1">Pay securely via UPI, Cards, or Netbanking.</span>
+              <span className="text-xs mt-1 font-medium">Pay securely via UPI, Cards, or Netbanking.</span>
             </label>
           </div>
         </div>
@@ -579,7 +579,7 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
       {/* Right Column: Order Summary & Coupon Codes (sticky so the order + Place Order button stay in view) */}
       <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28 lg:self-start">
         {/* Order Summary */}
-        <div className="bg-white rounded-3xl p-6 border border-cream-line shadow-card space-y-6">
+        <div className="bg-panel rounded-3xl p-6 border border-cream-line shadow-card space-y-6">
           <h2 className="text-lg font-bold text-ink uppercase tracking-wider flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-gold" /> Order Summary
           </h2>
@@ -704,7 +704,7 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
 
         {/* Coupons Form */}
         {hasCoupons && (
-          <div className="bg-white rounded-3xl p-6 border border-cream-line shadow-card space-y-4">
+          <div className="bg-panel rounded-3xl p-6 border border-cream-line shadow-card space-y-4">
             <h3 className="text-sm font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
               <Tag className="w-4 h-4 text-gold" /> Have a Coupon?
             </h3>
@@ -833,7 +833,7 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
                         showToast(res.error, 'error')
                       } else if (res?.success) {
                         try {
-                          window.dispatchEvent(new Event('gulshan-login-status-change'))
+                          window.dispatchEvent(new Event('rawflex-login-status-change'))
                           await executeOrderPlacement()
                           setOtpSent(false)
                         } catch (e: any) {

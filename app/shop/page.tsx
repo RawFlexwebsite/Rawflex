@@ -3,10 +3,11 @@ import Footer from '@/components/Footer'
 import ShopGrid from './_components/ShopGrid'
 import { createClient } from "@/lib/supabase/server";
 import Image from 'next/image'
+import { getSampleImages, hasSampleImages } from '@/lib/samples'
 
 export const metadata = {
-  title: 'Shop Collection | Gulshan Modest',
-  description: 'Browse our complete premium collection of modest abayas, hijabs, jilbabs and khimars.',
+  title: 'Shop Collection | RAWFLEX',
+  description: 'Browse the RAWFLEX collection — oversized tees, acid wash edits, gym wear and limited streetwear drops.',
 }
 
 export default async function ShopPage({
@@ -76,24 +77,46 @@ export default async function ShopPage({
     colorCount: p.color_group_id ? colorGroupCounts[p.color_group_id] || 1 : 1,
   }));
 
+  const selectedCategory = resolvedSearchParams.category || '';
+
+  // Add sample images as products for categories that have them
+  const sampleImageUrls = selectedCategory && hasSampleImages(selectedCategory) 
+    ? getSampleImages(selectedCategory) 
+    : [];
+  
+  const sampleProducts = sampleImageUrls.map((imageUrl, index) => ({
+    id: `sample-${selectedCategory}-${index}`,
+    name: `${selectedCategory.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} ${index + 1}`,
+    slug: `sample-${selectedCategory}-${index}`,
+    category_id: selectedCategory,
+    image_url: imageUrl,
+    price: 1299 + (index * 100) % 800,
+    oldPrice: undefined,
+    badge: index === 0 ? 'New' : undefined,
+    rating: 4.5 + (index % 5) * 0.1,
+    colors: [],
+    colorCount: 1,
+  }));
+
+  const allProducts = [...sampleProducts, ...products];
+
   const categories = categoriesData || [];
-  const selectedCategory = resolvedSearchParams.category || ''
 
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-cream pt-[72px] md:pt-[84px]">
+      <main className="min-h-screen bg-cream pt-[108px] md:pt-[120px]">
         
         {/* Shop Hero Banner */}
         <section className="relative w-full h-[250px] md:h-[340px] bg-emerald-deep flex items-center justify-center overflow-hidden border-b border-cream-line">
           <Image
             src="/shop-banner.png"
-            alt="Gulshan Modest Fashion Collection"
+            alt="RAWFLEX Streetwear Collection"
             fill
             className="object-cover opacity-80 mix-blend-luminosity"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-tr from-ink/90 via-emerald-deep/60 to-ink/90" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-black/85 via-black/60 to-black/85" />
           
           <div className="relative z-10 text-center px-5">
             <div className="eyebrow justify-center inline-flex items-center gap-2 mb-3 text-gold-light">
@@ -101,11 +124,11 @@ export default async function ShopPage({
               Complete Collection
               <span className="h-px w-6 bg-gold" />
             </div>
-            <h1 className="font-display font-bold text-3xl md:text-5xl text-cream tracking-wide">
+            <h1 className="font-display font-bold text-3xl md:text-5xl text-white tracking-wide">
               Shop the Drop
             </h1>
-            <p className="mt-4 text-cream/70 font-body text-sm md:text-base max-w-lg mx-auto">
-              Timeless silhouettes designed with maximum drape, elegance, and comfort.
+            <p className="mt-4 text-white/70 font-body text-sm md:text-base max-w-lg mx-auto">
+              Heavyweight streetwear, one-of-one washes and limited drops. Built different.
             </p>
           </div>
         </section>
@@ -113,7 +136,7 @@ export default async function ShopPage({
         <div className="max-w-wrap mx-auto px-5 md:px-8 py-10 md:py-16">
 
           <ShopGrid 
-            initialProducts={products} 
+            initialProducts={allProducts} 
             categories={categories} 
             selectedCategory={selectedCategory} 
           />

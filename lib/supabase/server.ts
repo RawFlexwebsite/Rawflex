@@ -166,7 +166,7 @@ export async function createClient() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const cookieStore = await cookies()
 
-  const customSessionVal = cookieStore.get('gulshan-user-session')?.value
+  const customSessionVal = cookieStore.get('rawflex-user-session')?.value
   let customSession: any = null
   if (customSessionVal) {
     try {
@@ -183,7 +183,7 @@ export async function createClient() {
       }
       const hasMockCookie = cookieStore.get('mock-admin-logged-in')?.value === 'true'
       if (hasMockCookie) {
-        return { data: { user: { id: 'mock-admin-id', email: 'admin@gulshanmodest.com', user_metadata: { role: 'admin' } } }, error: null }
+        return { data: { user: { id: 'mock-admin-id', email: 'admin@rawflex.in', user_metadata: { role: 'admin' } } }, error: null }
       }
       if (realAuth) return await realAuth.getUser()
       return { data: { user: null }, error: null }
@@ -194,7 +194,7 @@ export async function createClient() {
       }
       const hasMockCookie = cookieStore.get('mock-admin-logged-in')?.value === 'true'
       if (hasMockCookie) {
-        return { data: { session: { user: { id: 'mock-admin-id', email: 'admin@gulshanmodest.com', user_metadata: { role: 'admin' } } } }, error: null }
+        return { data: { session: { user: { id: 'mock-admin-id', email: 'admin@rawflex.in', user_metadata: { role: 'admin' } } } }, error: null }
       }
       if (realAuth) return await realAuth.getSession()
       return { data: { session: null }, error: null }
@@ -208,7 +208,7 @@ export async function createClient() {
       return { data: null, error: { message: 'Mock signin only works for admin' } }
     },
     signOut: async () => {
-      cookieStore.set('gulshan-user-session', '', { path: '/', expires: new Date(0) })
+      cookieStore.set('rawflex-user-session', '', { path: '/', expires: new Date(0) })
       cookieStore.set('mock-admin-logged-in', '', { path: '/', expires: new Date(0) })
       if (realAuth) await realAuth.signOut()
       return { error: null }
@@ -230,7 +230,7 @@ export async function createClient() {
       cookies: {
         getAll() {
           // Exclude our custom session cookie so Supabase SSR does not try to parse it
-          return cookieStore.getAll().filter(c => c.name !== 'gulshan-user-session')
+          return cookieStore.getAll().filter(c => c.name !== 'rawflex-user-session')
         },
         setAll(cookiesToSet) {
           try {

@@ -1,14 +1,13 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 
 export const metadata = {
-  title: 'Terms & Conditions | Gulshan Modest',
+  title: 'Terms & Conditions | RAWFLEX',
 }
 
 export default function TermsConditions() {
   return (
-    <main className="overflow-x-hidden pt-[72px] md:pt-[84px] bg-cream min-h-screen flex flex-col">
+    <main className="overflow-x-hidden pt-[108px] md:pt-[120px] bg-cream min-h-screen flex flex-col">
       <Header />
       
       <div className="flex-1 max-w-3xl mx-auto w-full px-5 py-16 md:py-24">
@@ -18,7 +17,7 @@ export default function TermsConditions() {
           <p>Last updated: {new Date().toLocaleDateString('en-IN')}</p>
           
           <p>
-            Welcome to Gulshan Modest. By accessing or using our website, you agree to be bound by these Terms and Conditions and our Privacy Policy.
+            Welcome to RAWFLEX. By accessing or using our website, you agree to be bound by these Terms and Conditions and our Privacy Policy.
           </p>
 
           <h3 className="font-display font-semibold text-xl text-ink mt-8 mb-4">1. Online Store Terms</h3>
@@ -44,7 +43,6 @@ export default function TermsConditions() {
       </div>
 
       <Footer />
-      <FloatingWhatsApp />
     </main>
   );
 }

@@ -67,7 +67,7 @@ export function createClient() {
 
   const getCustomAuth = (realAuth: any = null) => {
     const getSessionData = () => {
-      const customSessionVal = getCookie('gulshan-user-session')
+      const customSessionVal = getCookie('rawflex-user-session')
       if (customSessionVal) {
         try {
           return JSON.parse(customSessionVal)
@@ -84,7 +84,7 @@ export function createClient() {
         }
         const mockCookie = getCookie('mock-admin-logged-in') === 'true'
         if (mockCookie) {
-          return { data: { user: { id: 'mock-admin-id', email: 'admin@gulshanmodest.com', user_metadata: { role: 'admin' } } }, error: null }
+          return { data: { user: { id: 'mock-admin-id', email: 'admin@rawflex.in', user_metadata: { role: 'admin' } } }, error: null }
         }
         if (realAuth) return await realAuth.getUser()
         return { data: { user: null }, error: null }
@@ -96,7 +96,7 @@ export function createClient() {
         }
         const mockCookie = getCookie('mock-admin-logged-in') === 'true'
         if (mockCookie) {
-          return { data: { session: { user: { id: 'mock-admin-id', email: 'admin@gulshanmodest.com', user_metadata: { role: 'admin' } } } }, error: null }
+          return { data: { session: { user: { id: 'mock-admin-id', email: 'admin@rawflex.in', user_metadata: { role: 'admin' } } } }, error: null }
         }
         if (realAuth) return await realAuth.getSession()
         return { data: { session: null }, error: null }
@@ -113,7 +113,7 @@ export function createClient() {
       },
       signOut: async () => {
         if (typeof window !== 'undefined') {
-          document.cookie = 'gulshan-user-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+          document.cookie = 'rawflex-user-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
           document.cookie = 'mock-admin-logged-in=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
         }
         if (realAuth) await realAuth.signOut()

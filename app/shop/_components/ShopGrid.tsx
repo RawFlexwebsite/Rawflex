@@ -81,7 +81,7 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
               <div
                 className={`w-5 h-5 rounded border flex items-center justify-center transition-colors shadow-sm ${selectedCategories.includes(cat.id)
                     ? 'bg-emerald border-emerald'
-                    : 'bg-white border-cream-line group-hover:border-emerald'
+                    : 'bg-cream-deep border-cream-line group-hover:border-emerald'
                   }`}
               >
                 {selectedCategories.includes(cat.id) && (
@@ -127,10 +127,10 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
       {isMobileFilterOpen && (
         <div className="fixed inset-0 z-[100000] flex lg:hidden">
           <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm" onClick={() => setIsMobileFilterOpen(false)} />
-          <div className="relative mr-auto w-[85%] max-w-sm h-full bg-white p-6 overflow-y-auto flex flex-col shadow-2xl">
+          <div className="relative mr-auto w-[85%] max-w-sm h-full bg-panel p-6 overflow-y-auto flex flex-col shadow-2xl">
             <div className="flex items-center justify-between mb-8 border-b border-cream-line/60 pb-4">
               <h2 className="font-display font-bold text-2xl text-ink">Filters</h2>
-              <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 bg-cream rounded-full text-ink/70 hover:text-emerald transition-colors">
+              <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 bg-cream-deep rounded-full text-ink/70 hover:text-emerald transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -142,7 +142,7 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
         {/* Left Sidebar Filter (Desktop) */}
-        <div className="hidden lg:block lg:col-span-1 bg-white p-6 rounded-[28px] border border-emerald/10 shadow-lg h-fit sticky top-[100px]">
+        <div className="hidden lg:block lg:col-span-1 bg-panel p-6 rounded-[28px] border border-cream-line/60 shadow-lg h-fit sticky top-[100px]">
           {FilterContent}
         </div>
 
@@ -165,7 +165,7 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
           </div>
 
           {filteredProducts.length === 0 ? (
-            <div className="text-center py-20 text-ink/50 bg-white rounded-[28px] border border-emerald/10 shadow-lg">
+            <div className="text-center py-20 text-ink/50 bg-panel rounded-[28px] border border-cream-line/60 shadow-lg">
               No products match your filters.
             </div>
           ) : (
@@ -173,7 +173,7 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
               {filteredProducts.map((p) => {
                 const catName = categories.find(c => c.id === p.category_id)?.name || p.category_id
                 return (
-                  <div key={p.id} className="lift group bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-cream-line/80 flex flex-col">
+                  <div key={p.id} className="lift group bg-panel rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-cream-line/80 flex flex-col">
                     <Link href={`/shop/${p.id}`} className="relative aspect-[4/5] overflow-hidden block bg-cream-deep/20">
                       <Image
                         src={p.image_url}

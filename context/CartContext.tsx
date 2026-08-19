@@ -32,7 +32,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Load cart from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedCart = localStorage.getItem('gulshan-cart')
+      const savedCart = localStorage.getItem('rawflex-cart')
       if (savedCart) {
         try {
           setCart(JSON.parse(savedCart))
@@ -46,7 +46,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Save cart to localStorage when it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('gulshan-cart', JSON.stringify(cart))
+      localStorage.setItem('rawflex-cart', JSON.stringify(cart))
     }
   }, [cart])
 

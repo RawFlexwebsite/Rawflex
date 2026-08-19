@@ -17,7 +17,7 @@ export async function updateSession(request: NextRequest) {
         getUser: async () => {
           const hasMockCookie = request.cookies.get('mock-admin-logged-in')?.value === 'true'
           if (hasMockCookie) {
-            return { data: { user: { id: 'mock-admin-id', email: 'admin@gulshanmodest.com' } }, error: null }
+            return { data: { user: { id: 'mock-admin-id', email: 'admin@rawflex.in' } }, error: null }
           }
           return { data: { user: null }, error: null }
         }

@@ -2,27 +2,27 @@
   "profiles": [
     {
       "id": "mock-admin-id",
-      "email": "admin@gulshanmodest.com",
+      "email": "admin@rawflex.in",
       "role": "admin",
-      "full_name": "Admin",
-      "phone": "+91 87964 59447",
+      "full_name": "RAWFLEX Admin",
+      "phone": "+91 63872 17330",
       "is_active": true,
       "created_at": "2026-06-25T14:34:14Z"
     },
     {
       "id": "customer-1",
-      "email": "sumaiya@gmail.com",
+      "email": "rohan@gmail.com",
       "role": "customer",
-      "full_name": "Sumaiya R.",
+      "full_name": "Rohan Sharma",
       "phone": "+91 99999 88888",
       "is_active": true,
       "created_at": "2026-06-26T12:00:00Z"
     },
     {
       "id": "customer-2",
-      "email": "afreen@gmail.com",
+      "email": "aditya@gmail.com",
       "role": "customer",
-      "full_name": "Afreen K.",
+      "full_name": "Aditya Verma",
       "phone": "+91 99999 77777",
       "is_active": true,
       "created_at": "2026-06-26T15:00:00Z"
@@ -30,118 +30,336 @@
   ],
   "categories": [
     {
-      "id": "abayas",
-      "name": "Abayas",
-      "slug": "abayas",
-      "description": "Flowing double layer & classic silhouettes in breathable crepe & nida",
-      "image_url": "/abaya-double-layer.png",
+      "id": "new-drops",
+      "name": "New Drops",
+      "slug": "new-drops",
+      "description": "Fresh silhouettes hitting the racks every week — cop before they're gone.",
+      "image_url": "/categories/new-drops.png",
+      "count": "24 styles",
+      "is_active": true,
+      "created_at": "2026-06-25T14:34:14Z"
+    },
+    {
+      "id": "best-sellers",
+      "name": "Best Sellers",
+      "slug": "best-sellers",
+      "description": "The pieces everyone's repping. Restocked weekly, sold out fast.",
+      "image_url": "/categories/best-sellers.png",
+      "count": "18 styles",
+      "is_active": true,
+      "created_at": "2026-06-25T14:34:14Z"
+    },
+    {
+      "id": "oversized-tees",
+      "name": "Oversized Tees",
+      "slug": "oversized-tees",
+      "description": "Heavyweight cotton tees with boxy fits and bold graphic prints.",
+      "image_url": "/categories/oversized-tees.png",
       "count": "32 styles",
       "is_active": true,
       "created_at": "2026-06-25T14:34:14Z"
     },
     {
-      "id": "hijabs",
-      "name": "Hijabs",
-      "slug": "hijabs",
-      "description": "Basic Luxe chiffon, luxury jersey and multi-colour wrap sets",
-      "image_url": "/hijab-medina.jpg",
-      "count": "27 styles",
-      "is_active": true,
-      "created_at": "2026-06-25T14:34:14Z"
-    },
-    {
-      "id": "jilbabs",
-      "name": "Jilbabs",
-      "slug": "jilbabs",
-      "description": "Full coverage flowing overhead drapes in classic shades & royal blue",
-      "image_url": "/jilbab-blue.png",
-      "count": "4 styles",
-      "is_active": true,
-      "created_at": "2026-06-25T14:34:14Z"
-    },
-    {
-      "id": "khimars",
-      "name": "Khimars",
-      "slug": "khimars",
-      "description": "One layer or exquisitely detailed handwork khimars",
-      "image_url": "/khimar-handwork-1.png",
-      "count": "6 styles",
-      "is_active": true,
-      "created_at": "2026-06-25T14:34:14Z"
-    },
-    {
-      "id": "salwar_kameez",
-      "name": "Luxe Salwar Kameez",
-      "slug": "luxe-salwar-kameez",
-      "description": "Exquisite Pakistani salwar suits, heavy embroidery, and luxury lawn sets",
-      "image_url": "/luxe-salwar-kameez.png",
+      "id": "acid-wash",
+      "name": "Acid Wash",
+      "slug": "acid-wash",
+      "description": "Distressed, faded and one-of-one — every wash job is unique.",
+      "image_url": "/categories/acid-wash.png",
       "count": "12 styles",
       "is_active": true,
-      "created_at": "2026-06-30T15:00:00Z"
+      "created_at": "2026-06-25T14:34:14Z"
+    },
+    {
+      "id": "gym-collection",
+      "name": "Gym Collection",
+      "slug": "gym-collection",
+      "description": "Moisture-wicking comfort for the grind. Built to move, styled to flex.",
+      "image_url": "/categories/gym-collection.png",
+      "count": "16 styles",
+      "is_active": true,
+      "created_at": "2026-06-25T14:34:14Z"
+    },
+    {
+      "id": "streetwear-collection",
+      "name": "Streetwear Collection",
+      "slug": "streetwear-collection",
+      "description": "Hoodies, cargo, jackets and the fits that define the culture.",
+      "image_url": "/categories/streetwear-collection.png",
+      "count": "28 styles",
+      "is_active": true,
+      "created_at": "2026-06-25T14:34:14Z"
+    },
+    {
+      "id": "limited-edition",
+      "name": "Limited Edition",
+      "slug": "limited-edition",
+      "description": "Numbered runs that never restock. When it's gone, it's gone.",
+      "image_url": "/categories/limited-edition.png",
+      "count": "8 styles",
+      "is_active": true,
+      "created_at": "2026-06-25T14:34:14Z"
     }
   ],
   "products": [
     {
       "id": "p1",
-      "name": "Front Open Double Layer Abaya",
-      "slug": "front-open-double-layer-abaya",
-      "category_id": "abayas",
-      "price": 3299,
-      "oldPrice": 3999,
-      "image_url": "/abaya-double-layer.png",
+      "name": "RAW Flex Heavyweight Oversized Tee — Black",
+      "slug": "raw-flex-heavyweight-oversized-tee-black",
+      "category_id": "oversized-tees",
+      "price": 1299,
+      "oldPrice": 1599,
+      "featured_image_url": "/products/oversized-tee-black.png",
       "badge": "Bestseller",
       "rating": 4.9,
       "is_active": true,
       "is_featured": true,
-      "description": "Premium front open double layer abaya designed with maximum flow and drape.",
-      "short_description": "Front open double layer abaya",
+      "description": "240 GSM heavyweight cotton oversized tee with a boxy street fit. Drop shoulder, ribbed collar, screen-printed RAWFLEX graphic.",
+      "short_description": "Heavyweight oversized tee with bold RAWFLEX branding.",
+      "fabric": "240 GSM 100% combed cotton",
+      "stitching": "Double-needle sleeve & hem",
+      "product_images": [
+        { "image_url": "/products/oversized-tee-black.png", "color_name": "Black" }
+      ],
+      "product_variants": [
+        { "id": "p1-s-m", "variant_name": "M", "price": 1299, "original_price": 1599, "stock_quantity": 10 },
+        { "id": "p1-s-l", "variant_name": "L", "price": 1299, "original_price": 1599, "stock_quantity": 12 },
+        { "id": "p1-s-xl", "variant_name": "XL", "price": 1299, "original_price": 1599, "stock_quantity": 8 },
+        { "id": "p1-s-xxl", "variant_name": "XXL", "price": 1299, "original_price": 1599, "stock_quantity": 5 }
+      ],
+      "product_information": [
+        { "label": "Fabric", "value": "240 GSM Cotton" },
+        { "label": "Fit", "value": "Oversized" },
+        { "label": "Country of Origin", "value": "India" },
+        { "label": "Wash Care", "value": "Machine wash cold" }
+      ],
+      "product_faqs": [
+        { "question": "How does the fit run?", "answer": "Oversized by design. Size down if you want a regular fit." },
+        { "question": "Is it pre-shrunk?", "answer": "Yes, pre-shrunk and colour-fast." }
+      ],
       "created_at": "2026-06-25T14:34:14Z"
     },
     {
       "id": "p2",
-      "name": "Basic Luxe Chiffon Hijab — Medina",
-      "slug": "basic-luxe-chiffon-hijab-medina",
-      "category_id": "hijabs",
-      "price": 699,
-      "oldPrice": 899,
-      "image_url": "/hijab-medina.jpg",
+      "name": "Acid Wash Distressed Tee — Washed Grey",
+      "slug": "acid-wash-distressed-tee-washed-grey",
+      "category_id": "acid-wash",
+      "price": 1499,
+      "oldPrice": 1899,
+      "featured_image_url": "/products/acid-wash-grey.png",
       "badge": "New",
       "rating": 4.8,
       "is_active": true,
       "is_featured": true,
-      "description": "Premium quality chiffon hijab with neat baby hem finishing.",
-      "short_description": "Premium quality chiffon hijab",
+      "description": "Hand-finished acid wash with distressed detailing. Every tee is one-of-one — no two washes look the same.",
+      "short_description": "One-of-one hand-finished acid wash tee.",
+      "fabric": "220 GSM cotton blend",
+      "product_images": [
+        { "image_url": "/products/acid-wash-grey.png", "color_name": "Washed Grey" }
+      ],
+      "product_variants": [
+        { "id": "p2-s-m", "variant_name": "M", "price": 1499, "original_price": 1899, "stock_quantity": 6 },
+        { "id": "p2-s-l", "variant_name": "L", "price": 1499, "original_price": 1899, "stock_quantity": 9 },
+        { "id": "p2-s-xl", "variant_name": "XL", "price": 1499, "original_price": 1899, "stock_quantity": 7 }
+      ],
+      "product_information": [
+        { "label": "Fabric", "value": "220 GSM Blend" },
+        { "label": "Finish", "value": "Hand Acid Wash" },
+        { "label": "Fit", "value": "Oversized" }
+      ],
+      "product_faqs": [
+        { "question": "Will it fade more?", "answer": "No, the wash is sealed. Colour stays put through washes." }
+      ],
       "created_at": "2026-06-25T14:34:14Z"
     },
     {
       "id": "p3",
-      "name": "Luxury Jersey Hijab — Muted Sage",
-      "slug": "luxury-jersey-hijab-muted-sage",
-      "category_id": "hijabs",
-      "price": 799,
-      "image_url": "/hijab-muted-sage.jpeg",
+      "name": "FlexFit Gym Training Tee — Neon Detail",
+      "slug": "flexfit-gym-training-tee-neon-detail",
+      "category_id": "gym-collection",
+      "price": 999,
+      "oldPrice": 1299,
+      "featured_image_url": "/products/gym-tee.png",
       "badge": "Hot",
-      "rating": 4.9,
+      "rating": 4.7,
       "is_active": true,
       "is_featured": true,
-      "description": "Super soft, stretchable, and durable jersey hijab.",
-      "short_description": "Super soft jersey hijab",
+      "description": "Moisture-wicking performance tee with breathable mesh panels and neon RAWFLEX details. Built for heavy sessions.",
+      "short_description": "Performance tee built for the grind.",
+      "fabric": "Polyester-spandex tech blend",
+      "product_images": [
+        { "image_url": "/products/gym-tee.png", "color_name": "Black" }
+      ],
+      "product_variants": [
+        { "id": "p3-s-m", "variant_name": "M", "price": 999, "original_price": 1299, "stock_quantity": 14 },
+        { "id": "p3-s-l", "variant_name": "L", "price": 999, "original_price": 1299, "stock_quantity": 16 },
+        { "id": "p3-s-xl", "variant_name": "XL", "price": 999, "original_price": 1299, "stock_quantity": 11 }
+      ],
+      "product_information": [
+        { "label": "Fabric", "value": "Tech Blend" },
+        { "label": "Fit", "value": "Athletic" },
+        { "label": "Feature", "value": "Moisture Wicking" }
+      ],
+      "product_faqs": [
+        { "question": "Is it sweat-proof?", "answer": "Moisture-wicking and quick-dry for intense sessions." }
+      ],
       "created_at": "2026-06-25T14:34:14Z"
     },
     {
       "id": "p4",
-      "name": "Classic Flowing Blue Jilbab",
-      "slug": "classic-flowing-blue-jilbab",
-      "category_id": "jilbabs",
-      "price": 3499,
-      "oldPrice": 4299,
-      "image_url": "/jilbab-blue.png",
-      "badge": "Premium",
-      "rating": 4.7,
+      "name": "Limited Edition Logo Hoodie — Numbered Drop",
+      "slug": "limited-edition-logo-hoodie-numbered-drop",
+      "category_id": "limited-edition",
+      "price": 2499,
+      "oldPrice": 2999,
+      "featured_image_url": "/products/hoodie-limited.png",
+      "badge": "Limited",
+      "rating": 4.9,
       "is_active": true,
       "is_featured": true,
-      "description": "Overhead flowing jilbab with finger loops and high-quality tie back band.",
-      "short_description": "Overhead flowing blue jilbab",
+      "description": "Numbered limited run — each hoodie has its own drop number. Fleece-lined, heavyweight and never restocked.",
+      "short_description": "Numbered run fleece hoodie. Never restocked.",
+      "fabric": "350 GSM fleece",
+      "product_images": [
+        { "image_url": "/products/hoodie-limited.png", "color_name": "Black" }
+      ],
+      "product_variants": [
+        { "id": "p4-s-m", "variant_name": "M", "price": 2499, "original_price": 2999, "stock_quantity": 3 },
+        { "id": "p4-s-l", "variant_name": "L", "price": 2499, "original_price": 2999, "stock_quantity": 4 },
+        { "id": "p4-s-xl", "variant_name": "XL", "price": 2499, "original_price": 2999, "stock_quantity": 2 }
+      ],
+      "product_information": [
+        { "label": "Fabric", "value": "350 GSM Fleece" },
+        { "label": "Run", "value": "Numbered Drop" },
+        { "label": "Fit", "value": "Oversized" }
+      ],
+      "product_faqs": [
+        { "question": "Will this be restocked?", "answer": "No. Limited edition runs are one-time only." }
+      ],
+      "created_at": "2026-06-25T14:34:14Z"
+    },
+    {
+      "id": "p5",
+      "name": "Street Cargo Pants — Olive",
+      "slug": "street-cargo-pants-olive",
+      "category_id": "streetwear-collection",
+      "price": 1799,
+      "oldPrice": 2199,
+      "featured_image_url": "/products/cargo-olive.png",
+      "badge": "",
+      "rating": 4.6,
+      "is_active": true,
+      "is_featured": false,
+      "description": "Six-pocket tactical cargo pants with tapered fit, ripstop fabric and adjustable ankle cuffs.",
+      "short_description": "Tactical six-pocket cargo pants.",
+      "fabric": "Ripstop cotton-poly",
+      "product_images": [
+        { "image_url": "/products/cargo-olive.png", "color_name": "Olive" }
+      ],
+      "product_variants": [
+        { "id": "p5-s-30", "variant_name": "30", "price": 1799, "original_price": 2199, "stock_quantity": 8 },
+        { "id": "p5-s-32", "variant_name": "32", "price": 1799, "original_price": 2199, "stock_quantity": 10 },
+        { "id": "p5-s-34", "variant_name": "34", "price": 1799, "original_price": 2199, "stock_quantity": 6 }
+      ],
+      "product_information": [
+        { "label": "Fabric", "value": "Ripstop Blend" },
+        { "label": "Fit", "value": "Tapered" },
+        { "label": "Pockets", "value": "Six-Pocket" }
+      ],
+      "product_faqs": [],
+      "created_at": "2026-06-25T14:34:14Z"
+    },
+    {
+      "id": "p6",
+      "name": "Graphic Oversized Tee — 'FLEX' Print",
+      "slug": "graphic-oversized-tee-flex-print",
+      "category_id": "oversized-tees",
+      "price": 1399,
+      "oldPrice": 1699,
+      "featured_image_url": "/products/oversized-tee-flex.png",
+      "badge": "New Drop",
+      "rating": 4.8,
+      "is_active": true,
+      "is_featured": false,
+      "description": "Big-front 'FLEX' graphic print on heavyweight cotton. The statement piece of the season.",
+      "short_description": "Bold front graphic on heavyweight cotton.",
+      "fabric": "240 GSM combed cotton",
+      "product_images": [
+        { "image_url": "/products/oversized-tee-flex.png", "color_name": "Black" }
+      ],
+      "product_variants": [
+        { "id": "p6-s-m", "variant_name": "M", "price": 1399, "original_price": 1699, "stock_quantity": 9 },
+        { "id": "p6-s-l", "variant_name": "L", "price": 1399, "original_price": 1699, "stock_quantity": 11 },
+        { "id": "p6-s-xl", "variant_name": "XL", "price": 1399, "original_price": 1699, "stock_quantity": 7 }
+      ],
+      "product_information": [
+        { "label": "Fabric", "value": "240 GSM Cotton" },
+        { "label": "Print", "value": "Screen Printed" },
+        { "label": "Fit", "value": "Oversized" }
+      ],
+      "product_faqs": [],
+      "created_at": "2026-06-25T14:34:14Z"
+    },
+    {
+      "id": "p7",
+      "name": "Acid Wash Denim Jacket — Faded Blue",
+      "slug": "acid-wash-denim-jacket-faded-blue",
+      "category_id": "acid-wash",
+      "price": 2799,
+      "oldPrice": 3299,
+      "featured_image_url": "/products/acid-wash-jacket.png",
+      "badge": "",
+      "rating": 4.5,
+      "is_active": true,
+      "is_featured": false,
+      "description": "Faded acid wash denim jacket with an oversized street cut and distressed hardware.",
+      "short_description": "Faded acid wash denim with street cut.",
+      "fabric": "12oz denim",
+      "product_images": [
+        { "image_url": "/products/acid-wash-jacket.png", "color_name": "Faded Blue" }
+      ],
+      "product_variants": [
+        { "id": "p7-s-m", "variant_name": "M", "price": 2799, "original_price": 3299, "stock_quantity": 5 },
+        { "id": "p7-s-l", "variant_name": "L", "price": 2799, "original_price": 3299, "stock_quantity": 6 },
+        { "id": "p7-s-xl", "variant_name": "XL", "price": 2799, "original_price": 3299, "stock_quantity": 4 }
+      ],
+      "product_information": [
+        { "label": "Fabric", "value": "12oz Denim" },
+        { "label": "Finish", "value": "Acid Wash" },
+        { "label": "Fit", "value": "Oversized" }
+      ],
+      "product_faqs": [],
+      "created_at": "2026-06-25T14:34:14Z"
+    },
+    {
+      "id": "p8",
+      "name": "Athleisure Joggers — Tech Fabric",
+      "slug": "athleisure-joggers-tech-fabric",
+      "category_id": "gym-collection",
+      "price": 1599,
+      "oldPrice": 1999,
+      "featured_image_url": "/products/gym-joggers.png",
+      "badge": "Popular",
+      "rating": 4.7,
+      "is_active": true,
+      "is_featured": false,
+      "description": "Four-way stretch tech joggers with zip pockets, tapered fit and a gusseted crotch for full range of motion.",
+      "short_description": "Four-way stretch tech joggers with zip pockets.",
+      "fabric": "Nylon-spandex tech fabric",
+      "product_images": [
+        { "image_url": "/products/gym-joggers.png", "color_name": "Black" }
+      ],
+      "product_variants": [
+        { "id": "p8-s-s", "variant_name": "S", "price": 1599, "original_price": 1999, "stock_quantity": 10 },
+        { "id": "p8-s-m", "variant_name": "M", "price": 1599, "original_price": 1999, "stock_quantity": 12 },
+        { "id": "p8-s-l", "variant_name": "L", "price": 1599, "original_price": 1999, "stock_quantity": 9 },
+        { "id": "p8-s-xl", "variant_name": "XL", "price": 1599, "original_price": 1999, "stock_quantity": 6 }
+      ],
+      "product_information": [
+        { "label": "Fabric", "value": "Tech Blend" },
+        { "label": "Fit", "value": "Tapered" },
+        { "label": "Pockets", "value": "Zip Pockets" }
+      ],
+      "product_faqs": [],
       "created_at": "2026-06-25T14:34:14Z"
     }
   ],
@@ -149,7 +367,7 @@
     {
       "id": "order-1",
       "order_number": "10001",
-      "total_amount": 3299,
+      "total_amount": 1299,
       "order_status": "processing",
       "payment_status": "paid",
       "created_at": "2026-06-27T10:00:00Z"
@@ -157,7 +375,7 @@
     {
       "id": "order-2",
       "order_number": "10002",
-      "total_amount": 1498,
+      "total_amount": 2998,
       "order_status": "cancelled",
       "payment_status": "pending",
       "created_at": "2026-06-27T12:00:00Z",
@@ -169,11 +387,11 @@
   "hero_slides": [
     {
       "id": "slide-1",
-      "image_url": "/model-cream-hijab.png",
-      "title": "Gulshan Modest",
-      "subtitle": "Modest Fashion, Quietly Elevated",
-      "button_text": "Shop on WhatsApp",
-      "button_link": "https://wa.me/918796459447",
+      "image_url": "/hero-stock-1.png",
+      "title": "RAWFLEX",
+      "subtitle": "Streetwear. Built Different.",
+      "button_text": "Shop New Drops",
+      "button_link": "https://wa.me/916387217330",
       "text_mode": "global",
       "is_active": true,
       "display_order": 0,
@@ -181,7 +399,7 @@
     },
     {
       "id": "slide-2",
-      "image_url": "/abaya-double-layer.png",
+      "image_url": "/hero-stock-2.png",
       "title": "",
       "subtitle": "",
       "button_text": "",
@@ -193,7 +411,7 @@
     },
     {
       "id": "slide-3",
-      "image_url": "/khimar-handwork.png",
+      "image_url": "/hero-stock-3.png",
       "title": "",
       "subtitle": "",
       "button_text": "",
@@ -205,7 +423,7 @@
     },
     {
       "id": "slide-4",
-      "image_url": "/jilbab-blue.png",
+      "image_url": "/hero-stock-4.png",
       "title": "",
       "subtitle": "",
       "button_text": "",
@@ -219,9 +437,9 @@
   "coupons": [
     {
       "id": "c1",
-      "code": "EID50",
+      "code": "FLEX50",
       "type": "percentage",
-      "value": 50,
+      "value": 10,
       "min_purchase": 999,
       "is_active": true,
       "created_at": "2026-06-27T18:00:00Z"
@@ -240,7 +458,7 @@
     "announcements": [
       {
         "id": "ann-1",
-        "text": "Eid Special Collection is Live! Free Shipping Pan-India.",
+        "text": "New Drop Alert! Limited Edition Drop 004 is Live — Free Shipping Pan-India.",
         "is_active": true
       }
     ],

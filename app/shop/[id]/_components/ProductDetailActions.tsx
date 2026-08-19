@@ -172,7 +172,7 @@ export default function ProductDetailActions({ product, selectedColor = null }: 
         {/* Quantity control */}
         <div className="flex items-center gap-4">
           <span className="text-[13px] uppercase tracking-wider font-bold text-ink/70">Quantity</span>
-          <div className="flex items-center border border-cream-line bg-white rounded-full p-1 shadow-sm">
+          <div className="flex items-center border border-cream-line bg-cream-deep rounded-full p-1 shadow-sm">
             <button
               onClick={() => setQuantity(q => Math.max(1, q - 1))}
               className="p-1.5 hover:text-emerald text-ink/60 transition-colors rounded-full hover:bg-cream"
