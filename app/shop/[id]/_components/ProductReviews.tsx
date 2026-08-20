@@ -145,7 +145,7 @@ export default function ProductReviews({
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full py-2.5 bg-emerald text-cream text-sm font-medium rounded-xl hover:bg-emerald-deep transition-colors disabled:opacity-50"
+                className="w-full py-2.5 bg-emerald text-cream text-sm font-medium rounded-xl hover:bg-emerald-deep hover:text-emerald transition-colors disabled:opacity-50"
               >
                 {isPending ? 'Submitting...' : 'Submit Review'}
               </button>

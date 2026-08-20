@@ -50,7 +50,7 @@ export default function CouponForm() {
       {success && <div className="p-3 bg-green-50 text-green-600 rounded-xl text-xs">{success}</div>}
 
       <div>
-        <label className="block text-xs font-semibold text-stone-600 mb-1">
+        <label className="block text-xs font-semibold text-ink/60 mb-1">
           Coupon Code
         </label>
         <div className="relative">
@@ -59,27 +59,27 @@ export default function CouponForm() {
             name="code"
             required
             placeholder="e.g. FESTIVE200"
-            className="w-full pl-9 pr-3 py-2 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-700/30"
+            className="w-full pl-9 pr-3 py-2 rounded-xl border border-cream-line text-sm focus:outline-none focus:ring-2 focus:ring-teal-700/30"
           />
-          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/40" />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-semibold text-stone-600 mb-1">
+          <label className="block text-xs font-semibold text-ink/60 mb-1">
             Discount Type
           </label>
           <select
             name="type"
-            className="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/30"
+            className="w-full px-3 py-2 rounded-xl border border-cream-line text-sm bg-panel focus:outline-none focus:ring-2 focus:ring-teal-700/30"
           >
             <option value="percentage">Percentage (%)</option>
             <option value="flat">Flat Value (₹)</option>
           </select>
         </div>
         <div>
-          <label className="block text-xs font-semibold text-stone-600 mb-1">
+          <label className="block text-xs font-semibold text-ink/60 mb-1">
             Value
           </label>
           <input
@@ -88,13 +88,13 @@ export default function CouponForm() {
             required
             min="1"
             placeholder="e.g. 10 or 150"
-            className="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-700/30"
+            className="w-full px-3 py-2 rounded-xl border border-cream-line text-sm focus:outline-none focus:ring-2 focus:ring-teal-700/30"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-stone-600 mb-1">
+        <label className="block text-xs font-semibold text-ink/60 mb-1">
           Min Purchase (₹)
         </label>
         <div className="relative">
@@ -104,19 +104,19 @@ export default function CouponForm() {
             required
             min="0"
             placeholder="e.g. 499"
-            className="w-full pl-9 pr-3 py-2 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-700/30"
+            className="w-full pl-9 pr-3 py-2 rounded-xl border border-cream-line text-sm focus:outline-none focus:ring-2 focus:ring-teal-700/30"
           />
-          <CircleDollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+          <CircleDollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/40" />
         </div>
       </div>
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full py-2.5 bg-gradient-to-r from-teal-700 to-teal-800 text-white text-xs font-semibold rounded-xl hover:from-teal-800 hover:to-teal-900 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+        className="w-full py-2.5 bg-gradient-to-r from-teal-700 to-teal-800 text-ink text-xs font-semibold rounded-xl hover:from-teal-800 hover:to-teal-900 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
       >
         {pending ? (
-          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
         ) : (
           <>
             <PlusCircle className="w-4 h-4" />

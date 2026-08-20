@@ -35,7 +35,7 @@ export async function setHomeBannerEnabled(enabled: boolean) {
   const { error } = await supabase
     .from('settings')
     .update({ home_banner_enabled: enabled })
-    .eq('id', 'global-settings-id')
+    .eq('id', 'site_settings')
 
   if (error) return { success: false, error: error.message }
 

@@ -14,8 +14,8 @@ export default async function AdminHomeBannerPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Home Banner</h1>
-        <p className="text-sm text-stone-500 mt-1">
+        <h1 className="text-2xl font-bold text-ink">Home Banner</h1>
+        <p className="text-sm text-ink/60 mt-1">
           Manage the auto-swiping banner shown on the homepage, just above "Shop by Category".
         </p>
       </div>

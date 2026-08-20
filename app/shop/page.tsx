@@ -3,7 +3,6 @@ import Footer from '@/components/Footer'
 import ShopGrid from './_components/ShopGrid'
 import { createClient } from "@/lib/supabase/server";
 import Image from 'next/image'
-import { getSampleImages, hasSampleImages } from '@/lib/samples'
 
 export const metadata = {
   title: 'Shop Collection | RAWFLEX',
@@ -79,26 +78,7 @@ export default async function ShopPage({
 
   const selectedCategory = resolvedSearchParams.category || '';
 
-  // Add sample images as products for categories that have them
-  const sampleImageUrls = selectedCategory && hasSampleImages(selectedCategory) 
-    ? getSampleImages(selectedCategory) 
-    : [];
-  
-  const sampleProducts = sampleImageUrls.map((imageUrl, index) => ({
-    id: `sample-${selectedCategory}-${index}`,
-    name: `${selectedCategory.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} ${index + 1}`,
-    slug: `sample-${selectedCategory}-${index}`,
-    category_id: selectedCategory,
-    image_url: imageUrl,
-    price: 1299 + (index * 100) % 800,
-    oldPrice: undefined,
-    badge: index === 0 ? 'New' : undefined,
-    rating: 4.5 + (index % 5) * 0.1,
-    colors: [],
-    colorCount: 1,
-  }));
-
-  const allProducts = [...sampleProducts, ...products];
+  const allProducts = products;
 
   const categories = categoriesData || [];
 

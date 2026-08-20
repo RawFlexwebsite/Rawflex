@@ -13,24 +13,24 @@ export default function CategoryRow({ category }: { category: Category }) {
   if (deleted) return null
 
   return (
-    <tr className="hover:bg-stone-50/50 transition-colors">
+    <tr className="hover:bg-panel/50 transition-colors">
       <td className="px-6 py-3.5">
         <div className="flex items-center gap-3">
           {category.image_url ? (
             <img
               src={category.image_url}
               alt={category.name}
-              className="w-10 h-10 rounded-lg object-cover bg-stone-100"
+              className="w-10 h-10 rounded-lg object-cover bg-cream-deep"
             />
           ) : (
-            <div className="w-10 h-10 rounded-lg bg-stone-100 flex items-center justify-center text-stone-400 text-xs font-medium">
+            <div className="w-10 h-10 rounded-lg bg-cream-deep flex items-center justify-center text-ink/40 text-xs font-medium">
               IMG
             </div>
           )}
           <div>
-            <p className="text-sm font-medium text-stone-900">{category.name}</p>
+            <p className="text-sm font-medium text-ink">{category.name}</p>
             {category.description && (
-              <p className="text-xs text-stone-400 mt-0.5 line-clamp-1">
+              <p className="text-xs text-ink/40 mt-0.5 line-clamp-1">
                 {category.description}
               </p>
             )}
@@ -38,7 +38,7 @@ export default function CategoryRow({ category }: { category: Category }) {
         </div>
       </td>
       <td className="px-6 py-3.5">
-        <code className="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded">
+        <code className="text-xs bg-cream-deep text-ink/60 px-2 py-0.5 rounded">
           {category.slug}
         </code>
       </td>
@@ -53,13 +53,13 @@ export default function CategoryRow({ category }: { category: Category }) {
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium cursor-pointer transition-colors ${
             category.is_active
               ? 'bg-green-100 text-green-700 hover:bg-green-200'
-              : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+              : 'bg-cream-deep text-ink/60 hover:bg-panel2'
           }`}
         >
           {category.is_active ? 'Active' : 'Inactive'}
         </button>
       </td>
-      <td className="px-6 py-3.5 text-sm text-stone-500">
+      <td className="px-6 py-3.5 text-sm text-ink/60">
         {new Date(category.created_at).toLocaleDateString('en-IN', {
           day: 'numeric',
           month: 'short',
@@ -70,7 +70,7 @@ export default function CategoryRow({ category }: { category: Category }) {
         <div className="flex items-center justify-end gap-1">
           <Link
             href={`/admin/categories/${category.id}/edit`}
-            className="p-2 rounded-lg text-stone-400 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+            className="p-2 rounded-lg text-ink/40 hover:text-orange-600 hover:bg-orange-50 transition-colors"
           >
             <Pencil className="w-4 h-4" />
           </Link>
@@ -84,7 +84,7 @@ export default function CategoryRow({ category }: { category: Category }) {
                 })
               }
             }}
-            className="p-2 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+            className="p-2 rounded-lg text-ink/40 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
           >
             <Trash2 className="w-4 h-4" />
           </button>

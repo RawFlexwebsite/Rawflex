@@ -48,7 +48,7 @@ export default function ShippingForm({ initialShipping }: { initialShipping: any
       )}
 
       <div>
-        <label className="block text-sm font-semibold text-stone-700 mb-1.5">
+        <label className="block text-sm font-semibold text-ink/80 mb-1.5">
           Flat Shipping Rate (₹)
         </label>
         <div className="relative">
@@ -58,14 +58,14 @@ export default function ShippingForm({ initialShipping }: { initialShipping: any
             defaultValue={initialShipping.flat_rate ?? 99}
             required
             min="0"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-teal-700/40 focus:border-teal-700 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink focus:outline-none focus:ring-2 focus:ring-teal-700/40 focus:border-teal-700 transition-all"
           />
-          <Truck className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-stone-400" />
+          <Truck className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-ink/40" />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-stone-700 mb-1.5">
+        <label className="block text-sm font-semibold text-ink/80 mb-1.5">
           Free Shipping Threshold (₹)
         </label>
         <div className="relative">
@@ -75,14 +75,14 @@ export default function ShippingForm({ initialShipping }: { initialShipping: any
             defaultValue={initialShipping.free_threshold ?? 1999}
             required
             min="0"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-teal-700/40 focus:border-teal-700 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink focus:outline-none focus:ring-2 focus:ring-teal-700/40 focus:border-teal-700 transition-all"
           />
-          <CircleDollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-stone-400" />
+          <CircleDollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-ink/40" />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-stone-700 mb-1.5">
+        <label className="block text-sm font-semibold text-ink/80 mb-1.5">
           Cash on Delivery (COD) Charge (₹)
         </label>
         <div className="relative">
@@ -92,14 +92,14 @@ export default function ShippingForm({ initialShipping }: { initialShipping: any
             defaultValue={initialShipping.cod_charge ?? 50}
             required
             min="0"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-teal-700/40 focus:border-teal-700 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink focus:outline-none focus:ring-2 focus:ring-teal-700/40 focus:border-teal-700 transition-all"
           />
-          <CircleDollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-stone-400" />
+          <CircleDollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-ink/40" />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-stone-700 mb-1.5">
+        <label className="block text-sm font-semibold text-ink/80 mb-1.5">
           Online Payment Discount (%)
         </label>
         <div className="relative">
@@ -110,19 +110,19 @@ export default function ShippingForm({ initialShipping }: { initialShipping: any
             required
             min="0"
             max="100"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-teal-700/40 focus:border-teal-700 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink focus:outline-none focus:ring-2 focus:ring-teal-700/40 focus:border-teal-700 transition-all"
           />
-          <CircleDollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-stone-400" />
+          <CircleDollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-ink/40" />
         </div>
       </div>
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full py-2.5 px-4 bg-gradient-to-r from-teal-700 to-teal-800 text-white font-semibold rounded-xl shadow-md shadow-teal-700/20 hover:shadow-lg hover:from-teal-800 hover:to-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-700/40 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+        className="w-full py-2.5 px-4 bg-gradient-to-r from-teal-700 to-teal-800 text-ink font-semibold rounded-xl shadow-md shadow-teal-700/20 hover:shadow-lg hover:from-teal-800 hover:to-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-700/40 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
       >
         {pending ? (
-          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
         ) : (
           <>
             <CheckCircle className="w-4.5 h-4.5" />

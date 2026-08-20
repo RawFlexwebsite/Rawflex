@@ -27,7 +27,7 @@ export default function CouponsList({ initialCoupons }: { initialCoupons: Coupon
 
   if (coupons.length === 0) {
     return (
-      <div className="p-8 text-center text-stone-400 text-sm">
+      <div className="p-8 text-center text-ink/40 text-sm">
         No coupons created yet. Create one on the left to get started.
       </div>
     )
@@ -37,7 +37,7 @@ export default function CouponsList({ initialCoupons }: { initialCoupons: Coupon
     <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="bg-stone-50 text-stone-500 text-xs font-bold uppercase border-b border-stone-100">
+          <tr className="bg-cream-deep text-ink/60 text-xs font-bold uppercase border-b border-cream-line">
             <th className="p-4">Code</th>
             <th className="p-4">Type</th>
             <th className="p-4">Value</th>
@@ -46,10 +46,10 @@ export default function CouponsList({ initialCoupons }: { initialCoupons: Coupon
             <th className="p-4 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-stone-100 text-sm text-stone-700">
+        <tbody className="divide-y divide-cream-line text-sm text-ink/80">
           {coupons.map((coupon) => (
-            <tr key={coupon.id} className="hover:bg-stone-50/50 transition-colors">
-              <td className="p-4 font-bold text-stone-900">{coupon.code}</td>
+            <tr key={coupon.id} className="hover:bg-panel/50 transition-colors">
+              <td className="p-4 font-bold text-ink">{coupon.code}</td>
               <td className="p-4 capitalize">{coupon.type}</td>
               <td className="p-4 font-semibold">
                 {coupon.type === 'percentage' ? `${coupon.value}%` : `₹${coupon.value}`}
@@ -61,7 +61,7 @@ export default function CouponsList({ initialCoupons }: { initialCoupons: Coupon
                     <ShieldCheck className="w-3.5 h-3.5" /> Active
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-xs text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-xs text-ink/60 bg-cream-deep px-2 py-0.5 rounded-full">
                     <ShieldAlert className="w-3.5 h-3.5" /> Inactive
                   </span>
                 )}
@@ -70,7 +70,7 @@ export default function CouponsList({ initialCoupons }: { initialCoupons: Coupon
                 <button
                   onClick={() => handleDelete(coupon.id)}
                   disabled={pending}
-                  className="p-1 text-stone-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                  className="p-1 text-ink/40 hover:text-red-500 transition-colors disabled:opacity-50"
                   title="Delete Coupon"
                 >
                   <Trash2 className="w-4 h-4" />

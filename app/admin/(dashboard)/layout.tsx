@@ -32,7 +32,7 @@ export default async function AdminDashboardLayout({
 
   return (
     <AdminSidebarProvider>
-      <div className="admin-shell flex h-screen overflow-hidden bg-stone-50">
+      <div className="admin-shell flex h-screen overflow-hidden bg-cream-deep">
         <AdminSidebar />
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           <AdminHeader />

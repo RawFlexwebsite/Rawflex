@@ -89,7 +89,7 @@ export function ProductImagesEditor({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-900">Product Images</h3>
+        <h3 className="text-lg font-medium text-ink">Product Images</h3>
         <CldUploadWidget
           signatureEndpoint="/api/cloudinary/sign"
           onSuccess={handleUploadSuccess}
@@ -105,7 +105,7 @@ export function ProductImagesEditor({
                 type="button"
                 onClick={() => open()}
                 disabled={uploading || isPending}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-ink bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
               >
                 {uploading || isPending ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -120,14 +120,14 @@ export function ProductImagesEditor({
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-stone-200 pb-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-cream-line pb-3">
         <button
           type="button"
           onClick={() => setActiveTab('All')}
           className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
             activeTab === 'All'
-              ? 'bg-stone-900 text-white'
-              : 'text-stone-600 hover:bg-stone-100'
+              ? 'bg-panel text-ink'
+              : 'text-ink/60 hover:bg-panel2'
           }`}
         >
           All ({images.length})
@@ -144,8 +144,8 @@ export function ProductImagesEditor({
               onClick={() => setActiveTab(colorName)}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                 activeTab === colorName
-                  ? 'bg-stone-900 text-white'
-                  : 'text-stone-600 hover:bg-stone-100'
+                  ? 'bg-panel text-ink'
+                  : 'text-ink/60 hover:bg-panel2'
               }`}
             >
               <span 
@@ -172,8 +172,8 @@ export function ProductImagesEditor({
           return (
             <div
               key={img.id}
-              className={`group flex flex-col rounded-lg border-2 bg-stone-50 overflow-hidden ${
-                isFeatured ? 'border-indigo-600' : 'border-gray-200'
+              className={`group flex flex-col rounded-lg border-2 bg-cream-deep overflow-hidden ${
+                isFeatured ? 'border-indigo-600' : 'border-cream-line'
               }`}
             >
               <div className="relative aspect-square w-full">
@@ -190,7 +190,7 @@ export function ProductImagesEditor({
                       type="button"
                       onClick={() => handleDelete(img.id)}
                       disabled={isPending}
-                      className="p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                      className="p-1.5 bg-red-600 text-ink rounded-full hover:bg-red-700 transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -202,7 +202,7 @@ export function ProductImagesEditor({
                         type="button"
                         onClick={() => handleSetFeatured(img.image_url)}
                         disabled={isPending}
-                        className="px-3 py-1.5 text-xs font-medium text-gray-900 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
+                        className="px-3 py-1.5 text-xs font-medium text-ink bg-panel rounded-full shadow-sm hover:bg-panel2 transition-colors"
                       >
                         Set as Featured
                       </button>
@@ -223,9 +223,9 @@ export function ProductImagesEditor({
         })}
 
         {displayedImages.length === 0 && (
-          <div className="col-span-full py-12 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-            <p className="text-sm text-gray-500">No images uploaded for "{activeTab}" yet</p>
-            <p className="text-xs text-gray-400 mt-1">Click "Upload Image" to add some under this tab</p>
+          <div className="col-span-full py-12 flex flex-col items-center justify-center border-2 border-dashed border-cream-line rounded-lg bg-cream-deep">
+            <p className="text-sm text-ink/60">No images uploaded for "{activeTab}" yet</p>
+            <p className="text-xs text-ink/40 mt-1">Click "Upload Image" to add some under this tab</p>
           </div>
         )}
       </div>

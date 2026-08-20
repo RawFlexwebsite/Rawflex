@@ -12,8 +12,8 @@ export default async function AdminCouponsPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Checkout Coupons</h1>
-        <p className="mt-1 text-sm text-stone-500">
+        <h1 className="text-2xl font-bold text-ink">Checkout Coupons</h1>
+        <p className="mt-1 text-sm text-ink/60">
           Create, toggle and manage discount coupons for customer checkouts.
         </p>
       </div>
@@ -21,8 +21,8 @@ export default async function AdminCouponsPage() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         {/* Left Column: Create Coupon */}
         <div className="xl:col-span-4">
-          <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-stone-800 uppercase tracking-wider">
+          <div className="bg-panel p-6 rounded-2xl border border-cream-line shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-ink/80 uppercase tracking-wider">
               Create New Coupon
             </h3>
             <CouponForm />
@@ -31,9 +31,9 @@ export default async function AdminCouponsPage() {
 
         {/* Right Column: List Coupons */}
         <div className="xl:col-span-8">
-          <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-stone-100">
-              <h3 className="text-sm font-bold text-stone-800 uppercase tracking-wider">
+          <div className="bg-panel rounded-2xl border border-cream-line shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-cream-line">
+              <h3 className="text-sm font-bold text-ink/80 uppercase tracking-wider">
                 Active Coupons
               </h3>
             </div>

@@ -24,7 +24,7 @@ const writeDb = (data: any) => {
 
 class MockQueryBuilder {
   private tableName: string
-  private filters: Array<{ field: string; val: any }> = []
+  private filters: Array<{ field: string; val: any; op?: string }> = []
   private isSingle = false
   private isDelete = false
   private isInsert = false
@@ -40,7 +40,7 @@ class MockQueryBuilder {
 
   select() { return this }
   eq(field: string, val: any) {
-    this.filters.push({ field, val })
+    this.filters.push({ field, val, op: 'eq' })
     return this
   }
   single() {
@@ -69,6 +69,10 @@ class MockQueryBuilder {
     this.updateData = data
     return this
   }
+  lt(field: string, val: any) {
+    this.filters.push({ field, val, op: 'lt' })
+    return this
+  }
 
   async execute() {
     const db = readDb()
@@ -84,6 +88,7 @@ class MockQueryBuilder {
       return { data: [db.settings || {}], count: 1, error: null }
     }
 
+    if (!db[this.tableName]) db[this.tableName] = []
     let table = db[this.tableName] || []
 
     if (!Array.isArray(table)) {
@@ -106,7 +111,10 @@ class MockQueryBuilder {
 
     if (this.isUpdate) {
       table = table.map((item: any) => {
-        const matches = this.filters.every(f => item[f.field] === f.val)
+        const matches = this.filters.every(f => {
+          if (f.op === 'lt') return new Date(item[f.field]) < new Date(f.val)
+          return item[f.field] === f.val
+        })
         if (matches) {
           return { ...item, ...this.updateData }
         }
@@ -119,7 +127,10 @@ class MockQueryBuilder {
 
     if (this.isDelete) {
       table = table.filter((item: any) => {
-        const matches = this.filters.every(f => item[f.field] === f.val)
+        const matches = this.filters.every(f => {
+          if (f.op === 'lt') return new Date(item[f.field]) < new Date(f.val)
+          return item[f.field] === f.val
+        })
         return !matches
       })
       db[this.tableName] = table
@@ -129,7 +140,10 @@ class MockQueryBuilder {
 
     let filtered = [...table]
     this.filters.forEach(f => {
-      filtered = filtered.filter(item => item[f.field] === f.val)
+      filtered = filtered.filter(item => {
+        if (f.op === 'lt') return new Date(item[f.field]) < new Date(f.val)
+        return item[f.field] === f.val
+      })
     })
 
     if (this.sortField) {

@@ -10,10 +10,10 @@ export default async function AdminHeader() {
   } = await supabase.auth.getUser()
 
   return (
-    <header className="h-16 bg-white border-b border-stone-200 flex items-center justify-between px-3 sm:px-6 shrink-0 gap-2">
+    <header className="h-16 bg-panel border-b border-cream-line flex items-center justify-between px-3 sm:px-6 shrink-0 gap-2">
       <div className="flex items-center gap-2 sm:gap-4 min-w-0">
         <MobileMenuButton />
-        <h2 className="text-base sm:text-lg font-semibold text-stone-900 truncate">
+        <h2 className="text-base sm:text-lg font-semibold text-ink truncate">
           Admin Dashboard
         </h2>
         <a
@@ -34,10 +34,10 @@ export default async function AdminHeader() {
             <User className="w-4 h-4 text-ink/60" />
           </div>
           <div className="hidden sm:block">
-            <p className="text-sm font-medium text-stone-700 leading-tight">
+            <p className="text-sm font-medium text-ink/75 leading-tight">
               {user?.email || 'Admin'}
             </p>
-            <p className="text-xs text-stone-400">Administrator</p>
+            <p className="text-xs text-ink/40">Administrator</p>
           </div>
         </div>
 

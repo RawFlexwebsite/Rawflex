@@ -47,72 +47,72 @@ export default function CustomerList({ initialCustomers }: CustomerListProps) {
       {/* Search */}
       <div className="relative max-w-md">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-stone-400" />
+          <Search className="h-5 w-5 text-ink/40" />
         </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search customers by name, email, or phone..."
-          className="block w-full pl-10 pr-3 py-2 border border-stone-200 rounded-xl leading-5 bg-white placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm transition-all"
+          className="block w-full pl-10 pr-3 py-2 border border-cream-line rounded-xl leading-5 bg-panel placeholder-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm transition-all"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-stone-200/80 overflow-hidden">
+      <div className="bg-panel rounded-xl shadow-sm border border-cream-line overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-stone-200">
-            <thead className="bg-stone-50">
+          <table className="min-w-full divide-y divide-cream-line">
+            <thead className="bg-cream-deep">
               <tr>
-                <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-ink/60 uppercase tracking-wider">
                   Customer
                 </th>
-                <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-ink/60 uppercase tracking-wider">
                   Contact
                 </th>
-                <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-ink/60 uppercase tracking-wider">
                   Joined
                 </th>
-                <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-ink/60 uppercase tracking-wider">
                   Status
                 </th>
-                <th scope="col" className="px-6 py-4 text-right text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-right text-xs font-semibold text-ink/60 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-stone-200">
+            <tbody className="bg-panel divide-y divide-cream-line">
               {filteredCustomers.length > 0 ? (
                 filteredCustomers.map((customer) => (
-                  <tr key={customer.id} className="hover:bg-stone-50/50 transition-colors">
+                  <tr key={customer.id} className="hover:bg-panel/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-orange-100 to-orange-100 flex items-center justify-center text-orange-600 font-bold border border-orange-200">
                           {customer.full_name.charAt(0).toUpperCase()}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-stone-900">
+                          <div className="text-sm font-medium text-ink">
                             {customer.full_name}
                           </div>
-                          <div className="text-sm text-stone-500 font-mono text-xs">
+                          <div className="text-sm text-ink/60 font-mono text-xs">
                             ID: {customer.id.substring(0, 8)}...
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-stone-900 flex items-center gap-2 mb-1">
-                        <Mail className="w-3.5 h-3.5 text-stone-400" />
+                      <div className="text-sm text-ink flex items-center gap-2 mb-1">
+                        <Mail className="w-3.5 h-3.5 text-ink/40" />
                         {customer.email}
                       </div>
-                      <div className="text-sm text-stone-500 flex items-center gap-2">
-                        <Phone className="w-3.5 h-3.5 text-stone-400" />
+                      <div className="text-sm text-ink/60 flex items-center gap-2">
+                        <Phone className="w-3.5 h-3.5 text-ink/40" />
                         {customer.phone || 'N/A'}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-ink/60">
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-stone-400" />
+                        <Calendar className="w-4 h-4 text-ink/40" />
                         {new Date(customer.created_at).toLocaleDateString()}
                       </div>
                     </td>
@@ -151,10 +151,10 @@ export default function CustomerList({ initialCustomers }: CustomerListProps) {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-stone-500">
+                  <td colSpan={5} className="px-6 py-12 text-center text-ink/60">
                     <div className="flex flex-col items-center justify-center">
-                      <UserX className="w-12 h-12 text-stone-300 mb-3" />
-                      <p className="text-lg font-medium text-stone-900">No customers found</p>
+                      <UserX className="w-12 h-12 text-ink/50 mb-3" />
+                      <p className="text-lg font-medium text-ink">No customers found</p>
                       <p className="text-sm">We couldn't find any customers matching your search.</p>
                     </div>
                   </td>

@@ -76,8 +76,8 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
         {/* Main column */}
         <div className="lg:col-span-2 space-y-6">
           {/* Basic Info */}
-          <div className="bg-white rounded-xl border border-stone-200/80 p-6 space-y-5">
-            <h2 className="text-base font-semibold text-stone-900">
+          <div className="bg-panel rounded-xl border border-cream-line p-6 space-y-5">
+            <h2 className="text-base font-semibold text-ink">
               Basic Information
             </h2>
 
@@ -86,7 +86,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
               <div>
                 <label
                   htmlFor="product-name"
-                  className="block text-sm font-medium text-stone-700 mb-1.5"
+                  className="block text-sm font-medium text-ink/80 mb-1.5"
                 >
                   Product Name <span className="text-red-500">*</span>
                 </label>
@@ -98,9 +98,9 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                   maxLength={255}
                   defaultValue={product?.name || ''}
                   placeholder="e.g. Premium Front Open Abaya"
-                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+                  className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
                 />
-                <p className="text-xs text-stone-400 mt-1.5">
+                <p className="text-xs text-ink/40 mt-1.5">
                   Slug will be auto-generated from the name.
                 </p>
               </div>
@@ -109,7 +109,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
               <div>
                 <label
                   htmlFor="product-category"
-                  className="block text-sm font-medium text-stone-700 mb-1.5"
+                  className="block text-sm font-medium text-ink/80 mb-1.5"
                 >
                   Category
                 </label>
@@ -118,7 +118,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                   name="category_id"
                   required
                   defaultValue={product?.category_id || ''}
-                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+                  className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
                 >
                   <option value="">Select a category</option>
                   {categories.map((cat) => (
@@ -134,7 +134,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
             <div>
               <label
                 htmlFor="product-short-desc"
-                className="block text-sm font-medium text-stone-700 mb-1.5"
+                className="block text-sm font-medium text-ink/80 mb-1.5"
               >
                 Short Description
               </label>
@@ -145,7 +145,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 maxLength={500}
                 defaultValue={product?.short_description || ''}
                 placeholder="Brief one-liner about the product"
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200 resize-none"
+                className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200 resize-none"
               />
             </div>
 
@@ -154,7 +154,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
               <div>
                 <label
                   htmlFor="product-fabric"
-                  className="block text-sm font-medium text-stone-700 mb-1.5"
+                  className="block text-sm font-medium text-ink/80 mb-1.5"
                 >
                   Fabric Details
                 </label>
@@ -164,7 +164,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                   type="text"
                   defaultValue={(product as any)?.fabric || ''}
                   placeholder="e.g. Premium quality nida/crepe"
-                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+                  className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
                 />
               </div>
 
@@ -172,7 +172,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
               <div>
                 <label
                   htmlFor="product-stitching"
-                  className="block text-sm font-medium text-stone-700 mb-1.5"
+                  className="block text-sm font-medium text-ink/80 mb-1.5"
                 >
                   Stitching Details
                 </label>
@@ -182,7 +182,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                   type="text"
                   defaultValue={(product as any)?.stitching || ''}
                   placeholder="e.g. Dual-reinforced seams"
-                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+                  className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
                 />
               </div>
             </div>
@@ -191,7 +191,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
             <div>
               <label
                 htmlFor="product-description"
-                className="block text-sm font-medium text-stone-700 mb-1.5"
+                className="block text-sm font-medium text-ink/80 mb-1.5"
               >
                 Full Description
               </label>
@@ -202,19 +202,19 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 maxLength={5000}
                 defaultValue={product?.description || ''}
                 placeholder="Detailed product description..."
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200 resize-y"
+                className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200 resize-y"
               />
             </div>
           </div>
 
           {/* SEO */}
-          <div className="bg-white rounded-xl border border-stone-200/80 p-6 space-y-5">
-            <h2 className="text-base font-semibold text-stone-900">SEO</h2>
+          <div className="bg-panel rounded-xl border border-cream-line p-6 space-y-5">
+            <h2 className="text-base font-semibold text-ink">SEO</h2>
 
             <div>
               <label
                 htmlFor="seo-title"
-                className="block text-sm font-medium text-stone-700 mb-1.5"
+                className="block text-sm font-medium text-ink/80 mb-1.5"
               >
                 SEO Title
               </label>
@@ -225,14 +225,14 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 maxLength={200}
                 defaultValue={product?.seo_title || ''}
                 placeholder="Custom title for search engines"
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+                className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
               />
             </div>
 
             <div>
               <label
                 htmlFor="seo-description"
-                className="block text-sm font-medium text-stone-700 mb-1.5"
+                className="block text-sm font-medium text-ink/80 mb-1.5"
               >
                 SEO Description
               </label>
@@ -243,14 +243,14 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 maxLength={500}
                 defaultValue={product?.seo_description || ''}
                 placeholder="Meta description for search results"
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200 resize-y"
+                className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200 resize-y"
               />
             </div>
 
             <div>
               <label
                 htmlFor="seo-keywords"
-                className="block text-sm font-medium text-stone-700 mb-1.5"
+                className="block text-sm font-medium text-ink/80 mb-1.5"
               >
                 SEO Keywords (comma separated)
               </label>
@@ -260,7 +260,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 type="text"
                 defaultValue={product?.seo_keywords || ''}
                 placeholder="e.g. abaya, modest fashion, premium hijab"
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+                className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
               />
             </div>
           </div>
@@ -269,14 +269,14 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
         {/* Sidebar column */}
         <div className="lg:col-span-1 space-y-6">
           {/* Status */}
-          <div className="bg-white rounded-xl border border-stone-200/80 p-6 space-y-5">
-            <h2 className="text-base font-semibold text-stone-900">Status</h2>
+          <div className="bg-panel rounded-xl border border-cream-line p-6 space-y-5">
+            <h2 className="text-base font-semibold text-ink">Status</h2>
 
             {/* Badge / Tag */}
             <div>
               <label
                 htmlFor="product-badge"
-                className="block text-sm font-medium text-stone-700 mb-1.5"
+                className="block text-sm font-medium text-ink/80 mb-1.5"
               >
                 Badge / Tag
               </label>
@@ -284,7 +284,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 id="product-badge"
                 name="badge"
                 defaultValue={product?.badge || ''}
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+                className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
               >
                 <option value="">No badge</option>
                 <option value="New">New</option>
@@ -295,7 +295,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 <option value="Luxe">Luxe</option>
                 <option value="Handcrafted">Handcrafted</option>
               </select>
-              <p className="text-xs text-stone-400 mt-1.5">
+              <p className="text-xs text-ink/40 mt-1.5">
                 Shown as a small tag on the product card in the storefront.
               </p>
             </div>
@@ -307,11 +307,11 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 name="is_active"
                 type="checkbox"
                 defaultChecked={product?.is_active ?? true}
-                className="w-4 h-4 rounded border-stone-300 text-orange-600 focus:ring-orange-500"
+                className="w-4 h-4 rounded border-cream-line text-orange-600 focus:ring-orange-500"
               />
               <label
                 htmlFor="product-active"
-                className="text-sm font-medium text-stone-700"
+                className="text-sm font-medium text-ink/80"
               >
                 Active — visible in the store
               </label>
@@ -324,20 +324,20 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 name="is_featured"
                 type="checkbox"
                 defaultChecked={product?.is_featured ?? false}
-                className="w-4 h-4 rounded border-stone-300 text-orange-600 focus:ring-orange-500"
+                className="w-4 h-4 rounded border-cream-line text-orange-600 focus:ring-orange-500"
               />
               <label
                 htmlFor="product-featured"
-                className="text-sm font-medium text-stone-700"
+                className="text-sm font-medium text-ink/80"
               >
                 Featured — highlight on homepage
               </label>
             </div>
           </div>
           {/* Colors Management */}
-          <div className="bg-white rounded-xl border border-stone-200/80 p-6 space-y-5">
-            <h2 className="text-base font-semibold text-stone-900">Product Colors</h2>
-            <p className="text-xs text-stone-400 -mt-3">
+          <div className="bg-panel rounded-xl border border-cream-line p-6 space-y-5">
+            <h2 className="text-base font-semibold text-ink">Product Colors</h2>
+            <p className="text-xs text-ink/40 -mt-3">
               Add the colors available for this product. 
               <strong> Click "Update Product" to save the product and generate these tabs for image uploads below.</strong>
             </p>
@@ -345,11 +345,11 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
             <div className="space-y-4">
               {/* Color List / Tags */}
               {colorsList.length > 0 ? (
-                <div className="flex flex-wrap gap-2 p-3 bg-stone-50 rounded-xl border border-stone-200/60">
+                <div className="flex flex-wrap gap-2 p-3 bg-cream-deep rounded-xl border border-cream-line">
                   {colorsList.map((c) => (
                     <div 
                       key={c.name}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-stone-200 text-xs font-semibold text-stone-850 shadow-sm"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-panel border border-cream-line text-xs font-semibold text-ink/80 shadow-sm"
                     >
                       <span 
                         className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0" 
@@ -359,7 +359,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                       <button
                         type="button"
                         onClick={() => handleRemoveColor(c.name)}
-                        className="text-stone-400 hover:text-red-500 transition-colors ml-1 font-bold text-sm"
+                        className="text-ink/40 hover:text-red-500 transition-colors ml-1 font-bold text-sm"
                       >
                         ×
                       </button>
@@ -367,8 +367,8 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                   ))}
                 </div>
               ) : (
-                <div className="p-4 text-center rounded-xl border-2 border-dashed border-stone-200 bg-stone-50/50">
-                  <p className="text-xs text-stone-450">No colors added yet.</p>
+                <div className="p-4 text-center rounded-xl border-2 border-dashed border-cream-line bg-panel/50">
+                  <p className="text-xs text-ink/40">No colors added yet.</p>
                 </div>
               )}
 
@@ -386,7 +386,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                       }
                     }}
                     placeholder="Color name (e.g. Olive, Cream)"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500"
                   />
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -394,14 +394,14 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                     type="color"
                     value={colorInputHex}
                     onChange={(e) => setColorInputHex(e.target.value)}
-                    className="w-8 h-8 rounded-lg border border-stone-200 cursor-pointer shrink-0 p-0.5"
+                    className="w-8 h-8 rounded-lg border border-cream-line cursor-pointer shrink-0 p-0.5"
                   />
-                  <span className="text-[10px] font-mono text-stone-500 uppercase">{colorInputHex}</span>
+                  <span className="text-[10px] font-mono text-ink/60 uppercase">{colorInputHex}</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleAddColor}
-                  className="px-3.5 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl transition-all"
+                  className="px-3.5 py-2 bg-panel hover:bg-panel2 text-ink text-xs font-semibold rounded-xl transition-all"
                 >
                   Add
                 </button>
@@ -418,7 +418,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
       <div className="flex items-center justify-between">
         <Link
           href="/admin/products"
-          className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-stone-700 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Products
@@ -426,10 +426,10 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-semibold rounded-xl shadow-md shadow-orange-500/20 hover:shadow-lg hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500/40 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-ink text-sm font-semibold rounded-xl shadow-md shadow-orange-500/20 hover:shadow-lg hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500/40 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
         >
           {pending ? (
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
           ) : (
             <Save className="w-4 h-4" />
           )}

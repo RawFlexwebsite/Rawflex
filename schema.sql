@@ -1,4 +1,8 @@
 -- RAWFLEX Supabase Schema
+-- Run this in Supabase SQL Editor
+
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. Profiles Table
 CREATE TABLE profiles (
@@ -8,10 +12,31 @@ CREATE TABLE profiles (
   full_name TEXT,
   phone TEXT,
   is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 2. Categories Table
+-- 2. Addresses Table
+CREATE TABLE addresses (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  full_name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  alternate_phone TEXT,
+  address_line_1 TEXT NOT NULL,
+  address_line_2 TEXT,
+  city TEXT NOT NULL,
+  state TEXT NOT NULL,
+  postal_code TEXT NOT NULL,
+  country TEXT DEFAULT 'India',
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX idx_addresses_user_id ON addresses(user_id);
+
+-- 3. Categories Table
 CREATE TABLE categories (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -20,10 +45,11 @@ CREATE TABLE categories (
   image_url TEXT,
   count TEXT,
   is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 3. Products Table
+-- 4. Products Table
 CREATE TABLE products (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -31,82 +57,299 @@ CREATE TABLE products (
   category_id TEXT REFERENCES categories(id),
   price NUMERIC NOT NULL,
   "oldPrice" NUMERIC,
-  image_url TEXT,
+  featured_image_url TEXT,
   badge TEXT,
   rating NUMERIC DEFAULT 0,
+  review_count INTEGER DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
   is_featured BOOLEAN DEFAULT false,
   description TEXT,
   short_description TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 4. Orders Table
-CREATE TABLE orders (
-  id TEXT PRIMARY KEY,
-  order_number TEXT UNIQUE NOT NULL,
-  total_amount NUMERIC NOT NULL,
-  order_status TEXT DEFAULT 'pending',
-  payment_status TEXT DEFAULT 'pending',
+  color_group_id UUID,
+  color_name TEXT,
+  color_hex TEXT,
+  seo_title TEXT,
+  seo_description TEXT,
+  seo_keywords TEXT,
+  fabric TEXT,
+  stitching TEXT,
+  use_global_faqs BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  cancelled_at TIMESTAMP WITH TIME ZONE
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 5. Reviews Table
-CREATE TABLE reviews (
-  id TEXT PRIMARY KEY,
-  product_id TEXT REFERENCES products(id),
-  user_id UUID REFERENCES profiles(id),
-  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
-  comment TEXT,
-  is_approved BOOLEAN DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+CREATE INDEX idx_products_category_id ON products(category_id);
+CREATE INDEX idx_products_is_active ON products(is_active);
+CREATE INDEX idx_products_is_featured ON products(is_featured);
+
+-- 5. Product Variants Table
+CREATE TABLE product_variants (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id TEXT REFERENCES products(id) ON DELETE CASCADE NOT NULL,
+  variant_name TEXT NOT NULL,
+  price NUMERIC NOT NULL,
+  original_price NUMERIC,
+  stock_quantity INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 6. Inquiries Table
-CREATE TABLE inquiries (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  email TEXT,
-  phone TEXT,
-  message TEXT NOT NULL,
-  status TEXT DEFAULT 'unread',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
+CREATE INDEX idx_product_variants_product_id ON product_variants(product_id);
 
--- 7. Hero Slides Table
-CREATE TABLE hero_slides (
-  id TEXT PRIMARY KEY,
+-- 6. Product Images Table
+CREATE TABLE product_images (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id TEXT REFERENCES products(id) ON DELETE CASCADE NOT NULL,
   image_url TEXT NOT NULL,
+  sort_order INTEGER DEFAULT 0,
+  color_name TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX idx_product_images_product_id ON product_images(product_id);
+
+-- 7. Product Information Table
+CREATE TABLE product_information (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id TEXT REFERENCES products(id) ON DELETE CASCADE NOT NULL,
+  label TEXT NOT NULL,
+  value TEXT NOT NULL,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX idx_product_information_product_id ON product_information(product_id);
+
+-- 8. Product FAQs Table
+CREATE TABLE product_faqs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id TEXT REFERENCES products(id) ON DELETE CASCADE NOT NULL,
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX idx_product_faqs_product_id ON product_faqs(product_id);
+
+-- 8b. Global FAQs Table
+CREATE TABLE global_faqs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 9. Cart Items Table
+CREATE TABLE cart_items (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  variant_id UUID REFERENCES product_variants(id) ON DELETE CASCADE NOT NULL,
+  quantity INTEGER DEFAULT 1,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  UNIQUE(user_id, variant_id)
+);
+
+CREATE INDEX idx_cart_items_user_id ON cart_items(user_id);
+
+-- 10. Orders Table
+CREATE TABLE orders (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  order_number TEXT UNIQUE NOT NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  address_id UUID REFERENCES addresses(id) ON DELETE SET NULL,
+  subtotal NUMERIC NOT NULL,
+  shipping_cost NUMERIC NOT NULL DEFAULT 0,
+  total_amount NUMERIC NOT NULL,
+  payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'failed', 'refunded')),
+  order_status TEXT DEFAULT 'pending' CHECK (order_status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled')),
+  payment_method TEXT,
+  razorpay_order_id TEXT,
+  razorpay_payment_id TEXT,
+  paid_at TIMESTAMP WITH TIME ZONE,
+  shipped_at TIMESTAMP WITH TIME ZONE,
+  delivered_at TIMESTAMP WITH TIME ZONE,
+  cancelled_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX idx_orders_user_id ON orders(user_id);
+CREATE INDEX idx_orders_order_number ON orders(order_number);
+CREATE INDEX idx_orders_created_at ON orders(created_at DESC);
+
+-- 11. Order Items Table
+CREATE TABLE order_items (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  order_id UUID REFERENCES orders(id) ON DELETE CASCADE NOT NULL,
+  product_id TEXT REFERENCES products(id) ON DELETE SET NULL,
+  variant_id UUID REFERENCES product_variants(id) ON DELETE SET NULL,
+  product_name TEXT NOT NULL,
+  variant_name TEXT NOT NULL,
+  price_at_purchase NUMERIC NOT NULL,
+  quantity INTEGER NOT NULL,
+  line_total NUMERIC NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+
+-- 12. Reviews Table
+CREATE TABLE reviews (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id TEXT REFERENCES products(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  review_text TEXT,
+  is_approved BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX idx_reviews_product_id ON reviews(product_id);
+CREATE INDEX idx_reviews_user_id ON reviews(user_id);
+
+-- 13. Contact Inquiries Table
+CREATE TABLE contact_inquiries (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  email TEXT,
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'unread' CHECK (status IN ('unread', 'read', 'replied')),
+  is_resolved BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 14. Hero Slides Table
+CREATE TABLE hero_slides (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT,
   subtitle TEXT,
+  image_url TEXT NOT NULL,
   button_text TEXT,
   button_link TEXT,
   text_mode TEXT DEFAULT 'global',
   is_active BOOLEAN DEFAULT true,
   display_order INTEGER DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 8. Coupons Table
+-- 15. Coupons Table
 CREATE TABLE coupons (
-  id TEXT PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   code TEXT UNIQUE NOT NULL,
-  type TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('percentage', 'flat')),
   value NUMERIC NOT NULL,
   min_purchase NUMERIC DEFAULT 0,
+  max_discount NUMERIC,
+  usage_limit INTEGER,
+  used_count INTEGER DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
+  starts_at TIMESTAMP WITH TIME ZONE,
+  expires_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 16. Settings Table (for shipping, announcements, etc.)
+CREATE TABLE settings (
+  id TEXT PRIMARY KEY DEFAULT 'site_settings',
+  shipping JSONB DEFAULT '{"flat_rate": 99, "free_threshold": 1999, "cod_charge": 50, "online_discount": 0}'::jsonb,
+  announcements JSONB DEFAULT '[]'::jsonb,
+  faqs JSONB DEFAULT '[]'::jsonb,
+  home_banner_enabled BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Insert default settings
+INSERT INTO settings (id) VALUES ('site_settings')
+ON CONFLICT (id) DO NOTHING;
+
+-- 16b. Home Banner Images Table
+CREATE TABLE home_banner_images (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  image_url TEXT NOT NULL,
+  link_url TEXT,
+  is_active BOOLEAN DEFAULT true,
+  display_order INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 9. Settings / Announcements Table
-CREATE TABLE announcements (
-  id TEXT PRIMARY KEY,
-  text TEXT NOT NULL,
-  is_active BOOLEAN DEFAULT true,
+-- 17. Email OTPs Table (for passwordless authentication)
+CREATE TABLE email_otps (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email TEXT NOT NULL,
+  otp TEXT NOT NULL,
+  full_name TEXT,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Note: We skipped a strict RLS (Row Level Security) policy for this initial setup 
--- to ensure the frontend can read the mock data smoothly as it connects. 
--- You may want to enable RLS later for security.
+CREATE INDEX idx_email_otps_email ON email_otps(email);
+CREATE INDEX idx_email_otps_expires_at ON email_otps(expires_at);
+
+-- 18. Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = timezone('utc'::text, now());
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- 19. Triggers for updated_at
+CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_addresses_updated_at BEFORE UPDATE ON addresses
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON products
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_product_variants_updated_at BEFORE UPDATE ON product_variants
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_product_information_updated_at BEFORE UPDATE ON product_information
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_product_faqs_updated_at BEFORE UPDATE ON product_faqs
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_cart_items_updated_at BEFORE UPDATE ON cart_items
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_contact_inquiries_updated_at BEFORE UPDATE ON contact_inquiries
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_hero_slides_updated_at BEFORE UPDATE ON hero_slides
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_coupons_updated_at BEFORE UPDATE ON coupons
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_settings_updated_at BEFORE UPDATE ON settings
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Note: RLS (Row Level Security) is not enabled for initial development
+-- Enable RLS and add policies for production:
+-- ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE addresses ENABLE ROW LEVEL SECURITY;
+-- ... etc.

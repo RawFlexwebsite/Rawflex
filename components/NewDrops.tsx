@@ -6,6 +6,7 @@ import { useCart } from "@/context/CartContext";
 
 interface NewDropProduct {
   id: string;
+  slug?: string;
   name: string;
   price: number;
   sale_price?: number | null;
@@ -45,7 +46,7 @@ export default function NewDrops({
               it&apos;s gone.
             </p>
             <Link
-              href="/shop?category=new-drops"
+              href="/shop"
               className="mt-5 sm:mt-6 inline-flex items-center gap-2 text-[#D4A82C] font-bold text-[12px] sm:text-[13px] tracking-[0.12em] uppercase hover:gap-3 transition-all"
             >
               View all drops
@@ -61,7 +62,7 @@ export default function NewDrops({
               const price = p.sale_price && p.sale_price < p.price ? p.sale_price : p.price;
               return (
                 <div key={p.id} className="group overflow-hidden rounded-md border border-white/10 hover:border-[#D4A82C]/50 transition-colors">
-                  <Link href="/shop?category=new-drops" className="relative block aspect-[4/5] overflow-hidden bg-[#EDEAE4]">
+                  <Link href={`/shop/${p.slug || p.id}`} className="relative block aspect-[4/5] overflow-hidden bg-[#EDEAE4]">
                     <Image
                       src={p.image_url}
                       alt={p.name}
@@ -74,7 +75,7 @@ export default function NewDrops({
                     </span>
                   </Link>
                   <div className="bg-[#111110] px-4 py-3.5">
-                    <Link href="/shop?category=new-drops">
+                    <Link href={`/shop/${p.slug || p.id}`}>
                       <p className="text-white/70 text-[11px] font-semibold uppercase tracking-wide leading-snug line-clamp-1 hover:text-[#D4A82C] transition-colors">
                         {p.name}
                       </p>

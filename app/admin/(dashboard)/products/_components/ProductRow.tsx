@@ -31,33 +31,33 @@ export default function ProductRow({
   const displayImage = product.image_url || product.featured_image_url
 
   return (
-    <tr className="hover:bg-stone-50/50 transition-colors">
+    <tr className="hover:bg-panel/50 transition-colors">
       <td className="px-6 py-3.5">
         <div className="flex items-center gap-3">
           {displayImage ? (
             <img
               src={displayImage}
               alt={product.name}
-              className="w-10 h-10 rounded-lg object-cover bg-stone-100"
+              className="w-10 h-10 rounded-lg object-cover bg-cream-deep"
             />
           ) : (
-            <div className="w-10 h-10 rounded-lg bg-stone-100 flex items-center justify-center text-stone-400 text-xs font-medium">
+            <div className="w-10 h-10 rounded-lg bg-cream-deep flex items-center justify-center text-ink/40 text-xs font-medium">
               IMG
             </div>
           )}
           <div>
-            <p className="text-sm font-medium text-stone-900">{product.name}</p>
-            <p className="text-xs text-stone-400 mt-0.5">/{product.slug}</p>
+            <p className="text-sm font-medium text-ink">{product.name}</p>
+            <p className="text-xs text-ink/40 mt-0.5">/{product.slug}</p>
           </div>
         </div>
       </td>
       <td className="px-6 py-3.5">
         {product.categories ? (
-          <span className="text-sm text-stone-600">
+          <span className="text-sm text-ink/60">
             {product.categories.name}
           </span>
         ) : (
-          <span className="text-xs text-stone-400 italic">Uncategorized</span>
+          <span className="text-xs text-ink/40 italic">Uncategorized</span>
         )}
       </td>
       <td className="px-6 py-3.5">
@@ -66,7 +66,7 @@ export default function ProductRow({
             {product.badge}
           </span>
         ) : (
-          <span className="text-xs text-stone-400 italic">None</span>
+          <span className="text-xs text-ink/40 italic">None</span>
         )}
       </td>
       <td className="px-6 py-3.5">
@@ -74,13 +74,13 @@ export default function ProductRow({
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
             product.is_active
               ? 'bg-green-100 text-green-700'
-              : 'bg-stone-100 text-stone-500'
+              : 'bg-cream-deep text-ink/60'
           }`}
         >
           {product.is_active ? 'Active' : 'Inactive'}
         </span>
       </td>
-      <td className="px-6 py-3.5 text-sm text-stone-500">
+      <td className="px-6 py-3.5 text-sm text-ink/60">
         {new Date(product.created_at).toLocaleDateString('en-IN', {
           day: 'numeric',
           month: 'short',
@@ -91,7 +91,7 @@ export default function ProductRow({
         <div className="flex items-center justify-end gap-1">
           <Link
             href={`/admin/products/${product.id}/edit`}
-            className="p-2 rounded-lg text-stone-400 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+            className="p-2 rounded-lg text-ink/40 hover:text-orange-600 hover:bg-orange-50 transition-colors"
           >
             <Pencil className="w-4 h-4" />
           </Link>
@@ -109,7 +109,7 @@ export default function ProductRow({
                 })
               }
             }}
-            className="p-2 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+            className="p-2 rounded-lg text-ink/40 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
           >
             <Trash2 className="w-4 h-4" />
           </button>

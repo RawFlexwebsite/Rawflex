@@ -15,7 +15,7 @@ export default function BrandBanner() {
             {/* Monogram Logo */}
             <div className="relative w-14 sm:w-16 h-14 sm:h-16 mb-3 sm:mb-4">
               <Image
-                src="/logo.png"
+                src="/rawflex_logo.png"
                 alt="RAWFLEX Logo"
                 fill
                 className="object-contain"
@@ -41,7 +41,7 @@ export default function BrandBanner() {
             {/* CTA Button */}
             <Link
               href="/shop"
-              className="mt-6 sm:mt-8 inline-flex items-center justify-center px-8 sm:px-10 py-3 sm:py-3.5 rounded-full bg-emerald text-cream font-body font-semibold text-[14px] sm:text-[15px] tracking-wide shadow-card hover:bg-emerald-deep transition-all hover:scale-[1.02]"
+              className="mt-6 sm:mt-8 inline-flex items-center justify-center px-8 sm:px-10 py-3 sm:py-3.5 rounded-full bg-emerald text-cream font-body font-semibold text-[14px] sm:text-[15px] tracking-wide shadow-card hover:bg-emerald-deep hover:text-emerald transition-all hover:scale-[1.02]"
             >
               Shop Collection
             </Link>
@@ -50,7 +50,7 @@ export default function BrandBanner() {
           {/* Right Column: Product Image with Rounded Corners */}
           <div className="relative w-full h-[280px] sm:h-[350px] md:h-[400px] lg:h-[480px] xl:h-[520px] rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-soft border border-cream-line bg-cream-deep">
             <Image
-              src="/story-stock.png"
+              src="/OVERSIZED_person.png"
               alt="RAWFLEX Premium Wear"
               fill
               sizes="(max-width: 1024px) 100vw, 550px"

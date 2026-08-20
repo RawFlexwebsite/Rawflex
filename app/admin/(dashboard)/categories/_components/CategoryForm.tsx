@@ -40,12 +40,12 @@ export default function CategoryForm({ category }: CategoryFormProps) {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-stone-200/80 p-6 space-y-5">
+      <div className="bg-panel rounded-xl border border-cream-line p-6 space-y-5">
         {/* Name */}
         <div>
           <label
             htmlFor="category-name"
-            className="block text-sm font-medium text-stone-700 mb-1.5"
+            className="block text-sm font-medium text-ink/80 mb-1.5"
           >
             Category Name <span className="text-red-500">*</span>
           </label>
@@ -57,9 +57,9 @@ export default function CategoryForm({ category }: CategoryFormProps) {
             maxLength={100}
             defaultValue={category?.name || ''}
             placeholder="e.g. Whole Spices"
-            className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+            className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
           />
-          <p className="text-xs text-stone-400 mt-1.5">
+          <p className="text-xs text-ink/40 mt-1.5">
             A URL-friendly slug will be auto-generated from the name.
           </p>
         </div>
@@ -68,7 +68,7 @@ export default function CategoryForm({ category }: CategoryFormProps) {
         <div>
           <label
             htmlFor="category-description"
-            className="block text-sm font-medium text-stone-700 mb-1.5"
+            className="block text-sm font-medium text-ink/80 mb-1.5"
           >
             Description
           </label>
@@ -79,19 +79,19 @@ export default function CategoryForm({ category }: CategoryFormProps) {
             maxLength={1000}
             defaultValue={category?.description || ''}
             placeholder="Optional description for this category"
-            className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200 resize-none"
+            className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200 resize-none"
           />
         </div>
 
         {/* Category Image */}
         <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1.5">
+          <label className="block text-sm font-medium text-ink/80 mb-1.5">
             Category Image (Optional)
           </label>
           <input type="hidden" name="image_url" value={imageUrl || ''} />
           
           {imageUrl ? (
-            <div className="relative w-full max-w-sm aspect-video rounded-xl border border-stone-200 overflow-hidden bg-stone-100">
+            <div className="relative w-full max-w-sm aspect-video rounded-xl border border-cream-line overflow-hidden bg-cream-deep">
               <Image 
                 src={imageUrl} 
                 alt="Category Image Preview" 
@@ -101,7 +101,7 @@ export default function CategoryForm({ category }: CategoryFormProps) {
               <button
                 type="button"
                 onClick={() => setImageUrl(null)}
-                className="absolute top-2 right-2 p-1.5 bg-white/90 hover:bg-white text-stone-700 hover:text-red-600 rounded-lg shadow-sm backdrop-blur-sm transition-all"
+                className="absolute top-2 right-2 p-1.5 bg-panel/90 hover:bg-panel2 text-ink/80 hover:text-red-600 rounded-lg shadow-sm backdrop-blur-sm transition-all"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -126,7 +126,7 @@ export default function CategoryForm({ category }: CategoryFormProps) {
                   type="button"
                   onClick={() => open()}
                   disabled={isUploading || pending}
-                  className="w-full max-w-sm aspect-video flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-stone-300 bg-stone-50 text-stone-500 hover:bg-stone-100 hover:border-orange-400 hover:text-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full max-w-sm aspect-video flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-cream-line bg-cream-deep text-ink/60 hover:bg-panel2 hover:border-orange-400 hover:text-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isUploading ? (
                     <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
@@ -147,11 +147,11 @@ export default function CategoryForm({ category }: CategoryFormProps) {
             name="is_active"
             type="checkbox"
             defaultChecked={category?.is_active ?? true}
-            className="w-4 h-4 rounded border-stone-300 text-orange-600 focus:ring-orange-500"
+            className="w-4 h-4 rounded border-cream-line text-orange-600 focus:ring-orange-500"
           />
           <label
             htmlFor="category-active"
-            className="text-sm font-medium text-stone-700"
+            className="text-sm font-medium text-ink/80"
           >
             Active — visible to customers
           </label>
@@ -162,7 +162,7 @@ export default function CategoryForm({ category }: CategoryFormProps) {
       <div className="flex items-center justify-between">
         <Link
           href="/admin/categories"
-          className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-stone-700 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Categories
@@ -170,10 +170,10 @@ export default function CategoryForm({ category }: CategoryFormProps) {
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-semibold rounded-xl shadow-md shadow-orange-500/20 hover:shadow-lg hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500/40 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-ink text-sm font-semibold rounded-xl shadow-md shadow-orange-500/20 hover:shadow-lg hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500/40 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
         >
           {pending ? (
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
           ) : (
             <Save className="w-4 h-4" />
           )}

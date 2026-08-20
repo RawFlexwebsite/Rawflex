@@ -49,18 +49,18 @@ export function ReviewList({ initialReviews }: { initialReviews: Review[] }) {
 
   if (initialReviews.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-stone-200 p-12 text-center">
-        <p className="text-stone-500">No reviews found.</p>
+      <div className="bg-panel rounded-2xl border border-cream-line p-12 text-center">
+        <p className="text-ink/60">No reviews found.</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
+    <div className="bg-panel rounded-2xl border border-cream-line overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-stone-50 border-b border-stone-200 text-stone-600 text-sm">
+            <tr className="bg-cream-deep border-b border-cream-line text-ink/60 text-sm">
               <th className="p-4 font-semibold">Status</th>
               <th className="p-4 font-semibold">Product</th>
               <th className="p-4 font-semibold">Customer</th>
@@ -69,9 +69,9 @@ export function ReviewList({ initialReviews }: { initialReviews: Review[] }) {
               <th className="p-4 font-semibold text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-stone-100">
+          <tbody className="divide-y divide-cream-line">
             {initialReviews.map((review) => (
-              <tr key={review.id} className="hover:bg-stone-50 transition-colors">
+              <tr key={review.id} className="hover:bg-panel2 transition-colors">
                 <td className="p-4">
                   {review.is_approved ? (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
@@ -86,28 +86,28 @@ export function ReviewList({ initialReviews }: { initialReviews: Review[] }) {
                   )}
                 </td>
                 <td className="p-4">
-                  <div className="font-medium text-stone-900">{review.products?.name || 'Unknown Product'}</div>
-                  <div className="text-xs text-stone-500">ID: {review.product_id.substring(0, 8)}...</div>
+                  <div className="font-medium text-ink">{review.products?.name || 'Unknown Product'}</div>
+                  <div className="text-xs text-ink/60">ID: {review.product_id.substring(0, 8)}...</div>
                 </td>
                 <td className="p-4">
-                  <div className="font-medium text-stone-900">{review.profiles?.full_name || 'Anonymous'}</div>
-                  <div className="text-xs text-stone-500">{review.profiles?.email || ''}</div>
+                  <div className="font-medium text-ink">{review.profiles?.full_name || 'Anonymous'}</div>
+                  <div className="text-xs text-ink/60">{review.profiles?.email || ''}</div>
                 </td>
                 <td className="p-4">
                   <div className="flex items-center gap-0.5">
                     {[...Array(5)].map((_, i) => (
                       <Star 
                         key={i} 
-                        className={`w-3.5 h-3.5 ${i < review.rating ? 'fill-orange-400 text-orange-400' : 'text-stone-200'}`} 
+                        className={`w-3.5 h-3.5 ${i < review.rating ? 'fill-orange-400 text-orange-400' : 'text-ink/20'}`} 
                       />
                     ))}
                   </div>
                 </td>
                 <td className="p-4 max-w-xs">
-                  <p className="text-sm text-stone-600 truncate" title={review.review_text || ''}>
-                    {review.review_text || <span className="italic text-stone-400">No text</span>}
+                  <p className="text-sm text-ink/60 truncate" title={review.review_text || ''}>
+                    {review.review_text || <span className="italic text-ink/40">No text</span>}
                   </p>
-                  <div className="text-xs text-stone-400 mt-1">
+                  <div className="text-xs text-ink/40 mt-1">
                     {new Date(review.created_at).toLocaleDateString()}
                   </div>
                 </td>
@@ -117,7 +117,7 @@ export function ReviewList({ initialReviews }: { initialReviews: Review[] }) {
                       <button
                         onClick={() => handleApprove(review.id)}
                         disabled={isProcessing === review.id}
-                        className="p-2 text-stone-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
+                        className="p-2 text-ink/40 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
                         title="Approve Review"
                       >
                         <CheckCircle className="w-5 h-5" />
@@ -126,7 +126,7 @@ export function ReviewList({ initialReviews }: { initialReviews: Review[] }) {
                     <button
                       onClick={() => handleDelete(review.id)}
                       disabled={isProcessing === review.id}
-                      className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                      className="p-2 text-ink/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                       title="Delete Review"
                     >
                       <Trash2 className="w-5 h-5" />

@@ -12,7 +12,7 @@ export default function PakistaniEditBanner() {
           {/* Left Column: Premium Model Image with Rounded Corners */}
           <div className="relative w-full h-[400px] md:h-[500px] lg:h-[560px] rounded-[32px] overflow-hidden shadow-soft border border-gold/20 order-2 lg:order-1 bg-cream-deep">
             <Image
-              src="/drop-banner.png"
+              src="/OVERSIZED..png"
               alt="The Acid Wash Edit - Limited Drop"
               fill
               sizes="(max-width: 1024px) 100vw, 550px"
@@ -25,7 +25,7 @@ export default function PakistaniEditBanner() {
             {/* Monogram Logo */}
             <div className="relative w-16 h-16 mb-6">
               <Image
-                src="/logo.png"
+                src="/rawflex_logo.png"
                 alt="RAWFLEX Logo"
                 fill
                 className="object-contain"

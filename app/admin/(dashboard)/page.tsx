@@ -65,29 +65,29 @@ export default async function AdminDashboardPage() {
       label: 'Total Revenue',
       value: `₹${totalRevenue.toLocaleString('en-IN')}`,
       icon: IndianRupee,
-      gradient: 'from-orange-500 to-orange-500',
-      shadowColor: 'shadow-orange-500/20',
+      gradient: 'from-gold to-gold-light',
+      shadowColor: 'shadow-gold/20',
     },
     {
       label: 'Total Orders',
       value: totalOrders.toString(),
       icon: ShoppingCart,
-      gradient: 'from-blue-500 to-indigo-500',
-      shadowColor: 'shadow-blue-500/20',
+      gradient: 'from-gold to-gold-light',
+      shadowColor: 'shadow-gold/20',
     },
     {
       label: 'Customers',
       value: totalCustomers.toString(),
       icon: Users,
-      gradient: 'from-emerald-500 to-teal-500',
-      shadowColor: 'shadow-emerald-500/20',
+      gradient: 'from-gold to-gold-light',
+      shadowColor: 'shadow-gold/20',
     },
     {
       label: 'Products',
       value: totalProducts.toString(),
       icon: Package,
-      gradient: 'from-violet-500 to-purple-500',
-      shadowColor: 'shadow-violet-500/20',
+      gradient: 'from-gold to-gold-light',
+      shadowColor: 'shadow-gold/20',
     },
   ]
 
@@ -95,8 +95,8 @@ export default async function AdminDashboardPage() {
     <div className="space-y-6">
       {/* Page title */}
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Overview</h1>
-        <p className="text-stone-500 text-sm mt-0.5">
+        <h1 className="text-2xl font-bold text-ink">Overview</h1>
+        <p className="text-ink/60 text-sm mt-0.5">
           Welcome back! Here&apos;s what&apos;s happening with your store.
         </p>
       </div>
@@ -108,29 +108,29 @@ export default async function AdminDashboardPage() {
           return (
             <div
               key={card.label}
-              className="bg-white rounded-xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all duration-300 group"
+              className="bg-panel rounded-xl border border-cream-line p-5 hover:shadow-lg hover:shadow-black/40 transition-all duration-300 group"
             >
               <div className="flex items-center justify-between mb-3">
                 <div
                   className={`w-10 h-10 rounded-lg bg-gradient-to-br ${card.gradient} flex items-center justify-center shadow-md ${card.shadowColor}`}
                 >
-                  <Icon className="w-5 h-5 text-white" />
+                  <Icon className="w-5 h-5 text-black" />
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-stone-300 group-hover:text-stone-400 transition-colors" />
+                <ArrowUpRight className="w-4 h-4 text-ink/50 group-hover:text-ink/40 transition-colors" />
               </div>
-              <p className="text-2xl font-bold text-stone-900">{card.value}</p>
-              <p className="text-sm text-stone-500 mt-0.5">{card.label}</p>
+              <p className="text-2xl font-bold text-ink">{card.value}</p>
+              <p className="text-sm text-ink/60 mt-0.5">{card.label}</p>
             </div>
           )
         })}
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-white rounded-xl border border-stone-200/80 overflow-hidden">
-        <div className="px-6 py-4 border-b border-stone-100 flex items-center justify-between">
+      <div className="bg-panel rounded-xl border border-cream-line overflow-hidden">
+        <div className="px-6 py-4 border-b border-cream-line flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="w-4.5 h-4.5 text-stone-400" />
-            <h2 className="text-base font-semibold text-stone-900">
+            <Clock className="w-4.5 h-4.5 text-ink/40" />
+            <h2 className="text-base font-semibold text-ink">
               Recent Orders
             </h2>
           </div>
@@ -138,9 +138,9 @@ export default async function AdminDashboardPage() {
 
         {recentOrders.length === 0 ? (
           <div className="p-12 text-center">
-            <ShoppingCart className="w-10 h-10 text-stone-300 mx-auto mb-3" />
-            <p className="text-stone-500 text-sm">No orders yet</p>
-            <p className="text-stone-400 text-xs mt-1">
+            <ShoppingCart className="w-10 h-10 text-ink/50 mx-auto mb-3" />
+            <p className="text-ink/60 text-sm">No orders yet</p>
+            <p className="text-ink/40 text-xs mt-1">
               Orders will appear here once customers start placing them.
             </p>
           </div>
@@ -148,41 +148,41 @@ export default async function AdminDashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-stone-50/50">
-                  <th className="text-left text-xs font-medium text-stone-500 uppercase tracking-wider px-6 py-3">
+                <tr className="bg-panel/50">
+                  <th className="text-left text-xs font-medium text-ink/60 uppercase tracking-wider px-6 py-3">
                     Order
                   </th>
-                  <th className="text-left text-xs font-medium text-stone-500 uppercase tracking-wider px-6 py-3">
+                  <th className="text-left text-xs font-medium text-ink/60 uppercase tracking-wider px-6 py-3">
                     Amount
                   </th>
-                  <th className="text-left text-xs font-medium text-stone-500 uppercase tracking-wider px-6 py-3">
+                  <th className="text-left text-xs font-medium text-ink/60 uppercase tracking-wider px-6 py-3">
                     Status
                   </th>
-                  <th className="text-left text-xs font-medium text-stone-500 uppercase tracking-wider px-6 py-3">
+                  <th className="text-left text-xs font-medium text-ink/60 uppercase tracking-wider px-6 py-3">
                     Payment
                   </th>
-                  <th className="text-left text-xs font-medium text-stone-500 uppercase tracking-wider px-6 py-3">
+                  <th className="text-left text-xs font-medium text-ink/60 uppercase tracking-wider px-6 py-3">
                     Date
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-cream-line">
                 {recentOrders.map((order) => (
                   <tr
                     key={order.id}
-                    className="hover:bg-stone-50/50 transition-colors"
+                    className="hover:bg-panel/50 transition-colors"
                   >
-                    <td className="px-6 py-3.5 text-sm font-medium text-stone-900">
+                    <td className="px-6 py-3.5 text-sm font-medium text-ink">
                       #{order.order_number}
                     </td>
-                    <td className="px-6 py-3.5 text-sm text-stone-700">
+                    <td className="px-6 py-3.5 text-sm text-ink/80">
                       ₹{Number(order.total_amount).toLocaleString('en-IN')}
                     </td>
                     <td className="px-6 py-3.5">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium capitalize ${
                           statusColors[order.order_status] ||
-                          'bg-stone-100 text-stone-700'
+                          'bg-cream-deep text-ink/80'
                         }`}
                       >
                         {order.order_status}
@@ -199,7 +199,7 @@ export default async function AdminDashboardPage() {
                         {order.payment_status}
                       </span>
                     </td>
-                    <td className="px-6 py-3.5 text-sm text-stone-500">
+                    <td className="px-6 py-3.5 text-sm text-ink/60">
                       {new Date(order.created_at).toLocaleDateString('en-IN', {
                         day: 'numeric',
                         month: 'short',

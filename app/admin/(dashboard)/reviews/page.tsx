@@ -35,8 +35,8 @@ export default async function AdminReviewsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Product Reviews</h1>
-          <p className="text-stone-500 text-sm mt-1">Manage and moderate customer reviews before they appear on the site.</p>
+          <h1 className="text-2xl font-bold text-ink">Product Reviews</h1>
+          <p className="text-ink/60 text-sm mt-1">Manage and moderate customer reviews before they appear on the site.</p>
         </div>
       </div>
 

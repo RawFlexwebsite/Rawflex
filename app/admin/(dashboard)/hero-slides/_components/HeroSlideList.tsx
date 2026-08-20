@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import Image from 'next/image'
-import { createHeroSlide, deleteHeroSlide, toggleHeroSlideStatus } from '@/actions/admin/hero'
-import { Trash2, Plus, GripVertical, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { createHeroSlide, deleteHeroSlide, toggleHeroSlideStatus, updateHeroSlide } from '@/actions/admin/hero'
+import { Trash2, Plus, GripVertical, Image as ImageIcon, Loader2, Pencil, Check, X } from 'lucide-react'
 import { CldUploadWidget } from 'next-cloudinary'
 
 export function HeroSlideList({ 
@@ -17,6 +17,40 @@ export function HeroSlideList({
 }) {
   const [slides, setSlides] = useState(initialSlides)
   const [isPending, startTransition] = useTransition()
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState({
+    title: '',
+    subtitle: '',
+    button_text: '',
+    button_link: '',
+  })
+
+  const startEdit = (slide: any) => {
+    setEditForm({
+      title: slide.title || '',
+      subtitle: slide.subtitle || '',
+      button_text: slide.button_text || '',
+      button_link: slide.button_link || '',
+    })
+    setEditingId(slide.id)
+  }
+
+  const saveEdit = (id: string) => {
+    startTransition(async () => {
+      const res = await updateHeroSlide(id, {
+        title: editForm.title,
+        subtitle: editForm.subtitle,
+        button_text: editForm.button_text,
+        button_link: editForm.button_link,
+      })
+      if (res.success) {
+        setSlides(slides.map(s => s.id === id ? { ...s, ...editForm } : s))
+        setEditingId(null)
+      } else {
+        alert(res.error)
+      }
+    })
+  }
 
   const handleUploadSuccess = (result: any) => {
     const imageUrl = result.info.secure_url
@@ -54,11 +88,11 @@ export function HeroSlideList({
   const activeCount = slides.filter(s => s.is_active).length
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-stone-200/60 p-6">
+    <div className="bg-panel rounded-2xl shadow-sm border border-cream-line p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <ImageIcon className="w-5 h-5 text-stone-400" />
-          <h2 className="text-lg font-bold text-stone-900">{title}</h2>
+          <ImageIcon className="w-5 h-5 text-ink/40" />
+          <h2 className="text-lg font-bold text-ink">{title}</h2>
         </div>
         
         {slides.length < 5 ? (
@@ -75,7 +109,7 @@ export function HeroSlideList({
               <button
                 onClick={() => open()}
                 disabled={isPending}
-                className="flex items-center gap-2 px-4 py-2 bg-stone-900 text-white text-sm font-semibold rounded-xl hover:bg-stone-800 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-panel text-ink text-sm font-semibold rounded-xl hover:bg-panel2 transition-colors disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" />
                 Add Slide
@@ -89,29 +123,29 @@ export function HeroSlideList({
         )}
       </div>
 
-      <p className="text-sm text-stone-500 mb-6 leading-relaxed">
+      <p className="text-sm text-ink/60 mb-6 leading-relaxed">
         Upload high-quality images (16:9 ratio recommended). They will loop automatically. You have {activeCount} active slides.
       </p>
 
       <div className="space-y-4">
         {slides.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-stone-200 rounded-xl bg-stone-50">
-            <ImageIcon className="w-8 h-8 text-stone-400 mx-auto mb-3" />
-            <p className="text-sm font-medium text-stone-900">No slides created</p>
-            <p className="text-sm text-stone-500 mt-1">Upload an image to start building your hero section.</p>
+          <div className="text-center py-12 border-2 border-dashed border-cream-line rounded-xl bg-cream-deep">
+            <ImageIcon className="w-8 h-8 text-ink/40 mx-auto mb-3" />
+            <p className="text-sm font-medium text-ink">No slides created</p>
+            <p className="text-sm text-ink/60 mt-1">Upload an image to start building your hero section.</p>
           </div>
         ) : (
           slides.map((slide, index) => {
             return (
-              <div key={slide.id} className={`flex flex-col rounded-xl border transition-all overflow-hidden ${slide.is_active ? 'border-stone-200 bg-white' : 'border-stone-100 bg-stone-50 opacity-60'}`}>
+              <div key={slide.id} className={`flex flex-col rounded-xl border transition-all overflow-hidden ${slide.is_active ? 'border-cream-line bg-panel' : 'border-cream-line bg-cream-deep opacity-60'}`}>
                 
                 {/* Slide Header Row */}
                 <div className="flex items-center gap-4 p-4">
-                  <div className="cursor-move text-stone-400 hover:text-stone-600 p-1">
+                  <div className="cursor-move text-ink/40 hover:text-ink p-1">
                     <GripVertical className="w-5 h-5" />
                   </div>
 
-                  <div className="h-16 w-28 shrink-0 rounded-lg overflow-hidden relative bg-stone-200 border border-stone-200">
+                  <div className="h-16 w-28 shrink-0 rounded-lg overflow-hidden relative bg-panel2 border border-cream-line">
                     <Image
                       src={slide.image_url}
                       alt="Hero Background"
@@ -121,8 +155,13 @@ export function HeroSlideList({
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-stone-900">Slide {index + 1}</p>
-                    <p className="text-xs text-stone-500 truncate mt-0.5">
+                    <p className="text-sm font-semibold text-ink">Slide {index + 1}</p>
+                    {slide.title ? (
+                      <p className="text-xs text-ink/80 truncate mt-0.5 font-medium">
+                        {slide.title.replace(/\n/g, ' / ')}
+                      </p>
+                    ) : null}
+                    <p className="text-xs text-ink/60 truncate mt-0.5">
                       {slide.image_url.split('/').pop()}
                     </p>
                   </div>
@@ -136,19 +175,90 @@ export function HeroSlideList({
                         onChange={() => handleToggle(slide.id, slide.is_active)}
                         disabled={isPending || (!slide.is_active && activeCount >= 5)}
                       />
-                      <div className="w-9 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                      <div className="w-9 h-5 bg-panel2 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-ink/50 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-ink after:border-ink/50 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gold"></div>
                     </label>
                     
                     <button
+                      onClick={() => startEdit(slide)}
+                      disabled={isPending}
+                      className="p-2 text-ink/40 hover:text-gold hover:bg-gold/10 rounded-lg transition-colors disabled:opacity-50"
+                      title="Edit Text & Button"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+
+                    <button
                       onClick={() => handleDelete(slide.id)}
                       disabled={isPending}
-                      className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 ml-1"
+                      className="p-2 text-ink/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 ml-1"
                       title="Delete Slide"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
+
+                {editingId === slide.id && (
+                  <div className="border-t border-cream-line p-4 space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-ink/60 mb-1">Headline (use a new line for the gold accent line)</label>
+                        <textarea
+                          rows={2}
+                          value={editForm.title}
+                          onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                          className="block w-full rounded-lg bg-panel2 border border-cream-line px-3 py-2 text-sm text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-ink/60 mb-1">Subtitle</label>
+                        <textarea
+                          rows={2}
+                          value={editForm.subtitle}
+                          onChange={(e) => setEditForm({ ...editForm, subtitle: e.target.value })}
+                          className="block w-full rounded-lg bg-panel2 border border-cream-line px-3 py-2 text-sm text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-ink/60 mb-1">Button Text</label>
+                        <input
+                          type="text"
+                          value={editForm.button_text}
+                          onChange={(e) => setEditForm({ ...editForm, button_text: e.target.value })}
+                          className="block w-full rounded-lg bg-panel2 border border-cream-line px-3 py-2 text-sm text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-ink/60 mb-1">Button Link</label>
+                        <input
+                          type="text"
+                          value={editForm.button_link}
+                          onChange={(e) => setEditForm({ ...editForm, button_link: e.target.value })}
+                          placeholder="/shop"
+                          className="block w-full rounded-lg bg-panel2 border border-cream-line px-3 py-2 text-sm text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => saveEdit(slide.id)}
+                        disabled={isPending}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-gold text-black text-sm font-semibold rounded-lg hover:bg-gold-light transition-colors disabled:opacity-50"
+                      >
+                        <Check className="w-4 h-4" />
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        disabled={isPending}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-panel2 text-ink text-sm font-semibold rounded-lg hover:bg-panel transition-colors disabled:opacity-50"
+                      >
+                        <X className="w-4 h-4" />
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )
           })
@@ -156,7 +266,7 @@ export function HeroSlideList({
       </div>
 
       {isPending && (
-        <div className="mt-4 flex items-center justify-center text-sm text-stone-500 gap-2">
+        <div className="mt-4 flex items-center justify-center text-sm text-ink/60 gap-2">
           <Loader2 className="w-4 h-4 animate-spin" />
           Processing...
         </div>

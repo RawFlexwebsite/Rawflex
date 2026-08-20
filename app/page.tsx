@@ -16,19 +16,24 @@ const PRODUCT_SELECT = `
 export default async function Home() {
   const supabase = await createClient();
 
-  // Fetch active categories
-  const { data: categoriesData } = await supabase
-    .from("categories")
-    .select("*")
-    .eq("is_active", true);
-
-  // Fetch all active products (mock: category filters return empty, so we
-  // select broadly and derive the homepage sections with fallbacks)
-  const { data: allProducts } = await supabase
-    .from("products")
-    .select(PRODUCT_SELECT)
-    .eq("is_active", true)
-    .order("created_at", { ascending: false });
+  const [
+    { data: categoriesData },
+    { data: allProducts },
+    { data: heroSlidesData },
+  ] = await Promise.all([
+    supabase.from("categories").select("*").eq("is_active", true),
+    supabase
+      .from("products")
+      .select(PRODUCT_SELECT)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("hero_slides")
+      .select("*")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true })
+      .order("created_at", { ascending: true }),
+  ]);
 
   // Product counts per category
   const productCounts = (allProducts || []).reduce((acc: any, p: any) => {
@@ -51,6 +56,7 @@ export default async function Home() {
       const original = variant?.original_price || p.oldPrice || null;
       return {
         id: p.id,
+        slug: p.slug,
         name: p.name,
         price,
         sale_price: original && original > price ? original : null,
@@ -58,25 +64,38 @@ export default async function Home() {
         badge: p.badge || "New",
         rating: p.rating || 4.9,
         review_count: p.review_count || 24,
+        is_featured: p.is_featured || false,
         category_name: categoryName(p.category_id),
       };
     });
 
   const products = formatProducts(allProducts || []);
 
-  // Derive section products with fallbacks
-  const heroFeatured = products.slice(0, 2);
-
+  // New drops: newest products
   const newDrops = products.filter((p) => p.category_name === "New Drops");
+  const newDropItems = (newDrops.length >= 4 ? newDrops : products).slice(0, 4);
+
+  // Best sellers: featured products (fallback newest)
+  const featuredProducts = products.filter((p) => p.is_featured);
+  const bestSellers = (featuredProducts.length >= 4 ? featuredProducts : products).slice(0, 6);
+
+  const heroSlides = (heroSlidesData || []).map((s: any) => ({
+    id: s.id,
+    image_url: s.image_url,
+    title: s.title,
+    subtitle: s.subtitle,
+    button_text: s.button_text,
+    button_link: s.button_link,
+  }));
 
   return (
     <main className="overflow-x-hidden">
       <Header />
-      <Hero featuredProducts={heroFeatured} />
+      <Hero slides={heroSlides} />
       <Categories categories={categories || []} />
-      <NewDrops products={(newDrops.length >= 4 ? newDrops : products).slice(0, 4)} />
+      <NewDrops products={newDropItems} />
       <OversizedPromo />
-      <BestSellersLookbook />
+      <BestSellersLookbook products={bestSellers} />
       <Footer />
     </main>
   );

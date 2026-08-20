@@ -220,7 +220,7 @@ export default function ProfileManager({ adminProfile, orders = [] }: { adminPro
 
           <button
             type="submit"
-            className="w-full py-3.5 px-4 bg-emerald text-cream font-body font-semibold rounded-full shadow-card hover:bg-emerald-deep transition-all duration-200"
+            className="w-full py-3.5 px-4 bg-emerald text-cream font-body font-semibold rounded-full shadow-card hover:bg-emerald-deep hover:text-emerald transition-all duration-200"
           >
             Save Account Details
           </button>

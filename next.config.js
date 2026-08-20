@@ -4,7 +4,7 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
-  images: {
+images: {
     remotePatterns: [
       {
         protocol: "https",
@@ -13,6 +13,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "bwudwdyzqkvpbymheybq.supabase.co",
       },
     ],
   },

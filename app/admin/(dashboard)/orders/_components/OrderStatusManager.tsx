@@ -39,9 +39,9 @@ export function OrderStatusManager({
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-stone-200/60 p-6 space-y-6">
+    <div className="bg-panel rounded-2xl shadow-sm border border-cream-line p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-stone-900">Manage Status</h3>
+        <h3 className="text-lg font-bold text-ink">Manage Status</h3>
         {isPending && <Loader2 className="w-5 h-5 text-orange-500 animate-spin" />}
         {success && !isPending && <Check className="w-5 h-5 text-green-500" />}
       </div>
@@ -53,14 +53,14 @@ export function OrderStatusManager({
       )}
 
       <div>
-        <label className="block text-sm font-semibold text-stone-700 mb-2">
+        <label className="block text-sm font-semibold text-ink/80 mb-2">
           Order Status
         </label>
         <select
           disabled={isPending}
           defaultValue={initialOrderStatus}
           onChange={(e) => handleStatusChange('order', e.target.value)}
-          className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-sm font-medium text-stone-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all capitalize"
+          className="w-full bg-cream-deep border border-cream-line rounded-xl px-4 py-2.5 text-sm font-medium text-ink/80 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all capitalize"
         >
           {ORDER_STATUSES.map(s => (
             <option key={s} value={s}>{s}</option>
@@ -69,14 +69,14 @@ export function OrderStatusManager({
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-stone-700 mb-2">
+        <label className="block text-sm font-semibold text-ink/80 mb-2">
           Payment Status
         </label>
         <select
           disabled={isPending}
           defaultValue={initialPaymentStatus}
           onChange={(e) => handleStatusChange('payment', e.target.value)}
-          className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-sm font-medium text-stone-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all capitalize"
+          className="w-full bg-cream-deep border border-cream-line rounded-xl px-4 py-2.5 text-sm font-medium text-ink/80 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all capitalize"
         >
           {PAYMENT_STATUSES.map(s => (
             <option key={s} value={s}>{s}</option>

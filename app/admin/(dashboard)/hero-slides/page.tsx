@@ -15,8 +15,8 @@ export default async function AdminHeroSlidesPage() {
     <div className="space-y-10">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Hero Section</h1>
-          <p className="text-sm text-stone-500 mt-1">
+          <h1 className="text-2xl font-bold text-ink">Hero Section</h1>
+          <p className="text-sm text-ink/60 mt-1">
             Manage the sliding background images for the storefront homepage.
           </p>
         </div>

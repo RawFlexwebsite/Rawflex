@@ -60,8 +60,8 @@ export default async function EditProductPage({
   return (
     <div className="max-w-6xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Edit Product</h1>
-        <p className="text-stone-500 text-sm mt-0.5">
+        <h1 className="text-2xl font-bold text-ink">Edit Product</h1>
+        <p className="text-ink/60 text-sm mt-0.5">
           Update &quot;{productRes.data.name}&quot;
         </p>
       </div>
@@ -78,7 +78,7 @@ export default async function EditProductPage({
         initialItems={infoRes.data || []}
       />
 
-      <div className="bg-white p-6 shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl">
+      <div className="bg-panel p-6 shadow-sm ring-1 ring-ink/10 sm:rounded-xl">
         <ProductVariantsEditor
           productId={id}
           variants={variantsRes.data || []}
@@ -86,7 +86,7 @@ export default async function EditProductPage({
         />
       </div>
 
-      <div className="bg-white p-6 shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl">
+      <div className="bg-panel p-6 shadow-sm ring-1 ring-ink/10 sm:rounded-xl">
         <ProductImagesEditor
           product={productRes.data}
           images={imagesRes.data || []}

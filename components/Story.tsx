@@ -12,7 +12,7 @@ export default function Story() {
             <div className="relative max-w-[460px] mx-auto">
               <div className="relative aspect-[5/6] rounded-[32px] overflow-hidden shadow-soft border border-[#E6DAC4]">
                 <Image
-                  src="/story-stock.png"
+                  src="/hero-parts.png"
                   alt="RAWFLEX streetwear in the wild"
                   fill
                   sizes="(max-width: 768px) 90vw, 460px"

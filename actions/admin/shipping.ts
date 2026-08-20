@@ -53,7 +53,7 @@ export async function updateShippingSettings(
         online_discount: onlineDiscount
       }
     })
-    .eq('id', 'global-settings-id') // Or matching single settings document
+    .eq('id', 'site_settings')
 
   if (error) {
     return { error: error.message }

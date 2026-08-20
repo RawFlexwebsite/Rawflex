@@ -261,14 +261,26 @@ export async function verifyEmailOtp(
   const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
   if (isMock) {
     const cookieStore = await cookies()
-    cookieStore.set('mock-admin-logged-in', 'true', { path: '/' })
-    
+    const mockProfileId = 'mock-user-' + Math.random().toString(36).substring(2, 9)
+
     await supabase.from('profiles').insert({
-      id: 'mock-user-' + Math.random().toString(36).substring(2, 9),
+      id: mockProfileId,
       email,
       full_name: fullName || record.full_name || 'Customer',
       role: 'customer',
       phone: phone || null
+    })
+
+    cookieStore.set('rawflex-user-session', JSON.stringify({
+      id: mockProfileId,
+      email,
+      full_name: fullName || record.full_name || 'Customer',
+      role: 'customer'
+    }), {
+      path: '/',
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 30 * 24 * 60 * 60
     })
 
     revalidatePath('/', 'layout')
@@ -413,17 +425,22 @@ export async function adminLogin(
   let data = signInRes.data
   let error = signInRes.error
 
+  let adminClient: any = null
   if (error && email.toLowerCase() === adminEmail.toLowerCase() && password === adminPassword) {
     try {
       const { createAdminClient } = await import('@/lib/supabase/admin')
-      const adminClient = createAdminClient()
-      
+      adminClient = createAdminClient()
+
       const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
         user_metadata: { role: 'admin', full_name: 'Admin' }
       })
+
+      if (createError) {
+        console.error('Admin auto-seed createUser error:', createError)
+      }
 
       if (!createError && newUser?.user) {
         const retry = await supabase.auth.signInWithPassword({ email, password })
@@ -447,32 +464,46 @@ export async function adminLogin(
     .maybeSingle()
 
   if (email.toLowerCase() === adminEmail.toLowerCase()) {
-    if (!profile) {
-      const { data: newProfile, error: insertError } = await supabase
-        .from('profiles')
-        .insert({
-          id: data.user.id,
-          email: email.toLowerCase(),
-          full_name: 'Admin',
-          role: 'admin'
-        })
-        .select('*')
-        .single()
-      
-      if (!insertError) {
-        profile = newProfile
+    try {
+      // Use the admin (service-role) client for profile writes so RLS / anon
+      // key restrictions can never block the admin seed.
+      const { createAdminClient } = await import('@/lib/supabase/admin')
+      const adminDbClient = adminClient || createAdminClient()
+
+      if (!profile) {
+        const { data: newProfile, error: insertError } = await adminDbClient
+          .from('profiles')
+          .upsert({
+            id: data.user.id,
+            email: email.toLowerCase(),
+            full_name: 'Admin',
+            role: 'admin',
+            is_active: true
+          }, { onConflict: 'id' })
+          .select('*')
+          .single()
+
+        if (!insertError) {
+          profile = newProfile
+        } else {
+          console.error('Admin profile upsert failed:', insertError)
+        }
+      } else if (profile.role !== 'admin') {
+        const { data: updatedProfile, error: updateError } = await adminDbClient
+          .from('profiles')
+          .update({ role: 'admin' })
+          .eq('id', data.user.id)
+          .select('*')
+          .single()
+
+        if (!updateError) {
+          profile = updatedProfile
+        } else {
+          console.error('Admin role update failed:', updateError)
+        }
       }
-    } else if (profile.role !== 'admin') {
-      const { data: updatedProfile, error: updateError } = await supabase
-        .from('profiles')
-        .update({ role: 'admin' })
-        .eq('id', data.user.id)
-        .select('*')
-        .single()
-      
-      if (!updateError) {
-        profile = updatedProfile
-      }
+    } catch (e) {
+      console.error('Admin profile seed error:', e)
     }
   }
 

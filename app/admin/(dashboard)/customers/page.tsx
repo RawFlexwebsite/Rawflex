@@ -16,27 +16,27 @@ export default async function CustomersPage() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Customers</h1>
-        <p className="mt-1 text-sm text-stone-500">
+        <h1 className="text-2xl font-bold text-ink">Customers</h1>
+        <p className="mt-1 text-sm text-ink/60">
           Manage your registered customers and their account status.
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-sm flex items-center justify-between">
+        <div className="bg-panel p-6 rounded-2xl border border-cream-line shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-stone-500">Total Customers</p>
-            <p className="text-3xl font-bold text-stone-900 mt-1">{totalCustomers}</p>
+            <p className="text-sm font-medium text-ink/60">Total Customers</p>
+            <p className="text-3xl font-bold text-ink mt-1">{totalCustomers}</p>
           </div>
           <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-sm flex items-center justify-between">
+        <div className="bg-panel p-6 rounded-2xl border border-cream-line shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-stone-500">Active Accounts</p>
+            <p className="text-sm font-medium text-ink/60">Active Accounts</p>
             <p className="text-3xl font-bold text-green-600 mt-1">{activeCustomers}</p>
           </div>
           <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center">

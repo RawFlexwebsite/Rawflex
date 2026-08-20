@@ -174,14 +174,25 @@ body {
 
 /* ============================================================
    Admin dashboard dark-theme overrides (scoped to .admin-shell)
+   Maps the stock Tailwind light palette onto the RAWFLEX
+   dark + gold homepage theme.
    ============================================================ */
+
+/* ---- Surfaces ---- */
 .admin-shell .bg-white { background-color: #141614 !important; }
 .admin-shell .bg-stone-50 { background-color: #0d0f0e !important; }
 .admin-shell .bg-stone-100 { background-color: #171917 !important; }
 .admin-shell .bg-stone-200 { background-color: #232624 !important; }
+.admin-shell .bg-stone-300 { background-color: #2a2e2b !important; }
 .admin-shell .bg-gray-50 { background-color: #0d0f0e !important; }
 .admin-shell .bg-gray-100 { background-color: #171917 !important; }
+.admin-shell .bg-gray-200 { background-color: #232624 !important; }
+.admin-shell .bg-white\/60 { background-color: rgba(20, 22, 20, 0.6) !important; }
+.admin-shell .bg-black\/5 { background-color: rgba(242, 239, 234, 0.08) !important; }
+.admin-shell .bg-stone-50\/50 { background-color: #171917 !important; }
+.admin-shell .bg-stone-100\/50 { background-color: #1e211f !important; }
 
+/* ---- Text ---- */
 .admin-shell .text-stone-900 { color: #eae6e2 !important; }
 .admin-shell .text-stone-800 { color: #dcd7d0 !important; }
 .admin-shell .text-stone-700 { color: #cfcac3 !important; }
@@ -189,6 +200,7 @@ body {
 .admin-shell .text-stone-500 { color: #98938b !important; }
 .admin-shell .text-stone-400 { color: #7c776f !important; }
 .admin-shell .text-stone-300 { color: #63605a !important; }
+.admin-shell .text-stone-200 { color: #474a46 !important; }
 .admin-shell .text-gray-900 { color: #eae6e2 !important; }
 .admin-shell .text-gray-800 { color: #dcd7d0 !important; }
 .admin-shell .text-gray-700 { color: #cfcac3 !important; }
@@ -196,32 +208,145 @@ body {
 .admin-shell .text-gray-500 { color: #98938b !important; }
 .admin-shell .text-gray-400 { color: #7c776f !important; }
 
-.admin-shell .border-stone-200 { border-color: #262926 !important; }
+/* ---- Borders & dividers ---- */
 .admin-shell .border-stone-100 { border-color: #1e211f !important; }
+.admin-shell .border-stone-200 { border-color: #262926 !important; }
 .admin-shell .border-stone-300 { border-color: #333633 !important; }
 .admin-shell .border-gray-200 { border-color: #262926 !important; }
 .admin-shell .border-gray-300 { border-color: #333633 !important; }
+.admin-shell .border-stone-200\/60 { border-color: rgba(38, 41, 38, 0.6) !important; }
+.admin-shell .border-stone-200\/80 { border-color: rgba(38, 41, 38, 0.8) !important; }
 .admin-shell .divide-stone-100 > :not([hidden]) ~ :not([hidden]) { border-color: #1e211f !important; }
 .admin-shell .divide-stone-200 > :not([hidden]) ~ :not([hidden]) { border-color: #262926 !important; }
 
+/* ---- Hover states ---- */
 .admin-shell .hover\:bg-stone-50:hover { background-color: #171917 !important; }
 .admin-shell .hover\:bg-stone-100:hover { background-color: #1e211f !important; }
+.admin-shell .hover\:bg-stone-50\/50:hover { background-color: #171917 !important; }
 .admin-shell .hover\:bg-gray-50:hover { background-color: #171917 !important; }
+.admin-shell .hover\:bg-gray-100:hover { background-color: #1e211f !important; }
 .admin-shell .hover\:text-stone-900:hover { color: #eae6e2 !important; }
+.admin-shell .hover\:border-stone-200:hover { border-color: #333633 !important; }
+.admin-shell .shadow-stone-200\/50 { --tw-shadow-color: rgba(10, 11, 10, 0.9) !important; }
 
-/* Light primary buttons in admin -> high-contrast light buttons */
-.admin-shell .bg-stone-900 { background-color: #f2efea !important; }
+/* ---- Buttons: primary CTAs become gold ---- */
+.admin-shell .bg-stone-900 { background-color: #c7b79e !important; }
 .admin-shell .bg-stone-900.text-white,
 .admin-shell .bg-stone-900 .text-white { color: #080909 !important; }
-.admin-shell .hover\:bg-stone-800:hover { background-color: #dcd7d0 !important; }
+.admin-shell .hover\:bg-stone-800:hover { background-color: #e4d8c4 !important; }
 
-/* Form controls */
-.admin-shell input, .admin-shell select, .admin-shell textarea {
+.admin-shell .bg-indigo-600 { background-color: #c7b79e !important; }
+.admin-shell .bg-indigo-700 { background-color: #c7b79e !important; }
+.admin-shell .bg-indigo-600.text-white,
+.admin-shell .bg-indigo-600 .text-white,
+.admin-shell .bg-indigo-700.text-white,
+.admin-shell .bg-indigo-700 .text-white { color: #080909 !important; }
+.admin-shell .hover\:bg-indigo-600:hover,
+.admin-shell .hover\:bg-indigo-700:hover { background-color: #e4d8c4 !important; }
+
+/* Destructive buttons stay a warm rose */
+.admin-shell .bg-red-600 { background-color: #b55f45 !important; }
+.admin-shell .bg-red-700 { background-color: #a3503a !important; }
+.admin-shell .hover\:bg-red-600:hover,
+.admin-shell .hover\:bg-red-700:hover { background-color: #c9714f !important; }
+.admin-shell .bg-red-600.text-white,
+.admin-shell .bg-red-600 .text-white,
+.admin-shell .bg-red-700.text-white,
+.admin-shell .bg-red-700 .text-white { color: #f7f3ee !important; }
+
+/* ---- Gradient CTAs -> gold gradient ---- */
+.admin-shell .from-orange-500 { --tw-gradient-from: #c7b79e !important; }
+.admin-shell .to-orange-500 { --tw-gradient-to: #e4d8c4 !important; }
+.admin-shell .to-orange-600 { --tw-gradient-to: #e4d8c4 !important; }
+.admin-shell .from-blue-500 { --tw-gradient-from: #c7b79e !important; }
+.admin-shell .to-indigo-500 { --tw-gradient-to: #e4d8c4 !important; }
+.admin-shell .from-emerald-500 { --tw-gradient-from: #c7b79e !important; }
+.admin-shell .to-teal-500 { --tw-gradient-to: #e4d8c4 !important; }
+.admin-shell .from-violet-500 { --tw-gradient-from: #c7b79e !important; }
+.admin-shell .to-purple-500 { --tw-gradient-to: #e4d8c4 !important; }
+.admin-shell .from-teal-700 { --tw-gradient-from: #c7b79e !important; }
+.admin-shell .to-teal-800 { --tw-gradient-to: #e4d8c4 !important; }
+.admin-shell .hover\:from-teal-800:hover { --tw-gradient-from: #e4d8c4 !important; }
+.admin-shell .hover\:to-teal-800:hover { --tw-gradient-to: #e4d8c4 !important; }
+.admin-shell .from-orange-500.text-white,
+.admin-shell .from-orange-500 .text-white,
+.admin-shell .from-teal-700.text-white,
+.admin-shell .from-teal-700 .text-white { color: #080909 !important; }
+
+/* ---- Accent: orange -> gold ---- */
+.admin-shell .bg-orange-50 { background-color: rgba(199, 183, 158, 0.08) !important; }
+.admin-shell .bg-orange-100 { background-color: rgba(199, 183, 158, 0.14) !important; }
+.admin-shell .bg-orange-600 { background-color: #c7b79e !important; }
+.admin-shell .text-orange-500 { color: #d8c9b2 !important; }
+.admin-shell .text-orange-600 { color: #e4d8c4 !important; }
+.admin-shell .text-orange-700 { color: #c7b79e !important; }
+.admin-shell .border-orange-200 { border-color: rgba(199, 183, 158, 0.25) !important; }
+.admin-shell .border-orange-500 { border-color: #c7b79e !important; }
+.admin-shell .ring-orange-500 { --tw-ring-color: #c7b79e !important; }
+.admin-shell .ring-orange-500\/40 { --tw-ring-color: rgba(199, 183, 158, 0.4) !important; }
+.admin-shell .focus\:ring-orange-600:focus { --tw-ring-color: #c7b79e !important; }
+.admin-shell .shadow-orange-500\/20 { --tw-shadow-color: rgba(199, 183, 158, 0.25) !important; }
+
+/* ---- Accent: indigo -> gold ---- */
+.admin-shell .bg-indigo-50 { background-color: rgba(199, 183, 158, 0.08) !important; }
+.admin-shell .bg-indigo-100 { background-color: rgba(199, 183, 158, 0.14) !important; }
+.admin-shell .text-indigo-700 { color: #e4d8c4 !important; }
+.admin-shell .text-indigo-900 { color: #eae6e2 !important; }
+.admin-shell .border-indigo-500 { border-color: #c7b79e !important; }
+.admin-shell .ring-indigo-500 { --tw-ring-color: #c7b79e !important; }
+
+/* ---- Accent: teal & emerald -> gold ---- */
+.admin-shell .border-teal-700 { border-color: #c7b79e !important; }
+.admin-shell .ring-teal-700\/30 { --tw-ring-color: rgba(199, 183, 158, 0.3) !important; }
+.admin-shell .ring-teal-700\/40 { --tw-ring-color: rgba(199, 183, 158, 0.4) !important; }
+.admin-shell .ring-emerald-500\/20 { --tw-ring-color: rgba(199, 183, 158, 0.2) !important; }
+.admin-shell .border-emerald { border-color: #c7b79e !important; }
+
+/* ---- Status chips (soft, readable on dark) ---- */
+.admin-shell .bg-green-50 { background-color: rgba(169, 205, 177, 0.08) !important; }
+.admin-shell .bg-green-100 { background-color: rgba(169, 205, 177, 0.16) !important; }
+.admin-shell .text-green-600 { color: #9cc4a5 !important; }
+.admin-shell .text-green-700 { color: #a9cdb1 !important; }
+.admin-shell .border-green-200 { border-color: rgba(169, 205, 177, 0.25) !important; }
+
+.admin-shell .bg-red-50 { background-color: rgba(210, 154, 132, 0.08) !important; }
+.admin-shell .bg-red-100 { background-color: rgba(210, 154, 132, 0.16) !important; }
+.admin-shell .text-red-500 { color: #cf7a5f !important; }
+.admin-shell .text-red-600 { color: #d98b72 !important; }
+.admin-shell .text-red-700 { color: #e2a993 !important; }
+.admin-shell .border-red-200 { border-color: rgba(210, 154, 132, 0.25) !important; }
+
+.admin-shell .bg-yellow-100 { background-color: rgba(199, 183, 158, 0.16) !important; }
+.admin-shell .text-yellow-700 { color: #e4d8c4 !important; }
+.admin-shell .bg-amber-100 { background-color: rgba(199, 183, 158, 0.16) !important; }
+.admin-shell .text-amber-700 { color: #e4d8c4 !important; }
+
+.admin-shell .bg-blue-100 { background-color: rgba(143, 180, 209, 0.16) !important; }
+.admin-shell .text-blue-500 { color: #7fa9c9 !important; }
+.admin-shell .text-blue-700 { color: #9dbcd4 !important; }
+
+/* ---- Form controls ---- */
+.admin-shell input,
+.admin-shell select,
+.admin-shell textarea {
+  background-color: #1a1d1b;
   color: #eae6e2;
+}
+.admin-shell input[type="checkbox"],
+.admin-shell input[type="radio"] {
+  accent-color: #c7b79e;
 }
 .admin-shell input::placeholder,
 .admin-shell textarea::placeholder {
   color: #6b675f;
 }
-.admin-shell .bg-white\/60 { background-color: rgba(20, 22, 20, 0.6) !important; }
-.admin-shell .bg-black\/5 { background-color: rgba(242, 239, 234, 0.08) !important; }
+.admin-shell select option {
+  background-color: #141614;
+  color: #eae6e2;
+}
+
+/* Ring offset uses the card color, not white */
+.admin-shell [class*="ring-offset-"] { --tw-ring-offset-color: #141614 !important; }
+
+/* Toggle knobs stay light for contrast */
+.admin-shell .rounded-full.bg-white { background-color: #f2efea !important; }

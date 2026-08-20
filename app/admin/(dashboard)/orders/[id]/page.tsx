@@ -76,13 +76,13 @@ export default async function AdminOrderDetailsPage({
       <div className="flex items-center gap-4">
         <Link 
           href="/admin/orders"
-          className="p-2 bg-white border border-stone-200 text-stone-600 rounded-xl hover:bg-stone-50 transition-colors"
+          className="p-2 bg-panel border border-cream-line text-ink/60 rounded-xl hover:bg-panel2 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Order {order.order_number}</h1>
-          <p className="text-sm text-stone-500 mt-1">
+          <h1 className="text-2xl font-bold text-ink">Order {order.order_number}</h1>
+          <p className="text-sm text-ink/60 mt-1">
             Placed on {new Date(order.created_at).toLocaleString('en-IN', {
               day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
             })}
@@ -97,48 +97,48 @@ export default async function AdminOrderDetailsPage({
           
           {/* Customer & Shipping Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl shadow-sm border border-stone-200/60 p-6">
-              <h3 className="text-lg font-bold text-stone-900 flex items-center gap-2 mb-4">
-                <User className="w-5 h-5 text-stone-400" />
+            <div className="bg-panel rounded-2xl shadow-sm border border-cream-line p-6">
+              <h3 className="text-lg font-bold text-ink flex items-center gap-2 mb-4">
+                <User className="w-5 h-5 text-ink/40" />
                 Customer
               </h3>
               <div className="space-y-2 text-sm">
-                <p className="font-medium text-stone-900">{order.profiles?.full_name || 'Guest'}</p>
-                <p className="text-stone-600">{order.profiles?.email}</p>
-                {order.profiles?.phone && <p className="text-stone-600">{order.profiles.phone}</p>}
+                <p className="font-medium text-ink">{order.profiles?.full_name || 'Guest'}</p>
+                <p className="text-ink/60">{order.profiles?.email}</p>
+                {order.profiles?.phone && <p className="text-ink/60">{order.profiles.phone}</p>}
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-stone-200/60 p-6">
-              <h3 className="text-lg font-bold text-stone-900 flex items-center gap-2 mb-4">
-                <MapPin className="w-5 h-5 text-stone-400" />
+            <div className="bg-panel rounded-2xl shadow-sm border border-cream-line p-6">
+              <h3 className="text-lg font-bold text-ink flex items-center gap-2 mb-4">
+                <MapPin className="w-5 h-5 text-ink/40" />
                 Shipping Address
               </h3>
               {order.addresses ? (
-                <div className="space-y-1 text-sm text-stone-600">
-                  <p className="font-medium text-stone-900 mb-1">{order.addresses.full_name}</p>
+                <div className="space-y-1 text-sm text-ink/60">
+                  <p className="font-medium text-ink mb-1">{order.addresses.full_name}</p>
                   <p>{order.addresses.address_line_1}</p>
                   <p>{order.addresses.city}, {order.addresses.state} {order.addresses.postal_code}</p>
-                  <p className="mt-2 pt-2 border-t border-stone-100">Phone: {order.addresses.phone}</p>
+                  <p className="mt-2 pt-2 border-t border-cream-line">Phone: {order.addresses.phone}</p>
                   {order.addresses.alternate_phone && (
                     <p>Alternate: {order.addresses.alternate_phone}</p>
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-stone-500 italic">No address details available.</p>
+                <p className="text-sm text-ink/60 italic">No address details available.</p>
               )}
             </div>
           </div>
 
           {/* Order Items */}
-          <div className="bg-white rounded-2xl shadow-sm border border-stone-200/60 overflow-hidden">
-            <div className="p-6 border-b border-stone-200/60 flex items-center gap-2">
-              <Package className="w-5 h-5 text-stone-400" />
-              <h3 className="text-lg font-bold text-stone-900">Order Items</h3>
+          <div className="bg-panel rounded-2xl shadow-sm border border-cream-line overflow-hidden">
+            <div className="p-6 border-b border-cream-line flex items-center gap-2">
+              <Package className="w-5 h-5 text-ink/40" />
+              <h3 className="text-lg font-bold text-ink">Order Items</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead className="bg-stone-50 text-stone-500 uppercase tracking-wider text-xs">
+                <thead className="bg-cream-deep text-ink/60 uppercase tracking-wider text-xs">
                   <tr>
                     <th className="px-6 py-4 font-semibold">Product</th>
                     <th className="px-6 py-4 font-semibold">Variant</th>
@@ -148,17 +148,17 @@ export default async function AdminOrderDetailsPage({
                     <th className="px-6 py-4 font-semibold text-right">Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100">
+                <tbody className="divide-y divide-cream-line">
                   {order.order_items?.map((item: any) => {
                     const product = item.product_id ? productsById[item.product_id] : null
                     const href = product?.is_active ? `/shop/${item.product_id}` : null
 
                     const thumbnail = (
-                      <div className="relative w-12 h-14 rounded-lg overflow-hidden shrink-0 border border-stone-200 bg-stone-100">
+                      <div className="relative w-12 h-14 rounded-lg overflow-hidden shrink-0 border border-cream-line bg-cream-deep">
                         {product?.image_url ? (
                           <Image src={product.image_url} alt={item.product_name} fill className="object-cover" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-stone-300 text-[10px] font-medium">
+                          <div className="w-full h-full flex items-center justify-center text-ink/50 text-[10px] font-medium">
                             IMG
                           </div>
                         )}
@@ -166,12 +166,12 @@ export default async function AdminOrderDetailsPage({
                     )
 
                     return (
-                      <tr key={item.id} className="hover:bg-stone-50/50 transition-colors">
+                      <tr key={item.id} className="hover:bg-panel/50 transition-colors">
                         <td className="px-6 py-4">
                           {href ? (
                             <Link href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group">
                               {thumbnail}
-                              <span className="font-medium text-stone-900 group-hover:text-orange-600 transition-colors">
+                              <span className="font-medium text-ink group-hover:text-orange-600 transition-colors">
                                 {item.product_name}
                               </span>
                             </Link>
@@ -179,19 +179,19 @@ export default async function AdminOrderDetailsPage({
                             <div className="flex items-center gap-3">
                               {thumbnail}
                               <div>
-                                <span className="font-medium text-stone-900">{item.product_name}</span>
-                                <span className="block text-[11px] text-stone-400 font-medium">
+                                <span className="font-medium text-ink">{item.product_name}</span>
+                                <span className="block text-[11px] text-ink/40 font-medium">
                                   {product ? 'Inactive — not viewable on site' : 'Product no longer available'}
                                 </span>
                               </div>
                             </div>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-stone-600">{item.variant_name}</td>
-                        <td className="px-6 py-4 text-stone-400 text-xs">{item.product_id || '—'}</td>
-                        <td className="px-6 py-4 text-stone-600">₹{item.price_at_purchase}</td>
-                        <td className="px-6 py-4 text-stone-600">{item.quantity}</td>
-                        <td className="px-6 py-4 font-medium text-stone-900 text-right">₹{item.line_total}</td>
+                        <td className="px-6 py-4 text-ink/60">{item.variant_name}</td>
+                        <td className="px-6 py-4 text-ink/40 text-xs">{item.product_id || '—'}</td>
+                        <td className="px-6 py-4 text-ink/60">₹{item.price_at_purchase}</td>
+                        <td className="px-6 py-4 text-ink/60">{item.quantity}</td>
+                        <td className="px-6 py-4 font-medium text-ink text-right">₹{item.line_total}</td>
                       </tr>
                     )
                   })}
@@ -211,44 +211,44 @@ export default async function AdminOrderDetailsPage({
             initialPaymentStatus={order.payment_status}
           />
 
-          <div className="bg-white rounded-2xl shadow-sm border border-stone-200/60 p-6">
-            <h3 className="text-lg font-bold text-stone-900 flex items-center gap-2 mb-6">
-              <CreditCard className="w-5 h-5 text-stone-400" />
+          <div className="bg-panel rounded-2xl shadow-sm border border-cream-line p-6">
+            <h3 className="text-lg font-bold text-ink flex items-center gap-2 mb-6">
+              <CreditCard className="w-5 h-5 text-ink/40" />
               Payment Summary
             </h3>
             
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between text-stone-600">
+              <div className="flex justify-between text-ink/60">
                 <span>Subtotal</span>
-                <span className="font-medium text-stone-900">₹{order.subtotal}</span>
+                <span className="font-medium text-ink">₹{order.subtotal}</span>
               </div>
-              <div className="flex justify-between text-stone-600">
+              <div className="flex justify-between text-ink/60">
                 <span>Shipping</span>
                 {order.shipping_cost === 0 ? (
                   <span className="font-medium text-green-600">Free</span>
                 ) : (
-                  <span className="font-medium text-stone-900">₹{order.shipping_cost}</span>
+                  <span className="font-medium text-ink">₹{order.shipping_cost}</span>
                 )}
               </div>
-              <div className="pt-3 border-t border-stone-200 flex justify-between items-center">
-                <span className="font-bold text-stone-900">Total</span>
+              <div className="pt-3 border-t border-cream-line flex justify-between items-center">
+                <span className="font-bold text-ink">Total</span>
                 <span className="text-xl font-bold text-orange-600">₹{order.total_amount}</span>
               </div>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-stone-200">
-              <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">Payment Method</p>
-              <p className="text-sm font-medium text-stone-900">{order.payment_method}</p>
+            <div className="mt-6 pt-6 border-t border-cream-line">
+              <p className="text-xs font-semibold text-ink/60 uppercase tracking-wider mb-2">Payment Method</p>
+              <p className="text-sm font-medium text-ink">{order.payment_method}</p>
             </div>
           </div>
 
           {/* Timeline Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-stone-200/60 p-6">
-            <h3 className="text-lg font-bold text-stone-900 mb-6">Timeline</h3>
+          <div className="bg-panel rounded-2xl shadow-sm border border-cream-line p-6">
+            <h3 className="text-lg font-bold text-ink mb-6">Timeline</h3>
             <div className="space-y-4 text-sm">
               <div className="flex justify-between">
-                <span className="text-stone-500">Order Placed</span>
-                <span className="font-medium text-stone-900">
+                <span className="text-ink/60">Order Placed</span>
+                <span className="font-medium text-ink">
                   {new Date(order.created_at).toLocaleString('en-IN', {
                     day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                   })}
@@ -256,8 +256,8 @@ export default async function AdminOrderDetailsPage({
               </div>
               {order.paid_at && (
                 <div className="flex justify-between">
-                  <span className="text-stone-500">Paid</span>
-                  <span className="font-medium text-stone-900">
+                  <span className="text-ink/60">Paid</span>
+                  <span className="font-medium text-ink">
                     {new Date(order.paid_at).toLocaleString('en-IN', {
                       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                     })}
@@ -266,8 +266,8 @@ export default async function AdminOrderDetailsPage({
               )}
               {order.shipped_at && (
                 <div className="flex justify-between">
-                  <span className="text-stone-500">Shipped</span>
-                  <span className="font-medium text-stone-900">
+                  <span className="text-ink/60">Shipped</span>
+                  <span className="font-medium text-ink">
                     {new Date(order.shipped_at).toLocaleString('en-IN', {
                       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                     })}
@@ -276,8 +276,8 @@ export default async function AdminOrderDetailsPage({
               )}
               {order.delivered_at && (
                 <div className="flex justify-between">
-                  <span className="text-stone-500">Delivered</span>
-                  <span className="font-medium text-stone-900">
+                  <span className="text-ink/60">Delivered</span>
+                  <span className="font-medium text-ink">
                     {new Date(order.delivered_at).toLocaleString('en-IN', {
                       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                     })}

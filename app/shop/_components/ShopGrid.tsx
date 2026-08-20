@@ -259,7 +259,7 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
                             });
                             router.push('/checkout');
                           }}
-                          className="w-full text-center rounded-lg bg-emerald text-cream text-[13px] md:text-sm font-bold py-2.5 hover:bg-emerald-deep transition-colors flex items-center justify-center shadow-sm"
+                          className="w-full text-center rounded-lg bg-emerald text-cream text-[13px] md:text-sm font-bold py-2.5 hover:bg-emerald-deep hover:text-emerald transition-colors flex items-center justify-center shadow-sm"
                         >
                           Buy now
                         </button>

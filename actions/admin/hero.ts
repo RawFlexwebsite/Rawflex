@@ -77,6 +77,32 @@ export async function deleteHeroSlide(id: string) {
   return { success: true }
 }
 
+export async function updateHeroSlide(
+  id: string,
+  fields: {
+    title?: string
+    subtitle?: string
+    button_text?: string
+    button_link?: string
+    display_order?: number
+  }
+) {
+  const supabase = await createClient()
+  const isAdmin = await checkAdminAuth(supabase)
+  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+
+  const { error } = await supabase
+    .from('hero_slides')
+    .update(fields)
+    .eq('id', id)
+
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath('/', 'layout')
+  revalidatePath('/admin/hero-slides')
+  return { success: true }
+}
+
 export async function toggleHeroSlideStatus(id: string, isActive: boolean) {
   const supabase = await createClient()
   const isAdmin = await checkAdminAuth(supabase)

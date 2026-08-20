@@ -28,8 +28,8 @@ export default async function EditCategoryPage({
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Edit Category</h1>
-        <p className="text-stone-500 text-sm mt-0.5">
+        <h1 className="text-2xl font-bold text-ink">Edit Category</h1>
+        <p className="text-ink/60 text-sm mt-0.5">
           Update &quot;{category.name}&quot;
         </p>
       </div>

@@ -3,13 +3,15 @@
 import { useRef } from "react";
 import Image from "next/image";
 
+const BASE = "https://bwudwdyzqkvpbymheybq.supabase.co/storage/v1/object/public/rawflex";
+
 const LOOKBOOK = [
-  "/lookbook-1.jpg",
-  "/lookbook-2.jpg",
-  "/lookbook-3.jpg",
-  "/lookbook-4.jpg",
-  "/lookbook-5.jpg",
-  "/lookbook-6.jpg",
+  `${BASE}/lookbook/lookbook-1.jpg`,
+  `${BASE}/lookbook/lookbook-2.jpg`,
+  `${BASE}/lookbook/lookbook-3.jpg`,
+  `${BASE}/lookbook/lookbook-4.jpg`,
+  `${BASE}/lookbook/lookbook-5.jpg`,
+  `${BASE}/lookbook/lookbook-6.jpg`,
 ];
 
 export default function Lookbook() {

@@ -193,7 +193,7 @@ export default function ProductDetailActions({ product, selectedColor = null }: 
           <button
             onClick={handleAdd}
             disabled={product.variants.length > 0 && !selectedVariant}
-            className="w-full py-3.5 px-4 bg-emerald text-cream font-body font-semibold rounded-full shadow-card hover:bg-emerald-deep transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3.5 px-4 bg-emerald text-cream font-body font-semibold rounded-full shadow-card hover:bg-emerald-deep hover:text-emerald transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ShoppingBag className="w-5 h-5" /> Add to Cart
           </button>

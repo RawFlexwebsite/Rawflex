@@ -71,18 +71,18 @@ export default function ProductFaqEditor({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200/80 p-6 space-y-4">
+    <div className="bg-panel rounded-xl border border-cream-line p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold text-stone-900">
+          <h2 className="text-base font-semibold text-ink">
             Frequently Asked Questions
           </h2>
-          <p className="text-xs text-stone-400 mt-0.5">
+          <p className="text-xs text-ink/40 mt-0.5">
             Product-specific Q&A displayed on the product detail page
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-stone-700">Use Global FAQs</label>
+          <label className="text-sm font-medium text-ink/80">Use Global FAQs</label>
           <button
             type="button"
             onClick={async () => {
@@ -93,11 +93,11 @@ export default function ProductFaqEditor({
               });
             }}
             className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-offset-2 ${
-              useGlobal ? 'bg-orange-600' : 'bg-gray-200'
+              useGlobal ? 'bg-orange-600' : 'bg-panel2'
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-panel shadow ring-0 transition duration-200 ease-in-out ${
                 useGlobal ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
@@ -134,16 +134,16 @@ export default function ProductFaqEditor({
         {items.map((item, index) => (
           <div
             key={index}
-            className="p-4 rounded-lg border border-stone-100 bg-stone-50/50 space-y-3"
+            className="p-4 rounded-lg border border-cream-line bg-panel/50 space-y-3"
           >
             <div className="flex items-start justify-between gap-2">
-              <span className="text-xs font-medium text-stone-400 bg-stone-200/60 px-2 py-0.5 rounded mt-1">
+              <span className="text-xs font-medium text-ink/40 bg-panel2/60 px-2 py-0.5 rounded mt-1">
                 Q{index + 1}
               </span>
               <button
                 type="button"
                 onClick={() => removeItem(index)}
-                className="p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                className="p-1.5 rounded-lg text-ink/40 hover:text-red-500 hover:bg-red-50 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -154,7 +154,7 @@ export default function ProductFaqEditor({
               value={item.question}
               onChange={(e) => updateItem(index, 'question', e.target.value)}
               placeholder="Question"
-              className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all bg-white"
+              className="w-full px-3 py-2 rounded-lg border border-cream-line text-sm text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all bg-panel"
             />
             <textarea
               value={item.answer}
@@ -162,7 +162,7 @@ export default function ProductFaqEditor({
               onChange={(e) => updateItem(index, 'answer', e.target.value)}
               placeholder="Answer"
               rows={2}
-              className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all resize-none bg-white"
+              className="w-full px-3 py-2 rounded-lg border border-cream-line text-sm text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all resize-none bg-panel"
             />
           </div>
         ))}
@@ -172,10 +172,10 @@ export default function ProductFaqEditor({
         type="button"
         onClick={handleSave}
         disabled={isPending}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-stone-900 text-white text-sm font-medium rounded-lg hover:bg-stone-800 disabled:opacity-60 transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-panel text-ink text-sm font-medium rounded-lg hover:bg-panel2 disabled:opacity-60 transition-colors"
       >
         {isPending ? (
-          <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
         ) : (
           <Save className="w-3.5 h-3.5" />
         )}

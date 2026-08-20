@@ -249,13 +249,13 @@ export function ProductVariantsEditor({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-900">Size Options</h3>
+        <h3 className="text-lg font-medium text-ink">Size Options</h3>
         {!isAdding && !editingId && (
           <button
             type="button"
             onClick={initializeBulkForm}
             disabled={isPending}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50 shadow-sm"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-ink bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50 shadow-sm"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Size Options
@@ -265,15 +265,15 @@ export function ProductVariantsEditor({
 
       {/* Color Filter Tabs */}
       {productColors.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 pb-3">
+        <div className="flex flex-wrap items-center gap-2 border-b border-cream-line pb-3">
           {isAdding && (
             <button
               type="button"
               onClick={() => setActiveTab('General')}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                 activeTab === 'General'
-                  ? 'bg-stone-900 text-white'
-                  : 'text-stone-600 hover:bg-stone-100'
+                  ? 'bg-panel text-ink'
+                  : 'text-ink/60 hover:bg-panel2'
               }`}
             >
               General Template
@@ -291,8 +291,8 @@ export function ProductVariantsEditor({
                 onClick={() => setActiveTab(color)}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   activeTab === color
-                    ? 'bg-stone-900 text-white'
-                    : 'text-stone-600 hover:bg-stone-100'
+                    ? 'bg-panel text-ink'
+                    : 'text-ink/60 hover:bg-panel2'
                 }`}
               >
                 {color} ({count})
@@ -305,23 +305,23 @@ export function ProductVariantsEditor({
 
       {/* SINGLE EDIT FORM */}
       {editingId && (
-        <form onSubmit={handleSingleSubmit} className="bg-gray-50 p-5 rounded-xl border border-gray-200 shadow-sm">
-          <h4 className="text-sm font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">Edit Size Option</h4>
+        <form onSubmit={handleSingleSubmit} className="bg-cream-deep p-5 rounded-xl border border-cream-line shadow-sm">
+          <h4 className="text-sm font-bold text-ink/80 mb-4 pb-2 border-b border-cream-line">Edit Size Option</h4>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-5">
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Size Name</label>
+              <label className="block text-xs font-semibold text-ink/60 uppercase tracking-wider mb-1">Size Name</label>
               <input
                 required
                 type="text"
                 maxLength={100}
                 value={formData.variant_name}
                 onChange={(e) => setFormData({ ...formData, variant_name: e.target.value })}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                className="block w-full rounded-md border-cream-line shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
                 placeholder="e.g. M, L, XL"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Price (₹)</label>
+              <label className="block text-xs font-semibold text-ink/60 uppercase tracking-wider mb-1">Price (₹)</label>
               <input
                 required
                 type="number"
@@ -329,30 +329,30 @@ export function ProductVariantsEditor({
                 min="0"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                className="block w-full rounded-md border-cream-line shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Old Price (₹)</label>
+              <label className="block text-xs font-semibold text-ink/60 uppercase tracking-wider mb-1">Old Price (₹)</label>
               <input
                 type="number"
                 step="0.01"
                 min="0"
                 value={formData.original_price}
                 onChange={(e) => setFormData({ ...formData, original_price: e.target.value })}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                className="block w-full rounded-md border-cream-line shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
                 placeholder="Optional"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Stock</label>
+              <label className="block text-xs font-semibold text-ink/60 uppercase tracking-wider mb-1">Stock</label>
               <input
                 required
                 type="number"
                 min="0"
                 value={formData.stock_quantity}
                 onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                className="block w-full rounded-md border-cream-line shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
               />
             </div>
             <div className="md:col-span-5 flex items-center justify-between mt-2">
@@ -361,23 +361,23 @@ export function ProductVariantsEditor({
                   type="checkbox"
                   checked={formData.is_active}
                   onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                  className="rounded border-cream-line text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                 />
-                <span className="ml-2 text-sm font-medium text-gray-700">Active</span>
+                <span className="ml-2 text-sm font-medium text-ink/80">Active</span>
               </label>
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={resetForm}
                   disabled={isPending}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="px-4 py-2 text-sm font-medium text-ink/80 bg-panel border border-cream-line rounded-md shadow-sm hover:bg-panel2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="inline-flex items-center px-5 py-2 text-sm font-bold text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                  className="inline-flex items-center px-5 py-2 text-sm font-bold text-ink bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                 >
                   {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Save Changes
@@ -390,11 +390,11 @@ export function ProductVariantsEditor({
 
       {/* BULK ADD FORM */}
       {isAdding && (
-        <form onSubmit={handleBulkSubmit} className="bg-gray-50 p-5 rounded-xl border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+        <form onSubmit={handleBulkSubmit} className="bg-cream-deep p-5 rounded-xl border border-cream-line shadow-sm">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-cream-line">
             <div>
-              <h4 className="text-sm font-bold text-gray-800">Quick Add Size Options</h4>
-              <p className="text-xs text-gray-500 mt-1">Fill in the prices and stock for the standard sizes, or add custom ones.</p>
+              <h4 className="text-sm font-bold text-ink/80">Quick Add Size Options</h4>
+              <p className="text-xs text-ink/60 mt-1">Fill in the prices and stock for the standard sizes, or add custom ones.</p>
             </div>
             <button
               type="button"
@@ -415,7 +415,7 @@ export function ProductVariantsEditor({
               <button
                 type="button"
                 onClick={handleApplyToAllColors}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm"
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-ink text-xs font-semibold rounded-lg transition-colors shadow-sm"
               >
                 ✨ Apply for All Colors
               </button>
@@ -425,11 +425,11 @@ export function ProductVariantsEditor({
           <div className="space-y-3">
             {/* Headers */}
             <div className="hidden md:grid grid-cols-12 gap-3 px-2">
-              <div className="col-span-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Size Name</div>
-              <div className="col-span-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">Price (₹)*</div>
-              <div className="col-span-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">Old Price</div>
-              <div className="col-span-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">Stock*</div>
-              <div className="col-span-2 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Active</div>
+              <div className="col-span-3 text-xs font-semibold text-ink/60 uppercase tracking-wider">Size Name</div>
+              <div className="col-span-2 text-xs font-semibold text-ink/60 uppercase tracking-wider">Price (₹)*</div>
+              <div className="col-span-2 text-xs font-semibold text-ink/60 uppercase tracking-wider">Old Price</div>
+              <div className="col-span-2 text-xs font-semibold text-ink/60 uppercase tracking-wider">Stock*</div>
+              <div className="col-span-2 text-xs font-semibold text-ink/60 uppercase tracking-wider text-center">Active</div>
               <div className="col-span-1"></div>
             </div>
 
@@ -446,49 +446,49 @@ export function ProductVariantsEditor({
               const nameLower = row.variant_name.toLowerCase().trim()
               return nameLower.includes(activeTab.toLowerCase().trim())
             }).map((row) => (
-              <div key={row.id} className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-white p-3 md:p-2 rounded-lg border border-gray-200 shadow-sm items-center">
+              <div key={row.id} className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-panel p-3 md:p-2 rounded-lg border border-cream-line shadow-sm items-center">
                 <div className="md:col-span-3">
-                  <label className="block text-xs font-medium text-gray-500 md:hidden mb-1">Size Name</label>
+                  <label className="block text-xs font-medium text-ink/60 md:hidden mb-1">Size Name</label>
                   <input
                     type="text"
                     value={row.variant_name}
                     onChange={(e) => updateBulkRow(row.id, 'variant_name', e.target.value)}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border font-medium text-gray-900"
+                    className="block w-full rounded-md border-cream-line shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border font-medium text-ink"
                     placeholder="e.g. XL"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-500 md:hidden mb-1">Price</label>
+                  <label className="block text-xs font-medium text-ink/60 md:hidden mb-1">Price</label>
                   <input
                     type="number"
                     step="0.01"
                     min="0"
                     value={row.price}
                     onChange={(e) => updateBulkRow(row.id, 'price', e.target.value)}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="block w-full rounded-md border-cream-line shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
                     placeholder="0.00"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-500 md:hidden mb-1">Old Price</label>
+                  <label className="block text-xs font-medium text-ink/60 md:hidden mb-1">Old Price</label>
                   <input
                     type="number"
                     step="0.01"
                     min="0"
                     value={row.original_price}
                     onChange={(e) => updateBulkRow(row.id, 'original_price', e.target.value)}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="block w-full rounded-md border-cream-line shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
                     placeholder="Optional"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-500 md:hidden mb-1">Stock</label>
+                  <label className="block text-xs font-medium text-ink/60 md:hidden mb-1">Stock</label>
                   <input
                     type="number"
                     min="0"
                     value={row.stock_quantity}
                     onChange={(e) => updateBulkRow(row.id, 'stock_quantity', e.target.value)}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="block w-full rounded-md border-cream-line shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
                   />
                 </div>
                 <div className="md:col-span-2 flex justify-start md:justify-center items-center mt-2 md:mt-0">
@@ -497,16 +497,16 @@ export function ProductVariantsEditor({
                       type="checkbox"
                       checked={row.is_active}
                       onChange={(e) => updateBulkRow(row.id, 'is_active', e.target.checked)}
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                      className="rounded border-cream-line text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                     />
-                    <span className="ml-2 text-sm text-gray-600 md:hidden">Active</span>
+                    <span className="ml-2 text-sm text-ink/60 md:hidden">Active</span>
                   </label>
                 </div>
                 <div className="md:col-span-1 flex justify-end">
                   <button
                     type="button"
                     onClick={() => removeBulkRow(row.id)}
-                    className="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"
+                    className="text-ink/40 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"
                     title="Remove Size"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -516,19 +516,19 @@ export function ProductVariantsEditor({
             ))}
           </div>
 
-          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-cream-line">
             <button
               type="button"
               onClick={resetForm}
               disabled={isPending}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="px-4 py-2 text-sm font-medium text-ink/80 bg-panel border border-cream-line rounded-md shadow-sm hover:bg-panel2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending || bulkData.length === 0}
-              className="inline-flex items-center px-6 py-2 text-sm font-bold text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="inline-flex items-center px-6 py-2 text-sm font-bold text-ink bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
               {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Save All Sizes
@@ -539,41 +539,41 @@ export function ProductVariantsEditor({
 
       {variants.length > 0 ? (
         <div className="space-y-4">
-          <div className="overflow-hidden bg-white shadow ring-1 ring-black ring-opacity-5 sm:rounded-xl">
-            <table className="min-w-full divide-y divide-gray-300">
-              <thead className="bg-gray-50">
+          <div className="overflow-hidden bg-panel shadow ring-1 ring-black ring-opacity-5 sm:rounded-xl">
+            <table className="min-w-full divide-y divide-cream-line">
+              <thead className="bg-cream-deep">
                 <tr>
-                  <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Size</th>
-                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Price</th>
-                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Stock</th>
-                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
+                  <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-ink">Size</th>
+                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-ink">Price</th>
+                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-ink">Stock</th>
+                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-ink">Status</th>
                   <th className="relative py-3.5 pl-3 pr-4 sm:pr-6"><span className="sr-only">Actions</span></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="divide-y divide-cream-line bg-panel">
                 {displayedVariants.map((variant) => (
-                  <tr key={variant.id} className={editingId === variant.id ? 'bg-indigo-50' : 'hover:bg-gray-50/50 transition-colors'}>
-                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-bold text-gray-900">
+                  <tr key={variant.id} className={editingId === variant.id ? 'bg-indigo-50' : 'hover:bg-panel2 transition-colors'}>
+                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-bold text-ink">
                       {variant.variant_name}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-ink/60">
                       <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">₹{variant.price}</span>
+                        <span className="font-medium text-ink">₹{variant.price}</span>
                         {variant.original_price && (
-                          <span className="text-xs text-gray-400 line-through">₹{variant.original_price}</span>
+                          <span className="text-xs text-ink/40 line-through">₹{variant.original_price}</span>
                         )}
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
+                    <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-ink">
                       {variant.stock_quantity}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-ink/60">
                       {variant.is_active ? (
                         <span className="inline-flex items-center rounded-md bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-600/20">
                           Active
                         </span>
                       ) : (
-                        <span className="inline-flex items-center rounded-md bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                        <span className="inline-flex items-center rounded-md bg-cream-deep px-2.5 py-1 text-xs font-medium text-ink/60 ring-1 ring-inset ring-ink/10">
                           Inactive
                         </span>
                       )}
@@ -605,9 +605,9 @@ export function ProductVariantsEditor({
           </div>
         </div>
       ) : (
-        <div className="text-center py-16 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl">
-          <p className="text-sm font-semibold text-gray-600">No size options added yet.</p>
-          <p className="text-sm text-gray-500 mt-2">Add sizes like "S", "M", "L" to this product.</p>
+        <div className="text-center py-16 bg-cream-deep border-2 border-dashed border-cream-line rounded-xl">
+          <p className="text-sm font-semibold text-ink/60">No size options added yet.</p>
+          <p className="text-sm text-ink/60 mt-2">Add sizes like "S", "M", "L" to this product.</p>
         </div>
       )}
     </div>

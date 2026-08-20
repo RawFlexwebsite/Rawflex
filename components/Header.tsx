@@ -164,7 +164,7 @@ export default function Header() {
             {navLinks.map((link) => {
               if (link.label === "Collections") {
                 return (
-                  <div key={link.href} className="relative group py-2">
+                  <div key={link.label} className="relative group py-2">
                     <a
                       href={link.href}
                       className="font-body text-[12px] font-bold uppercase tracking-wider text-ink hover:text-gold transition-colors flex items-center gap-1"
@@ -176,57 +176,59 @@ export default function Header() {
                     </a>
 
                     {/* Dropdown Menu */}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[540px] bg-panel border border-cream-line rounded-2xl shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 p-6 z-50">
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                        <div>
-                          <p className="px-1 mb-2 text-[11px] font-bold uppercase tracking-wider text-ink/40">Categories</p>
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                            {dbData.categories.map((cat: any) => (
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-[540px] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-50">
+                      <div className="bg-panel border border-cream-line rounded-2xl shadow-lg p-6">
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                          <div>
+                            <p className="px-1 mb-2 text-[11px] font-bold uppercase tracking-wider text-ink/40">Categories</p>
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                              {dbData.categories.map((cat: any) => (
+                                <a
+                                  key={cat.id}
+                                  href={`/shop?category=${cat.id}`}
+                                  className="block px-3 py-2 rounded-lg text-sm font-semibold text-ink/75 hover:bg-cream hover:text-emerald transition-colors"
+                                >
+                                  {cat.name}
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className="px-1 mb-2 text-[11px] font-bold uppercase tracking-wider text-ink/40">Discover</p>
+                            <div className="space-y-2">
                               <a
-                                key={cat.id}
-                                href={`/shop?category=${cat.id}`}
-                                className="block px-3 py-2 rounded-lg text-sm font-semibold text-ink/75 hover:bg-cream hover:text-emerald transition-colors"
+                                href="/shop"
+                                className="block p-3 rounded-xl bg-cream/60 hover:bg-cream transition-colors"
                               >
-                                {cat.name}
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-gold">New</span>
+                                <p className="font-display font-semibold text-ink text-sm mt-0.5">New Arrivals</p>
                               </a>
-                            ))}
+                              <a
+                                href="/shop?featured=true"
+                                className="block p-3 rounded-xl bg-cream/60 hover:bg-cream transition-colors"
+                              >
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-gold">Curated</span>
+                                <p className="font-display font-semibold text-ink text-sm mt-0.5">Featured Pieces</p>
+                              </a>
+                            </div>
                           </div>
                         </div>
 
-                        <div>
-                          <p className="px-1 mb-2 text-[11px] font-bold uppercase tracking-wider text-ink/40">Discover</p>
-                          <div className="space-y-2">
-                            <a
-                              href="/shop"
-                              className="block p-3 rounded-xl bg-cream/60 hover:bg-cream transition-colors"
-                            >
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-gold">New</span>
-                              <p className="font-display font-semibold text-ink text-sm mt-0.5">New Arrivals</p>
-                            </a>
-                            <a
-                              href="/shop?featured=true"
-                              className="block p-3 rounded-xl bg-cream/60 hover:bg-cream transition-colors"
-                            >
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-gold">Curated</span>
-                              <p className="font-display font-semibold text-ink text-sm mt-0.5">Featured Pieces</p>
-                            </a>
-                          </div>
-                        </div>
+                        <a
+                          href="/shop"
+                          className="mt-5 block text-center px-4 py-2.5 rounded-xl bg-emerald text-cream text-sm font-bold hover:bg-emerald-deep hover:text-emerald transition-colors"
+                        >
+                          Shop All
+                        </a>
                       </div>
-
-                      <a
-                        href="/shop"
-                        className="mt-5 block text-center px-4 py-2.5 rounded-xl bg-emerald text-cream text-sm font-bold hover:bg-emerald-deep transition-colors"
-                      >
-                        Shop All
-                      </a>
                     </div>
                   </div>
                 )
               }
               return (
                 <a
-                  key={link.href}
+                  key={link.label}
                   href={link.href}
                   className="font-body text-[12px] font-bold uppercase tracking-wider text-ink hover:text-gold transition-colors relative group"
                 >
@@ -399,7 +401,7 @@ export default function Header() {
             {navLinks.map((link, i) => {
               if (link.label === "Collections") {
                 return (
-                  <div key={link.href} className="border-b border-cream-line py-3.5">
+                  <div key={link.label} className="border-b border-cream-line py-3.5">
                     <button
                       onClick={() => setMobileCollectionOpen(!mobileCollectionOpen)}
                       className="w-full flex items-center justify-between font-display text-2xl font-semibold text-ink text-left"
@@ -454,7 +456,7 @@ export default function Header() {
               }
               return (
                 <a
-                  key={link.href}
+                  key={link.label}
                   href={link.href}
                   onClick={() => setOpen(false)}
                   className="font-display text-2xl font-semibold text-ink py-3.5 border-b border-cream-line"

@@ -3,8 +3,13 @@ import dbData from '../db.json'
 
 class MockQueryBuilder {
   private tableName: string
-  private filters: Array<{ field: string; val: any }> = []
+  private filters: Array<{ field: string; val: any; op?: string }> = []
   private isSingle = false
+  private isDelete = false
+  private isInsert = false
+  private insertData: any = null
+  private sortField = ''
+  private sortAsc = true
 
   constructor(tableName: string) {
     this.tableName = tableName
@@ -19,17 +24,71 @@ class MockQueryBuilder {
     this.isSingle = true
     return this
   }
-  order() { return this }
+  order(field: string, opts?: { ascending?: boolean }) {
+    this.sortField = field
+    this.sortAsc = opts?.ascending !== false
+    return this
+  }
   limit() { return this }
+  delete() {
+    this.isDelete = true
+    return this
+  }
+  insert(data: any) {
+    this.isInsert = true
+    this.insertData = data
+    return this
+  }
+  lt(field: string, val: any) {
+    this.filters.push({ field, val, op: 'lt' })
+    return this
+  }
 
   async execute() {
     const db: any = dbData
-    const table = db[this.tableName] || []
+    if (!db[this.tableName]) db[this.tableName] = []
 
-    let filtered = [...table]
+    if (this.isInsert) {
+      const dataToInsert = Array.isArray(this.insertData) ? this.insertData : [this.insertData]
+      dataToInsert.forEach((item: any) => {
+        if (!item.id) {
+          item.id = Math.random().toString(36).substring(2, 9)
+        }
+        item.created_at = new Date().toISOString()
+        db[this.tableName].push(item)
+      })
+      return { data: this.insertData, error: null }
+    }
+
+    if (this.isDelete) {
+      const before = db[this.tableName].length
+      db[this.tableName] = db[this.tableName].filter((item: any) => {
+        const matches = this.filters.every(f => {
+          if (f.op === 'lt') return new Date(item[f.field]) < new Date(f.val)
+          return item[f.field] === f.val
+        })
+        return !matches
+      })
+      return { data: null, error: null }
+    }
+
+    let filtered = [...db[this.tableName]]
     this.filters.forEach(f => {
-      filtered = filtered.filter(item => item[f.field] === f.val)
+      filtered = filtered.filter(item => {
+        if (f.op === 'lt') return new Date(item[f.field]) < new Date(f.val)
+        return item[f.field] === f.val
+      })
     })
+
+    if (this.sortField) {
+      filtered.sort((a, b) => {
+        const valA = a[this.sortField]
+        const valB = b[this.sortField]
+        if (valA < valB) return this.sortAsc ? -1 : 1
+        if (valA > valB) return this.sortAsc ? 1 : -1
+        return 0
+      })
+    }
 
     if (this.isSingle) {
       if (this.tableName === 'profiles' && filtered.length === 0 && this.filters.some(f => f.field === 'id' && f.val === 'mock-admin-id')) {

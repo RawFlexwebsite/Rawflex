@@ -1,3 +1,5 @@
+import { NextResponse } from 'next/server'
+
 export async function GET() {
-  return new Response("Migrate DB API Route")
+  return NextResponse.json({ message: 'Migrate DB API Route' })
 }

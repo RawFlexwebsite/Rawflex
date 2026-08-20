@@ -58,17 +58,17 @@ export function OrdersTableManager({ initialOrders }: OrdersTableManagerProps) {
   return (
     <div className="space-y-6">
       {/* Filters & Search */}
-      <div className="bg-white p-5 rounded-2xl shadow-sm border border-stone-200/60 flex flex-col gap-4">
+      <div className="bg-panel p-5 rounded-2xl shadow-sm border border-cream-line flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search Input */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/40" />
             <input
               type="text"
               placeholder="Search number, name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald transition-all"
+              className="w-full pl-10 pr-4 py-2 bg-cream-deep border border-cream-line rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald transition-all"
             />
           </div>
 
@@ -77,7 +77,7 @@ export function OrdersTableManager({ initialOrders }: OrdersTableManagerProps) {
             <select
               value={orderStatusFilter}
               onChange={(e) => setOrderStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald transition-all text-stone-700"
+              className="w-full px-3 py-2 bg-cream-deep border border-cream-line rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald transition-all text-ink/80"
             >
               <option value="ALL">All Order Statuses</option>
               <option value="pending">Pending</option>
@@ -93,7 +93,7 @@ export function OrdersTableManager({ initialOrders }: OrdersTableManagerProps) {
             <select
               value={paymentStatusFilter}
               onChange={(e) => setPaymentStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald transition-all text-stone-700"
+              className="w-full px-3 py-2 bg-cream-deep border border-cream-line rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald transition-all text-ink/80"
             >
               <option value="ALL">All Payment Statuses</option>
               <option value="pending">Pending</option>
@@ -109,7 +109,7 @@ export function OrdersTableManager({ initialOrders }: OrdersTableManagerProps) {
           <div className="flex justify-end">
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-lg text-xs font-semibold transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-cream-deep hover:bg-panel2 text-ink/60 rounded-lg text-xs font-semibold transition-colors"
             >
               <X className="w-3.5 h-3.5" />
               Clear Filters
@@ -119,10 +119,10 @@ export function OrdersTableManager({ initialOrders }: OrdersTableManagerProps) {
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-stone-200/60 overflow-hidden">
+      <div className="bg-panel rounded-2xl shadow-sm border border-cream-line overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-stone-50 text-stone-500 uppercase tracking-wider text-xs border-b border-stone-200/60">
+            <thead className="bg-cream-deep text-ink/60 uppercase tracking-wider text-xs border-b border-cream-line">
               <tr>
                 <th className="px-6 py-4 font-semibold">Order</th>
                 <th className="px-6 py-4 font-semibold">Date</th>
@@ -133,20 +133,20 @@ export function OrdersTableManager({ initialOrders }: OrdersTableManagerProps) {
                 <th className="px-6 py-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-100">
+            <tbody className="divide-y divide-cream-line">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-stone-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-ink/60">
                     No orders found matching the filter criteria.
                   </td>
                 </tr>
               ) : (
                 filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-stone-50/50 transition-colors group">
+                  <tr key={order.id} className="hover:bg-panel/50 transition-colors group">
                     <td className="px-6 py-4">
-                      <span className="font-semibold text-stone-900">{order.order_number}</span>
+                      <span className="font-semibold text-ink">{order.order_number}</span>
                     </td>
-                    <td className="px-6 py-4 text-stone-600">
+                    <td className="px-6 py-4 text-ink/60">
                       {new Date(order.created_at).toLocaleDateString('en-IN', {
                         day: 'numeric',
                         month: 'short',
@@ -155,12 +155,12 @@ export function OrdersTableManager({ initialOrders }: OrdersTableManagerProps) {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="font-medium text-stone-900">{order.profiles?.full_name || 'Guest'}</span>
-                        <span className="text-xs text-stone-500">{order.profiles?.email}</span>
+                        <span className="font-medium text-ink">{order.profiles?.full_name || 'Guest'}</span>
+                        <span className="text-xs text-ink/60">{order.profiles?.email}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-medium text-stone-900">₹{order.total_amount}</span>
+                      <span className="font-medium text-ink">₹{order.total_amount}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span
@@ -170,7 +170,7 @@ export function OrdersTableManager({ initialOrders }: OrdersTableManagerProps) {
                             : order.payment_status === 'failed'
                             ? 'bg-red-50 text-red-700 border-red-200'
                             : order.payment_status === 'refunded'
-                            ? 'bg-stone-100 text-stone-700 border-stone-200'
+                            ? 'bg-cream-deep text-ink/80 border-cream-line'
                             : 'bg-orange-50 text-orange-700 border-orange-200' // pending
                         }`}
                       >
@@ -197,7 +197,7 @@ export function OrdersTableManager({ initialOrders }: OrdersTableManagerProps) {
                     <td className="px-6 py-4 text-right">
                       <Link
                         href={`/admin/orders/${order.id}`}
-                        className="inline-flex items-center justify-center p-2 text-stone-400 hover:text-emerald hover:bg-emerald/5 rounded-xl transition-colors"
+                        className="inline-flex items-center justify-center p-2 text-ink/40 hover:text-emerald hover:bg-emerald/5 rounded-xl transition-colors"
                         title="View Details"
                       >
                         <Eye className="w-4 h-4" />

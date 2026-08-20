@@ -67,13 +67,13 @@ export default function ProductInfoEditor({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200/80 p-6 space-y-4">
+    <div className="bg-panel rounded-xl border border-cream-line p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold text-stone-900">
+          <h2 className="text-base font-semibold text-ink">
             Additional Information
           </h2>
-          <p className="text-xs text-stone-400 mt-0.5">
+          <p className="text-xs text-ink/40 mt-0.5">
             Product specifications displayed in a table (e.g. Brand, Shelf
             Life, Storage)
           </p>
@@ -103,14 +103,14 @@ export default function ProductInfoEditor({
       <div className="space-y-2">
         {items.map((item, index) => (
           <div key={index} className="flex items-center gap-2">
-            <GripVertical className="w-4 h-4 text-stone-300 shrink-0" />
+            <GripVertical className="w-4 h-4 text-ink/50 shrink-0" />
             <input
               type="text"
               maxLength={100}
               value={item.label}
               onChange={(e) => updateItem(index, 'label', e.target.value)}
               placeholder="Label (e.g. Brand)"
-              className="flex-1 px-3 py-2 rounded-lg border border-stone-200 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all"
+              className="flex-1 px-3 py-2 rounded-lg border border-cream-line bg-panel2 text-sm text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all"
             />
             <input
               type="text"
@@ -118,12 +118,12 @@ export default function ProductInfoEditor({
               value={item.value}
               onChange={(e) => updateItem(index, 'value', e.target.value)}
               placeholder="Value (e.g. RAWFLEX)"
-              className="flex-1 px-3 py-2 rounded-lg border border-stone-200 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all"
+              className="flex-1 px-3 py-2 rounded-lg border border-cream-line bg-panel2 text-sm text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all"
             />
             <button
               type="button"
               onClick={() => removeItem(index)}
-              className="p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+              className="p-1.5 rounded-lg text-ink/40 hover:text-red-500 hover:bg-red-50 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -135,10 +135,10 @@ export default function ProductInfoEditor({
         type="button"
         onClick={handleSave}
         disabled={isPending}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-stone-900 text-white text-sm font-medium rounded-lg hover:bg-stone-800 disabled:opacity-60 transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-panel text-ink text-sm font-medium rounded-lg hover:bg-panel2 disabled:opacity-60 transition-colors"
       >
         {isPending ? (
-          <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
         ) : (
           <Save className="w-3.5 h-3.5" />
         )}

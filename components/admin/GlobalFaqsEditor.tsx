@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Plus, Trash2, GripVertical } from 'lucide-react'
@@ -92,15 +92,15 @@ export function GlobalFaqsEditor({ initialFaqs }: { initialFaqs: Faq[] }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold leading-7 text-gray-900">Global FAQs</h2>
-          <p className="mt-1 text-sm leading-6 text-gray-600">
+          <h2 className="text-base font-semibold leading-7 text-ink">Global FAQs</h2>
+          <p className="mt-1 text-sm leading-6 text-ink/60">
             These FAQs will be shown on any product that has "Use Global FAQs" enabled.
           </p>
         </div>
         <button
           type="button"
           onClick={() => setIsAdding(true)}
-          className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+          className="inline-flex items-center gap-x-1.5 rounded-md bg-gold px-3 py-2 text-sm font-semibold text-black shadow-sm hover:bg-gold-light"
         >
           <Plus className="-ml-0.5 h-5 w-5" />
           Add Global FAQ
@@ -109,12 +109,12 @@ export function GlobalFaqsEditor({ initialFaqs }: { initialFaqs: Faq[] }) {
 
       <div className="space-y-4">
         {faqs.map((faq, index) => (
-          <form key={faq.id} onSubmit={(e) => handleUpdate(faq.id, e)} className="relative flex items-start gap-4 p-4 border rounded-lg bg-gray-50 group">
+          <form key={faq.id} onSubmit={(e) => handleUpdate(faq.id, e)} className="relative flex items-start gap-4 p-4 border rounded-lg bg-cream-deep group">
             <div className="flex flex-col gap-1 pt-2">
-              <button type="button" onClick={() => moveUp(index)} disabled={index === 0} className="text-gray-400 hover:text-gray-600 disabled:opacity-30">
+              <button type="button" onClick={() => moveUp(index)} disabled={index === 0} className="text-ink/40 hover:text-ink/60 disabled:opacity-30">
                 <GripVertical className="h-4 w-4" />
               </button>
-              <button type="button" onClick={() => moveDown(index)} disabled={index === faqs.length - 1} className="text-gray-400 hover:text-gray-600 disabled:opacity-30">
+              <button type="button" onClick={() => moveDown(index)} disabled={index === faqs.length - 1} className="text-ink/40 hover:text-ink/60 disabled:opacity-30">
                 <GripVertical className="h-4 w-4" />
               </button>
             </div>
@@ -125,7 +125,7 @@ export function GlobalFaqsEditor({ initialFaqs }: { initialFaqs: Faq[] }) {
                   type="text"
                   name="question"
                   defaultValue={faq.question}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md bg-panel2 border-0 py-1.5 text-ink shadow-sm ring-1 ring-inset ring-cream-line placeholder:text-ink/40 focus:ring-2 focus:ring-inset focus:ring-gold sm:text-sm sm:leading-6"
                   required
                 />
               </div>
@@ -134,7 +134,7 @@ export function GlobalFaqsEditor({ initialFaqs }: { initialFaqs: Faq[] }) {
                   name="answer"
                   rows={2}
                   defaultValue={faq.answer}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md bg-panel2 border-0 py-1.5 text-ink shadow-sm ring-1 ring-inset ring-cream-line placeholder:text-ink/40 focus:ring-2 focus:ring-inset focus:ring-gold sm:text-sm sm:leading-6"
                   required
                 />
               </div>
@@ -145,14 +145,14 @@ export function GlobalFaqsEditor({ initialFaqs }: { initialFaqs: Faq[] }) {
                 type="button"
                 onClick={() => handleDelete(faq.id)}
                 disabled={loading}
-                className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                className="rounded-md bg-panel px-2.5 py-1.5 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-inset ring-cream-line hover:bg-panel2"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                className="rounded-md bg-panel px-2.5 py-1.5 text-sm font-semibold text-ink shadow-sm ring-1 ring-inset ring-cream-line hover:bg-panel2"
               >
                 Save
               </button>
@@ -161,23 +161,23 @@ export function GlobalFaqsEditor({ initialFaqs }: { initialFaqs: Faq[] }) {
         ))}
 
         {isAdding && (
-          <form onSubmit={handleAdd} className="relative flex items-start gap-4 p-4 border rounded-lg bg-white border-indigo-200">
+          <form onSubmit={handleAdd} className="relative flex items-start gap-4 p-4 border rounded-lg bg-panel border-gold/30">
             <div className="flex-1 space-y-4">
               <div>
-                <label className="block text-sm font-medium leading-6 text-gray-900">Question</label>
+                <label className="block text-sm font-medium leading-6 text-ink">Question</label>
                 <input
                   type="text"
                   name="question"
-                  className="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="mt-1 block w-full rounded-md bg-panel2 border-0 py-1.5 text-ink shadow-sm ring-1 ring-inset ring-cream-line focus:ring-2 focus:ring-inset focus:ring-gold sm:text-sm sm:leading-6"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium leading-6 text-gray-900">Answer</label>
+                <label className="block text-sm font-medium leading-6 text-ink">Answer</label>
                 <textarea
                   name="answer"
                   rows={2}
-                  className="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="mt-1 block w-full rounded-md bg-panel2 border-0 py-1.5 text-ink shadow-sm ring-1 ring-inset ring-cream-line focus:ring-2 focus:ring-inset focus:ring-gold sm:text-sm sm:leading-6"
                   required
                 />
               </div>
@@ -186,14 +186,14 @@ export function GlobalFaqsEditor({ initialFaqs }: { initialFaqs: Faq[] }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                className="rounded-md bg-gold px-3 py-2 text-sm font-semibold text-black shadow-sm hover:bg-gold-light"
               >
                 Add
               </button>
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
-                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                className="rounded-md bg-panel px-3 py-2 text-sm font-semibold text-ink shadow-sm ring-1 ring-inset ring-cream-line hover:bg-panel2"
               >
                 Cancel
               </button>
