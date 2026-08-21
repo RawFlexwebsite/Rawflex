@@ -218,8 +218,8 @@ export const usps = [
 ];
 
 export const navLinks = [
-  { label: "New Drops", href: "/shop" },
+  { label: "New Drops", href: "/shop?category=new-drops" },
   { label: "Collections", href: "/shop" },
-  { label: "Best Sellers", href: "/shop" },
+  { label: "Best Sellers", href: "/shop?category=best-sellers" },
   { label: "About", href: "/about" },
 ];

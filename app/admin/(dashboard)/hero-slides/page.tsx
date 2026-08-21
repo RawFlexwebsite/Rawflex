@@ -1,14 +1,17 @@
-import { getHeroSlides } from '@/actions/admin/hero'
+import { getHeroLeftText, getHeroSlides } from '@/actions/admin/hero'
+import { HeroLeftTextForm } from './_components/HeroLeftTextForm'
 import { HeroSlideList } from './_components/HeroSlideList'
 
 export const metadata = {
-  title: 'Hero Slides | Admin Dashboard',
+  title: 'Hero Section | Admin Dashboard',
 }
 
 export default async function AdminHeroSlidesPage() {
-  const slides = await getHeroSlides()
+  const [slides, heroLeftText] = await Promise.all([
+    getHeroSlides(),
+    getHeroLeftText(),
+  ])
 
-  const leftSlides = slides.filter(s => s.position === 'left')
   const rightSlides = slides.filter(s => !s.position || s.position === 'right')
 
   return (
@@ -17,28 +20,20 @@ export default async function AdminHeroSlidesPage() {
         <div>
           <h1 className="text-2xl font-bold text-ink">Hero Section</h1>
           <p className="text-sm text-ink/60 mt-1">
-            Manage the sliding background images for the storefront homepage.
+            Manage the homepage hero text and right-side hero cards.
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        {/* Left and Right Slides */}
-        <div className="xl:col-span-6">
-          <HeroSlideList 
-            initialSlides={leftSlides} 
-            position="left"
-            title="Left Area Images"
-          />
+      <div className="max-w-5xl">
+        <div className="mb-8">
+          <HeroLeftTextForm initialText={heroLeftText} />
         </div>
-        <div className="xl:col-span-6">
-          <HeroSlideList 
-            initialSlides={rightSlides} 
-            position="right"
-            title="Right Area Images"
-          />
-        </div>
-
+        <HeroSlideList
+          initialSlides={rightSlides}
+          position="right"
+          title="Hero Card Images"
+        />
       </div>
     </div>
   )

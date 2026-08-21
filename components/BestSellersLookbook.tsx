@@ -44,11 +44,11 @@ const bestSellers = [
 ];
 
 const lookbook = [
-  `${BASE}/lookbook/lookbook-1.jpg`,
-  `${BASE}/lookbook/lookbook-2.jpg`,
-  `${BASE}/lookbook/lookbook-3.jpg`,
-  `${BASE}/lookbook/lookbook-4.jpg`,
-  `${BASE}/lookbook/lookbook-5.jpg`,
+  { id: "default-lookbook-1", image_url: `${BASE}/lookbook/lookbook-1.jpg`, link_url: "/shop" },
+  { id: "default-lookbook-2", image_url: `${BASE}/lookbook/lookbook-2.jpg`, link_url: "/shop" },
+  { id: "default-lookbook-3", image_url: `${BASE}/lookbook/lookbook-3.jpg`, link_url: "/shop" },
+  { id: "default-lookbook-4", image_url: `${BASE}/lookbook/lookbook-4.jpg`, link_url: "/shop" },
+  { id: "default-lookbook-5", image_url: `${BASE}/lookbook/lookbook-5.jpg`, link_url: "/shop" },
 ];
 
 function formatINR(value: number) {
@@ -93,10 +93,67 @@ function Rating({ reviews }: { reviews: number }) {
   );
 }
 
+type LookbookImage = {
+  id: string;
+  image_url: string;
+  link_url: string | null;
+};
+
+function LookbookCard({
+  item,
+  index,
+}: {
+  item: LookbookImage;
+  index: number;
+}) {
+  const href = item.link_url?.trim();
+  const className =
+    "group relative aspect-[1.55/1] overflow-hidden bg-[#111110] outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-[#D4A82C]";
+  const content = (
+    <>
+      <Image
+        src={item.image_url}
+        alt={`RAWFLEX lookbook style ${index + 1}`}
+        fill
+        sizes="(max-width: 640px) 78vw, (max-width: 1024px) 48vw, (max-width: 1280px) 30vw, 280px"
+        className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-black/20 transition-colors group-hover:bg-black/5" />
+      {href ? (
+        <div className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full border border-[#D4A82C]/60 bg-[#0a0909]/80 text-[#D4A82C] opacity-0 transition-all duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+          <ArrowRight className="h-4 w-4" />
+        </div>
+      ) : null}
+    </>
+  );
+
+  if (!href) {
+    return <div className={className}>{content}</div>;
+  }
+
+  if (href.startsWith("/")) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <a href={href} className={className}>
+      {content}
+    </a>
+  );
+}
+
 export default function BestSellersLookbook({
   products = [],
+  categoryId,
+  lookbookImages,
 }: {
   products?: any[];
+  categoryId?: string;
+  lookbookImages?: LookbookImage[];
 }) {
   const items =
     products.length > 0
@@ -109,11 +166,13 @@ export default function BestSellersLookbook({
           slug: p.slug,
         }))
       : bestSellers;
+  const lookbookItems = lookbookImages === undefined ? lookbook : lookbookImages;
+  const bestSellersHref = categoryId ? `/shop?category=${categoryId}` : '/shop?featured=true';
 
   return (
     <section className="relative bg-[#0a0909] pb-12 pt-6 md:pb-16 md:pt-8">
       <div className="max-w-wrap mx-auto px-5 md:px-8">
-        <SectionTitle title="Best Sellers" href="/shop" label="View All" />
+        <SectionTitle title="Best Sellers" href={bestSellersHref} label="View All" />
 
         <div className="relative">
           <div className="grid grid-flow-col auto-cols-[72%] gap-3 overflow-x-auto pb-2 no-scrollbar sm:auto-cols-[48%] md:auto-cols-[30%] lg:grid-flow-row lg:grid-cols-6 lg:overflow-visible lg:pb-0">
@@ -165,28 +224,17 @@ export default function BestSellersLookbook({
           </Link>
         </div>
 
-        <div className="mt-10 md:mt-12 lg:mt-14">
-          <SectionTitle title="Lookbook" href="/shop" label="View All Looks" />
+        {lookbookItems.length > 0 ? (
+          <div className="mt-10 md:mt-12 lg:mt-14">
+            <SectionTitle title="Lookbook" href="/shop" label="View All Looks" />
 
-          <div className="grid grid-flow-col auto-cols-[78%] gap-0 overflow-x-auto no-scrollbar border border-white/10 sm:auto-cols-[48%] md:auto-cols-[30%] lg:grid-flow-row lg:grid-cols-5 lg:overflow-hidden">
-            {lookbook.map((src, index) => (
-              <Link
-                key={src}
-                href="/shop"
-                className="group relative aspect-[1.55/1] overflow-hidden bg-[#111110]"
-              >
-                <Image
-                  src={src}
-                  alt={`RAWFLEX lookbook style ${index + 1}`}
-                  fill
-                  sizes="(max-width: 640px) 78vw, (max-width: 1024px) 48vw, (max-width: 1280px) 30vw, 280px"
-                  className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-black/20 transition-colors group-hover:bg-black/5" />
-              </Link>
-            ))}
+            <div className="grid grid-flow-col auto-cols-[78%] gap-0 overflow-x-auto no-scrollbar border border-white/10 sm:auto-cols-[48%] md:auto-cols-[30%] lg:grid-flow-row lg:grid-cols-5 lg:overflow-hidden">
+              {lookbookItems.map((item, index) => (
+                <LookbookCard key={item.id} item={item} index={index} />
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </section>
   );

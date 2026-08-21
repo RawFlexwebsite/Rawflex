@@ -10,6 +10,7 @@ import dbData from "@/lib/db.json";
 import { Search, User, ShoppingBag, LogOut, LayoutDashboard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getShippingSettings } from "@/actions/admin/shipping";
+import { logoutForClient } from "@/actions/auth";
 import AnnouncementBar from "./AnnouncementBar";
 
 export default function Header() {
@@ -294,8 +295,7 @@ export default function Header() {
                 </a>
                 <button
                   onClick={async () => {
-                    const supabase = createClient();
-                    await supabase.auth.signOut();
+                    await logoutForClient();
                     localStorage.removeItem('rawflex-customer-profile');
                     setUser(null);
                     window.location.reload();
@@ -498,8 +498,7 @@ export default function Header() {
             {user ? (
               <button
                 onClick={async () => {
-                  const supabase = createClient();
-                  await supabase.auth.signOut();
+                  await logoutForClient();
                   localStorage.removeItem('rawflex-customer-profile');
                   setUser(null);
                   setOpen(false);

@@ -1,13 +1,33 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
+import { createSignedRawflexSession, rawflexSessionCookieNames, type RawflexSession } from '@/lib/auth/session'
 
 export type AuthResult = {
   error?: string
   success?: boolean
+}
+
+async function setRawflexSessionCookie(session: RawflexSession) {
+  const cookieStore = await cookies()
+  const signedSession = createSignedRawflexSession(session)
+  const options = {
+    path: '/',
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    maxAge: 30 * 24 * 60 * 60,
+  }
+
+  cookieStore.set(rawflexSessionCookieNames.session, signedSession.payload, options)
+  cookieStore.set(rawflexSessionCookieNames.signature, signedSession.signature, {
+    ...options,
+    httpOnly: true,
+  })
 }
 
 export async function login(
@@ -15,6 +35,7 @@ export async function login(
   formData: FormData
 ): Promise<AuthResult> {
   const supabase = await createClient()
+  const adminSupabase = createAdminClient()
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
@@ -110,13 +131,14 @@ export async function sendEmailOtp(
   fullName?: string
 ): Promise<AuthResult> {
   const supabase = await createClient()
+  const adminSupabase = createAdminClient()
 
   if (!email) {
     return { error: 'Email is required' }
   }
 
   if (mode === 'LOGIN') {
-    const { data: profile } = await supabase
+    const { data: profile } = await adminSupabase
       .from('profiles')
       .select('id')
       .eq('email', email)
@@ -131,11 +153,11 @@ export async function sendEmailOtp(
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
   // Clean old OTPs for this email & clean all expired OTPs globally
-  await supabase.from('email_otps').delete().eq('email', email)
-  await supabase.from('email_otps').delete().lt('expires_at', new Date().toISOString())
+  await adminSupabase.from('email_otps').delete().eq('email', email)
+  await adminSupabase.from('email_otps').delete().lt('expires_at', new Date().toISOString())
 
   // Insert OTP record
-  const { error: dbError } = await supabase
+  const { error: dbError } = await adminSupabase
     .from('email_otps')
     .insert({
       email,
@@ -230,12 +252,13 @@ export async function verifyEmailOtp(
   phone?: string
 ): Promise<AuthResult> {
   const supabase = await createClient()
+  const adminSupabase = createAdminClient()
 
   if (!email || !otp) {
     return { error: 'Email and OTP code are required' }
   }
 
-  const { data: records } = await supabase
+  const { data: records } = await adminSupabase
     .from('email_otps')
     .select('*')
     .eq('email', email)
@@ -251,19 +274,18 @@ export async function verifyEmailOtp(
   }
 
   if (new Date(record.expires_at) < new Date()) {
-    await supabase.from('email_otps').delete().eq('email', email)
+    await adminSupabase.from('email_otps').delete().eq('email', email)
     return { error: 'OTP has expired. Please request a new one.' }
   }
 
   // OTP verified, delete it
-  await supabase.from('email_otps').delete().eq('email', email)
+  await adminSupabase.from('email_otps').delete().eq('email', email)
 
   const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
   if (isMock) {
-    const cookieStore = await cookies()
     const mockProfileId = 'mock-user-' + Math.random().toString(36).substring(2, 9)
 
-    await supabase.from('profiles').insert({
+    await adminSupabase.from('profiles').insert({
       id: mockProfileId,
       email,
       full_name: fullName || record.full_name || 'Customer',
@@ -271,16 +293,11 @@ export async function verifyEmailOtp(
       phone: phone || null
     })
 
-    cookieStore.set('rawflex-user-session', JSON.stringify({
+    await setRawflexSessionCookie({
       id: mockProfileId,
       email,
       full_name: fullName || record.full_name || 'Customer',
       role: 'customer'
-    }), {
-      path: '/',
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 30 * 24 * 60 * 60
     })
 
     revalidatePath('/', 'layout')
@@ -288,12 +305,11 @@ export async function verifyEmailOtp(
   }
 
   // Real Supabase Auth Flow
-  const { createAdminClient } = await import('@/lib/supabase/admin')
-  const adminAuth = createAdminClient().auth.admin
+  const adminAuth = adminSupabase.auth.admin
 
   // Check profiles table first
   let userExists = false
-  const { data: existingProfile } = await supabase
+  const { data: existingProfile } = await adminSupabase
     .from('profiles')
     .select('id')
     .eq('email', email)
@@ -335,7 +351,7 @@ export async function verifyEmailOtp(
     } else {
       try {
         if (newUser?.user) {
-          await supabase.from('profiles').insert({
+          await adminSupabase.from('profiles').insert({
             id: newUser.user.id,
             email,
             full_name: nameToUse,
@@ -350,7 +366,7 @@ export async function verifyEmailOtp(
   }
 
   // Custom Cookie Auth Session
-  const { data: profile } = await supabase
+  const { data: profile } = await adminSupabase
     .from('profiles')
     .select('*')
     .eq('email', email)
@@ -363,7 +379,7 @@ export async function verifyEmailOtp(
       const userData = (userList?.users as any[])?.find(u => u.email?.toLowerCase() === email.toLowerCase())
       if (userData) {
         const nameToUse = fullName || record.full_name || 'Customer'
-        const { data: insertedProfile } = await supabase.from('profiles').insert({
+        const { data: insertedProfile } = await adminSupabase.from('profiles').insert({
           id: userData.id,
           email,
           full_name: nameToUse,
@@ -381,17 +397,11 @@ export async function verifyEmailOtp(
     return { error: 'Failed to establish user profile session.' }
   }
 
-  const cookieStore = await cookies()
-  cookieStore.set('rawflex-user-session', JSON.stringify({
+  await setRawflexSessionCookie({
     id: finalProfile.id,
     email: finalProfile.email,
     full_name: finalProfile.full_name,
     role: finalProfile.role
-  }), {
-    path: '/',
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 30 * 24 * 60 * 60 // 30 days
   })
 
   revalidatePath('/', 'layout')
@@ -414,8 +424,12 @@ export async function adminLogin(
     return { error: 'Email and password are required' }
   }
 
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@rawflex.in'
-  const adminPassword = process.env.ADMIN_PASSWORD || 'GmC6BfKfeCgH5!7'
+  const adminEmail = process.env.ADMIN_EMAIL
+  const adminPassword = process.env.ADMIN_PASSWORD
+
+  if (!adminEmail || !adminPassword) {
+    return { error: 'Admin credentials are not configured.' }
+  }
 
   let signInRes = await supabase.auth.signInWithPassword({
     email,
@@ -512,17 +526,11 @@ export async function adminLogin(
     return { error: 'You do not have admin access' }
   }
 
-  const cookieStore = await cookies()
-  cookieStore.set('rawflex-user-session', JSON.stringify({
+  await setRawflexSessionCookie({
     id: data.user.id,
     email: data.user.email,
     full_name: profile.full_name || 'Admin',
     role: 'admin'
-  }), {
-    path: '/',
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 30 * 24 * 60 * 60 // 30 days
   })
 
   revalidatePath('/admin', 'layout')
@@ -534,5 +542,12 @@ export async function logout() {
   await supabase.auth.signOut()
   revalidatePath('/', 'layout')
   redirect('/login')
+}
+
+export async function logoutForClient(): Promise<AuthResult> {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+  revalidatePath('/', 'layout')
+  return { success: true }
 }
 

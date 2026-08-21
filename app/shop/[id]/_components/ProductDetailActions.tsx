@@ -75,7 +75,7 @@ export default function ProductDetailActions({ product, selectedColor = null }: 
   const currentOldPrice = selectedVariant ? selectedVariant.original_price : null
 
   // Find if this exact item+variant+color is already in cart
-  const cartItemId = `${product.id}-${selectedVariant?.id || 'default'}-${selectedColor || 'default'}`
+  const cartItemId = `${product.id}-${selectedVariant?.id || 'default'}`
   const cartItem = cart.find(item => item.cartItemId === cartItemId)
   const currentQty = cartItem ? cartItem.quantity : 0
 
@@ -97,7 +97,7 @@ export default function ProductDetailActions({ product, selectedColor = null }: 
         price: currentPrice,
         image_url: product.image_url,
         category_name: product.category_name,
-        variant_id: `${selectedVariant?.id || 'default'}-${selectedColor || 'default'}`,
+        variant_id: selectedVariant?.id || undefined,
         variant_name: `${getDisplayName(selectedVariant?.variant_name || '')}${selectedColor ? ` (${selectedColor})` : ''}`
       })
     }

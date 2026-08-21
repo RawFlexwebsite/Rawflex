@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function addToCart(variantId: string, quantity: number = 1) {
@@ -10,9 +11,10 @@ export async function addToCart(variantId: string, quantity: number = 1) {
   if (!user) {
     return { success: false, error: 'Please log in to add items to your cart.', requiresLogin: true }
   }
+  const adminSupabase = createAdminClient()
 
   // Check if this variant already exists in the user's cart
-  const { data: existing } = await supabase
+  const { data: existing } = await adminSupabase
     .from('cart_items')
     .select('id, quantity')
     .eq('user_id', user.id)
@@ -22,7 +24,7 @@ export async function addToCart(variantId: string, quantity: number = 1) {
   if (existing) {
     // Update quantity
     const newQty = existing.quantity + quantity
-    const { error } = await supabase
+    const { error } = await adminSupabase
       .from('cart_items')
       .update({ quantity: newQty })
       .eq('id', existing.id)
@@ -30,7 +32,7 @@ export async function addToCart(variantId: string, quantity: number = 1) {
     if (error) return { success: false, error: error.message }
   } else {
     // Insert new
-    const { error } = await supabase
+    const { error } = await adminSupabase
       .from('cart_items')
       .insert([{ user_id: user.id, variant_id: variantId, quantity }])
 
@@ -46,8 +48,9 @@ export async function removeFromCart(cartItemId: string) {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Unauthorized' }
+  const adminSupabase = createAdminClient()
 
-  const { error } = await supabase
+  const { error } = await adminSupabase
     .from('cart_items')
     .delete()
     .eq('id', cartItemId)
@@ -64,12 +67,13 @@ export async function updateCartQuantity(cartItemId: string, quantity: number) {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Unauthorized' }
+  const adminSupabase = createAdminClient()
 
   if (quantity <= 0) {
     return removeFromCart(cartItemId)
   }
 
-  const { error } = await supabase
+  const { error } = await adminSupabase
     .from('cart_items')
     .update({ quantity })
     .eq('id', cartItemId)
@@ -86,8 +90,9 @@ export async function getCart() {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Not logged in', items: [] }
+  const adminSupabase = createAdminClient()
 
-  const { data, error } = await supabase
+  const { data, error } = await adminSupabase
     .from('cart_items')
     .select(`
       id,
@@ -122,8 +127,9 @@ export async function getCartCount() {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return 0
+  const adminSupabase = createAdminClient()
 
-  const { data } = await supabase
+  const { data } = await adminSupabase
     .from('cart_items')
     .select('quantity')
     .eq('user_id', user.id)

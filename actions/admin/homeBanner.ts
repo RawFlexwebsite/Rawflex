@@ -3,6 +3,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+function revalidateHomeBannerPaths() {
+  revalidatePath('/')
+  revalidatePath('/admin/home-banner')
+}
+
 async function checkAdminAuth(supabase: any) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return false
@@ -34,13 +39,14 @@ export async function setHomeBannerEnabled(enabled: boolean) {
 
   const { error } = await supabase
     .from('settings')
-    .update({ home_banner_enabled: enabled })
-    .eq('id', 'site_settings')
+    .upsert(
+      { id: 'site_settings', home_banner_enabled: enabled },
+      { onConflict: 'id' }
+    )
 
   if (error) return { success: false, error: error.message }
 
-  revalidatePath('/', 'layout')
-  revalidatePath('/admin/home-banner')
+  revalidateHomeBannerPaths()
   return { success: true }
 }
 
@@ -81,8 +87,7 @@ export async function createHomeBannerImage(imageUrl: string, linkUrl: string) {
 
   if (error) return { success: false, error: error.message }
 
-  revalidatePath('/', 'layout')
-  revalidatePath('/admin/home-banner')
+  revalidateHomeBannerPaths()
   return { success: true }
 }
 
@@ -98,8 +103,7 @@ export async function updateHomeBannerImageLink(id: string, linkUrl: string) {
 
   if (error) return { success: false, error: error.message }
 
-  revalidatePath('/', 'layout')
-  revalidatePath('/admin/home-banner')
+  revalidateHomeBannerPaths()
   return { success: true }
 }
 
@@ -115,8 +119,7 @@ export async function toggleHomeBannerImageStatus(id: string, isActive: boolean)
 
   if (error) return { success: false, error: error.message }
 
-  revalidatePath('/', 'layout')
-  revalidatePath('/admin/home-banner')
+  revalidateHomeBannerPaths()
   return { success: true }
 }
 
@@ -132,7 +135,6 @@ export async function deleteHomeBannerImage(id: string) {
 
   if (error) return { success: false, error: error.message }
 
-  revalidatePath('/', 'layout')
-  revalidatePath('/admin/home-banner')
+  revalidateHomeBannerPaths()
   return { success: true }
 }

@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { parseSignedRawflexSession, rawflexSessionCookieNames } from '@/lib/auth/session'
 import fs from 'fs'
 import path from 'path'
 
@@ -29,6 +30,7 @@ class MockQueryBuilder {
   private isDelete = false
   private isInsert = false
   private isUpdate = false
+  private isUpsert = false
   private insertData: any = null
   private updateData: any = null
   private sortField = ''
@@ -69,6 +71,11 @@ class MockQueryBuilder {
     this.updateData = data
     return this
   }
+  upsert(data: any) {
+    this.isUpsert = true
+    this.insertData = data
+    return this
+  }
   lt(field: string, val: any) {
     this.filters.push({ field, val, op: 'lt' })
     return this
@@ -77,6 +84,11 @@ class MockQueryBuilder {
   async execute() {
     const db = readDb()
     if (this.tableName === 'settings') {
+      if (this.isUpsert) {
+        db.settings = { ...db.settings, ...this.insertData }
+        writeDb(db)
+        return { data: db.settings, error: null }
+      }
       if (this.isUpdate) {
         db.settings = { ...db.settings, ...this.updateData }
         writeDb(db)
@@ -180,15 +192,10 @@ export async function createClient() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const cookieStore = await cookies()
 
-  const customSessionVal = cookieStore.get('rawflex-user-session')?.value
-  let customSession: any = null
-  if (customSessionVal) {
-    try {
-      // Next.js URL-encodes cookie values; decode before parsing
-      const decoded = decodeURIComponent(customSessionVal)
-      customSession = JSON.parse(decoded)
-    } catch (e) { }
-  }
+  const customSession = parseSignedRawflexSession(
+    cookieStore.get(rawflexSessionCookieNames.session)?.value,
+    cookieStore.get(rawflexSessionCookieNames.signature)?.value
+  )
 
   const getCustomAuth = (realAuth: any = null) => ({
     getUser: async () => {
@@ -222,7 +229,8 @@ export async function createClient() {
       return { data: null, error: { message: 'Mock signin only works for admin' } }
     },
     signOut: async () => {
-      cookieStore.set('rawflex-user-session', '', { path: '/', expires: new Date(0) })
+      cookieStore.set(rawflexSessionCookieNames.session, '', { path: '/', expires: new Date(0) })
+      cookieStore.set(rawflexSessionCookieNames.signature, '', { path: '/', expires: new Date(0) })
       cookieStore.set('mock-admin-logged-in', '', { path: '/', expires: new Date(0) })
       if (realAuth) await realAuth.signOut()
       return { error: null }
@@ -244,7 +252,7 @@ export async function createClient() {
       cookies: {
         getAll() {
           // Exclude our custom session cookie so Supabase SSR does not try to parse it
-          return cookieStore.getAll().filter(c => c.name !== 'rawflex-user-session')
+          return cookieStore.getAll().filter(c => c.name !== rawflexSessionCookieNames.session && c.name !== rawflexSessionCookieNames.signature)
         },
         setAll(cookiesToSet) {
           try {

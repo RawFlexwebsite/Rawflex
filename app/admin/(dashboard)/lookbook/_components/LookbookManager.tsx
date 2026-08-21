@@ -2,56 +2,39 @@
 
 import { useState, useTransition } from 'react'
 import Image from 'next/image'
-import {
-  createHomeBannerImage,
-  deleteHomeBannerImage,
-  setHomeBannerEnabled,
-  toggleHomeBannerImageStatus,
-  updateHomeBannerImageLink,
-} from '@/actions/admin/homeBanner'
-import { Trash2, Plus, Image as ImageIcon, Loader2, Link as LinkIcon } from 'lucide-react'
 import { CldUploadWidget } from 'next-cloudinary'
+import { Image as ImageIcon, Link as LinkIcon, Loader2, Plus, Trash2 } from 'lucide-react'
+import {
+  createLookbookImage,
+  deleteLookbookImage,
+  toggleLookbookImageStatus,
+  updateLookbookImageLink,
+} from '@/actions/admin/lookbook'
 
-type BannerImage = {
+type LookbookImage = {
   id: string
   image_url: string
   link_url: string | null
   is_active: boolean
 }
 
-export function HomeBannerManager({
-  initialEnabled,
+export function LookbookManager({
   initialImages,
 }: {
-  initialEnabled: boolean
-  initialImages: BannerImage[]
+  initialImages: LookbookImage[]
 }) {
-  const [enabled, setEnabled] = useState(initialEnabled)
-  const [images, setImages] = useState<BannerImage[]>(initialImages)
+  const [images, setImages] = useState<LookbookImage[]>(initialImages)
   const [linkDrafts, setLinkDrafts] = useState<Record<string, string>>(
     Object.fromEntries(initialImages.map((img) => [img.id, img.link_url || '']))
   )
   const [isPending, startTransition] = useTransition()
-
-  const activeCount = images.filter((i) => i.is_active).length
-
-  const handleToggleEnabled = () => {
-    const next = !enabled
-    setEnabled(next)
-    startTransition(async () => {
-      const res = await setHomeBannerEnabled(next)
-      if (!res.success) {
-        setEnabled(!next)
-        alert(res.error)
-      }
-    })
-  }
+  const activeCount = images.filter((img) => img.is_active).length
 
   const handleUploadSuccess = (result: any) => {
     const imageUrl = result.info.secure_url
 
     startTransition(async () => {
-      const res = await createHomeBannerImage(imageUrl, '')
+      const res = await createLookbookImage(imageUrl, '')
       if (res.success) {
         window.location.reload()
       } else {
@@ -61,64 +44,52 @@ export function HomeBannerManager({
   }
 
   const handleDelete = (id: string) => {
-    if (!confirm('Are you sure you want to delete this banner image?')) return
+    if (!confirm('Are you sure you want to delete this lookbook image?')) return
 
     startTransition(async () => {
-      const res = await deleteHomeBannerImage(id)
+      const res = await deleteLookbookImage(id)
       if (res.success) {
-        setImages(images.filter((i) => i.id !== id))
+        setImages(images.filter((img) => img.id !== id))
+      } else {
+        alert(res.error)
       }
     })
   }
 
   const handleToggleImage = (id: string, currentStatus: boolean) => {
     startTransition(async () => {
-      const res = await toggleHomeBannerImageStatus(id, !currentStatus)
+      const res = await toggleLookbookImageStatus(id, !currentStatus)
       if (res.success) {
-        setImages(images.map((i) => (i.id === id ? { ...i, is_active: !currentStatus } : i)))
+        setImages(images.map((img) => (img.id === id ? { ...img, is_active: !currentStatus } : img)))
+      } else {
+        alert(res.error)
       }
     })
   }
 
   const handleLinkBlur = (id: string) => {
     const linkUrl = linkDrafts[id] || ''
+
     startTransition(async () => {
-      await updateHomeBannerImageLink(id, linkUrl)
-      setImages(images.map((i) => (i.id === id ? { ...i, link_url: linkUrl || null } : i)))
+      const res = await updateLookbookImageLink(id, linkUrl)
+      if (res.success) {
+        setImages(images.map((img) => (img.id === id ? { ...img, link_url: linkUrl || null } : img)))
+      } else {
+        alert(res.error)
+      }
     })
   }
 
   return (
     <div className="space-y-6">
-      {/* Enable / Disable */}
-      <div className="bg-panel rounded-2xl shadow-sm border border-cream-line p-6 flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-bold text-ink">Show Banner on Homepage</h2>
-          <p className="text-sm text-ink/60 mt-1">
-            Turn this on once you've added at least one active image below.
-          </p>
-        </div>
-        <label className="relative inline-flex items-center cursor-pointer shrink-0">
-          <input
-            type="checkbox"
-            className="sr-only peer"
-            checked={enabled}
-            onChange={handleToggleEnabled}
-            disabled={isPending}
-          />
-          <div className="w-12 h-7 bg-panel2 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-ink/50 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-ink after:border-ink/50 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gold"></div>
-        </label>
-      </div>
-
-      {/* Images */}
       <div className="bg-panel rounded-2xl shadow-sm border border-cream-line p-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
             <ImageIcon className="w-5 h-5 text-ink/40" />
-            <h2 className="text-lg font-bold text-ink">Banner Images</h2>
+            <h2 className="text-lg font-bold text-ink">Lookbook Images</h2>
           </div>
 
-          {images.length < 8 ? (
+          {images.length < 12 ? (
             <CldUploadWidget
               signatureEndpoint="/api/cloudinary/sign"
               options={{
@@ -141,21 +112,21 @@ export function HomeBannerManager({
             </CldUploadWidget>
           ) : (
             <span className="text-sm font-medium text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-200">
-              Maximum 8 images reached
+              Maximum 12 images reached
             </span>
           )}
         </div>
 
         <p className="text-sm text-ink/60 mb-6 leading-relaxed">
-          Upload wide landscape images for the best hero fit. They auto-swipe as the homepage hero background. You have {activeCount} active image{activeCount === 1 ? '' : 's'}.
+          Upload lifestyle or outfit images for the homepage Lookbook. Add an optional link to send shoppers to a product, collection, or external page. You have {activeCount} active image{activeCount === 1 ? '' : 's'}.
         </p>
 
         <div className="space-y-4">
           {images.length === 0 ? (
             <div className="text-center py-12 border-2 border-dashed border-cream-line rounded-xl bg-cream-deep">
               <ImageIcon className="w-8 h-8 text-ink/40 mx-auto mb-3" />
-              <p className="text-sm font-medium text-ink">No banner images yet</p>
-              <p className="text-sm text-ink/60 mt-1">Upload a wide landscape image to start building the hero banner.</p>
+              <p className="text-sm font-medium text-ink">No lookbook images yet</p>
+              <p className="text-sm text-ink/60 mt-1">Upload an image to start building the homepage Lookbook.</p>
             </div>
           ) : (
             images.map((img, index) => (
@@ -166,12 +137,12 @@ export function HomeBannerManager({
                 }`}
               >
                 <div className="flex items-center gap-4 p-4">
-                  <div className="w-32 aspect-[3/1] shrink-0 rounded-lg overflow-hidden relative bg-panel2 border border-cream-line">
-                    <Image src={img.image_url} alt={`Banner ${index + 1}`} fill className="object-contain" />
+                  <div className="w-32 aspect-[1.55/1] shrink-0 rounded-lg overflow-hidden relative bg-panel2 border border-cream-line">
+                    <Image src={img.image_url} alt={`Lookbook ${index + 1}`} fill className="object-cover object-center" />
                   </div>
 
                   <div className="flex-1 min-w-0 space-y-2">
-                    <p className="text-sm font-semibold text-ink">Banner {index + 1}</p>
+                    <p className="text-sm font-semibold text-ink">Lookbook {index + 1}</p>
                     <div className="relative">
                       <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/40" />
                       <input
@@ -179,7 +150,7 @@ export function HomeBannerManager({
                         value={linkDrafts[img.id] ?? ''}
                         onChange={(e) => setLinkDrafts({ ...linkDrafts, [img.id]: e.target.value })}
                         onBlur={() => handleLinkBlur(img.id)}
-                        placeholder="/shop or https://... (optional link when clicked)"
+                        placeholder="/shop/product-slug or https://... (optional)"
                         className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-cream-line bg-cream-deep focus:outline-none focus:ring-1 focus:ring-orange-400 focus:border-orange-400 transition-all"
                       />
                     </div>
@@ -201,7 +172,7 @@ export function HomeBannerManager({
                       onClick={() => handleDelete(img.id)}
                       disabled={isPending}
                       className="p-2 text-ink/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 ml-1"
-                      title="Delete Image"
+                      title="Delete image"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>

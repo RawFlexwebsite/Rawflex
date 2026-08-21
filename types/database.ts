@@ -184,6 +184,7 @@ export interface HeroSlide {
   image_url: string
   button_text: string | null
   button_link: string | null
+  position: 'left' | 'right' | null
   display_order: number
   is_active: boolean
   created_at: string
@@ -191,6 +192,15 @@ export interface HeroSlide {
 }
 
 // ─── Announcements ───────────────────────────────────────────
+export interface LookbookImage {
+  id: string
+  image_url: string
+  link_url: string | null
+  is_active: boolean
+  display_order: number
+  created_at: string
+}
+
 export interface Announcement {
   id: string
   message: string

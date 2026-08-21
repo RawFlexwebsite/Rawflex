@@ -2,6 +2,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ProfileManager from './_components/ProfileManager'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const metadata = {
   title: 'My Profile | RAWFLEX',
@@ -15,13 +16,15 @@ export default async function CustomerProfilePage() {
   let adminProfile = null
   let orders = []
   if (user) {
-    const { data: profile } = await supabase
+    const adminSupabase = createAdminClient()
+
+    const { data: profile } = await adminSupabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single()
 
-    const { data: address } = await supabase
+    const { data: address } = await adminSupabase
       .from('addresses')
       .select('*')
       .eq('user_id', user.id)
@@ -41,7 +44,7 @@ export default async function CustomerProfilePage() {
       }
     }
 
-    const { data: userOrders } = await supabase
+    const { data: userOrders } = await adminSupabase
       .from('orders')
       .select('*')
       .eq('user_id', user.id)

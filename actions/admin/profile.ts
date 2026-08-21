@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { revalidatePath } from 'next/cache'
 
 export type ProfileActionResult = {
@@ -9,18 +9,22 @@ export type ProfileActionResult = {
 }
 
 export async function getAdminProfile() {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) {
+    return null
+  }
+  const supabase = admin.adminClient
 
   // Fetch admin profile
-  const { data: admin } = await supabase
+  const { data: adminProfile } = await supabase
     .from('profiles')
     .select('*')
     .eq('role', 'admin')
     .single()
 
-  return admin || {
-    id: 'mock-admin-id',
-    email: 'admin@rawflex.in',
+  return adminProfile || {
+    id: '',
+    email: '',
     full_name: 'Admin',
     phone: '+91 87964 59447'
   }
@@ -29,7 +33,9 @@ export async function getAdminProfile() {
 export async function updateAdminProfile(
   formData: FormData
 ): Promise<ProfileActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   const fullName = formData.get('fullName') as string
   const email = formData.get('email') as string

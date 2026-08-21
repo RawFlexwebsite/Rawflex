@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface HeroSlide {
   id?: string;
@@ -12,6 +12,29 @@ interface HeroSlide {
   button_link?: string | null;
   image_url?: string | null;
 }
+
+interface HeroBackgroundImage {
+  id?: string;
+  image_url: string;
+}
+
+interface HeroLeftText {
+  eyebrow: string;
+  headline_top: string;
+  headline_accent: string;
+  subtitle: string;
+  button_text: string;
+  button_link: string;
+}
+
+const DEFAULT_HERO_LEFT_TEXT: HeroLeftText = {
+  eyebrow: "NEW SEASON '24",
+  headline_top: "MADE FOR",
+  headline_accent: "THE STREETS",
+  subtitle: "Oversized silhouettes. Premium fabrics.\nDesigned to move with you.",
+  button_text: "SHOP NOW",
+  button_link: "/shop",
+};
 
 const FALLBACK_SLIDES: HeroSlide[] = [
   {
@@ -56,11 +79,27 @@ function slideLines(slide: HeroSlide) {
 
 export default function Hero({
   slides = [],
+  backgroundImages = [],
+  leftText = DEFAULT_HERO_LEFT_TEXT,
 }: {
   slides?: HeroSlide[];
+  backgroundImages?: HeroBackgroundImage[];
+  leftText?: HeroLeftText;
 }) {
   const [current, setCurrent] = useState(0);
+  const [backgroundIndex, setBackgroundIndex] = useState(0);
   const slidesData = slides.length > 0 ? slides : FALLBACK_SLIDES;
+  const heroBackgroundImages = backgroundImages;
+
+  useEffect(() => {
+    if (heroBackgroundImages.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setBackgroundIndex((i) => (i + 1) % heroBackgroundImages.length);
+    }, 4500);
+
+    return () => clearInterval(timer);
+  }, [heroBackgroundImages.length]);
 
   const pairs: HeroSlide[][] = [];
   for (let i = 0; i < slidesData.length; i += 2) {
@@ -80,16 +119,25 @@ export default function Hero({
       className="relative w-full overflow-hidden bg-[#0a0909]"
       style={{ minHeight: "100vh" }}
     >
-      {/* ── Full-bleed environment background (static) ── */}
+      {/* ── Full-bleed environment background ── */}
       <div className="absolute inset-x-0 z-0" style={{ top: "13%", height: "100%" }}>
-        <Image
-          src="/hero-img.png"
-          alt="Hero background"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center"
-        />
+        {heroBackgroundImages.map((background, i) => {
+          const isCurrent = i === backgroundIndex % heroBackgroundImages.length;
+
+          return (
+            <Image
+              key={background.id || background.image_url}
+              src={background.image_url}
+              alt="Hero background"
+              fill
+              priority={i === 0}
+              sizes="100vw"
+              className={`object-cover object-center transition-opacity duration-700 ${
+                isCurrent ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          );
+        })}
         {/* gradient overlays for text legibility */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#0a0909] via-[#0a0909]/50 to-[#0a0909]/5" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0909]/90 via-transparent to-[#0a0909]/40" />
@@ -122,7 +170,7 @@ export default function Hero({
             {/* Season tag */}
             <div className="flex items-center gap-3 mb-3">
               <span className="text-[#D4A82C] text-xs font-bold tracking-[0.22em] uppercase">
-                NEW SEASON '24
+                {leftText.eyebrow}
               </span>
               <span className="w-10 h-[1.5px] bg-[#D4A82C]" />
             </div>
@@ -133,7 +181,7 @@ export default function Hero({
                 className="block text-white"
                 style={{ fontSize: "clamp(1.85rem, 6vw, 5.25rem)" }}
               >
-                MADE FOR
+                {leftText.headline_top}
               </span>
               <span
                 className="block normal-case"
@@ -146,7 +194,7 @@ export default function Hero({
                   transformOrigin: "left center",
                 }}
               >
-                THE STREETS
+                {leftText.headline_accent}
               </span>
             </h1>
 
@@ -155,17 +203,16 @@ export default function Hero({
               className="mt-3 max-w-[440px] text-[11px] md:text-base leading-relaxed whitespace-pre-line"
               style={{ color: "rgba(220,215,210,0.65)" }}
             >
-              Oversized silhouettes. Premium fabrics.
-              Designed to move with you.
+              {leftText.subtitle}
             </p>
 
             {/* CTA */}
             <div className="flex justify-start mt-5 lg:mt-9">
               <a
-                href="/shop"
+                href={leftText.button_link}
                 className="inline-flex items-center gap-2 border border-[#D4A82C] text-[#D4A82C] font-bold text-[10px] md:text-sm tracking-[0.18em] uppercase px-5 py-3 md:px-7 md:py-4 hover:bg-[#D4A82C] hover:text-[#0a0909] transition-all duration-300"
               >
-                SHOP NOW
+                {leftText.button_text}
                 <svg
                   className="w-3 h-3 md:w-4 md:h-4"
                   fill="none"

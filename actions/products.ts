@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -51,7 +52,9 @@ export async function createProduct(
   _prevState: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   const name = formData.get('name') as string
   const categoryId = formData.get('category_id') as string
@@ -109,7 +112,9 @@ export async function updateProduct(
   _prevState: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   const id = formData.get('id') as string
   const name = formData.get('name') as string
@@ -167,7 +172,9 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(id: string): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase.from('products').delete().eq('id', id)
 
@@ -185,7 +192,9 @@ export async function saveProductInformation(
   productId: string,
   items: { id?: string; label: string; value: string; display_order: number }[]
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   // Delete existing items and re-insert
   const { error: deleteError } = await supabase
@@ -225,7 +234,9 @@ export async function addProductImage(
   imageUrl: string,
   colorName?: string | null
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   // Get max sort_order
   const { data: maxSort } = await supabase
@@ -262,7 +273,9 @@ export async function addProductImage(
 }
 
 export async function deleteProductImage(imageId: string, productId: string): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   // Check if this is the featured image before deleting
   const { data: image } = await supabase
@@ -310,7 +323,9 @@ export async function setFeaturedImage(
   productId: string,
   imageUrl: string
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase
     .from('products')
@@ -329,7 +344,9 @@ export async function reorderProductImages(
   productId: string,
   orderedIds: string[]
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   for (let i = 0; i < orderedIds.length; i++) {
     await supabase
@@ -348,7 +365,9 @@ export async function updateProductImageColor(
   productId: string,
   colorName: string
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
   const { error } = await supabase
     .from('product_images')
     .update({ color_name: colorName.trim() || null })
@@ -368,7 +387,9 @@ export async function createProductVariant(
   _prevState: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   const productId = formData.get('product_id') as string
   const variantName = formData.get('variant_name') as string
@@ -408,7 +429,9 @@ export async function bulkCreateProductVariants(
     is_active: boolean
   }[]
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   if (!productId || variants.length === 0) {
     return { error: 'Invalid data' }
@@ -433,7 +456,9 @@ export async function updateProductVariant(
   _prevState: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   const id = formData.get('id') as string
   const productId = formData.get('product_id') as string
@@ -470,7 +495,9 @@ export async function deleteProductVariant(
   id: string,
   productId: string
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase.from('product_variants').delete().eq('id', id)
 
@@ -487,7 +514,9 @@ export async function saveProductFaqs(
   productId: string,
   items: { id?: string; question: string; answer: string; display_order: number }[]
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   // Delete existing FAQs and re-insert
   const { error: deleteError } = await supabase

@@ -3,13 +3,14 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function proxy(request: NextRequest) {
   const hasMockCookie = request.cookies.get('mock-admin-logged-in')?.value === 'true'
   const hasCustomCookie = request.cookies.get('rawflex-user-session')?.value
+  const hasCustomCookieSignature = request.cookies.get('rawflex-user-session-sig')?.value
   
   // Check if any supabase auth cookie exists (standard naming format is sb-<project-id>-auth-token)
   const hasSupabaseCookie = request.cookies.getAll().some(
     (c) => c.name.startsWith('sb-') && c.name.includes('-auth-token')
   )
 
-  const loggedIn = hasMockCookie || hasSupabaseCookie || !!hasCustomCookie
+  const loggedIn = hasMockCookie || hasSupabaseCookie || (!!hasCustomCookie && !!hasCustomCookieSignature)
 
   // Protected paths
   // Note: /checkout is intentionally not gated here — it collects the

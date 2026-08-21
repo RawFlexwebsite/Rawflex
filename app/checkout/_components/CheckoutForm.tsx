@@ -215,7 +215,7 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
           setPlacedOrder({
             order_number: orderData.orderNumber,
             id: orderData.orderId,
-            total: grandTotal,
+            total: orderData.totalAmount,
             items: [...cart],
             shippingAddress: addressString
           })
@@ -249,7 +249,7 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
     // Save profile to localstorage on order place
     localStorage.setItem('rawflex-customer-profile', JSON.stringify(profile))
 
-    const res = await processCheckout(profile, cart, method)
+    const res = await processCheckout(profile, cart, method, activeCoupon ? couponCode : undefined)
 
     if (res.success === false) {
       showToast(res.error || 'Failed to place order.', 'error')
@@ -260,7 +260,7 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
         setPlacedOrder({
           order_number: res.order_number,
           id: res.orderId,
-          total: grandTotal,
+          total: res.totalAmount,
           items: [...cart],
           shippingAddress: addressString
         })

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function addAddress(formData: FormData) {
@@ -8,6 +9,7 @@ export async function addAddress(formData: FormData) {
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Unauthorized' }
+  const adminSupabase = createAdminClient()
 
   const fullName = formData.get('full_name')?.toString()
   const phone = formData.get('phone')?.toString()
@@ -24,10 +26,10 @@ export async function addAddress(formData: FormData) {
 
   // If this address is set as default, we need to unset any other default first
   if (isDefault) {
-    await supabase.from('addresses').update({ is_default: false }).eq('user_id', user.id)
+    await adminSupabase.from('addresses').update({ is_default: false }).eq('user_id', user.id)
   } else {
     // If it's the first address, make it default automatically
-    const { count } = await supabase.from('addresses').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+    const { count } = await adminSupabase.from('addresses').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
     if (count === 0) {
       // It's the first one, make it default regardless of checkbox
     }
@@ -36,7 +38,7 @@ export async function addAddress(formData: FormData) {
   // Double check the count trick
   const finalIsDefault = isDefault ? true : false
 
-  const { error } = await supabase
+  const { error } = await adminSupabase
     .from('addresses')
     .insert([{
       user_id: user.id,
@@ -55,9 +57,9 @@ export async function addAddress(formData: FormData) {
   // we could forcefully set it. For simplicity, let's just insert what they asked,
   // but if it's the first one, we'll force it.
   if (!finalIsDefault) {
-    const { count } = await supabase.from('addresses').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+    const { count } = await adminSupabase.from('addresses').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
     if (count === 1) { // It's 1 because we just inserted it
-      await supabase.from('addresses').update({ is_default: true }).eq('user_id', user.id)
+      await adminSupabase.from('addresses').update({ is_default: true }).eq('user_id', user.id)
     }
   }
 
@@ -74,6 +76,7 @@ export async function updateAddress(id: string, formData: FormData) {
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Unauthorized' }
+  const adminSupabase = createAdminClient()
 
   const fullName = formData.get('full_name')?.toString()
   const phone = formData.get('phone')?.toString()
@@ -89,10 +92,10 @@ export async function updateAddress(id: string, formData: FormData) {
   }
 
   if (isDefault) {
-    await supabase.from('addresses').update({ is_default: false }).eq('user_id', user.id)
+    await adminSupabase.from('addresses').update({ is_default: false }).eq('user_id', user.id)
   }
 
-  const { error } = await supabase
+  const { error } = await adminSupabase
     .from('addresses')
     .update({
       full_name: fullName,
@@ -120,8 +123,9 @@ export async function deleteAddress(id: string) {
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Unauthorized' }
+  const adminSupabase = createAdminClient()
 
-  const { error } = await supabase
+  const { error } = await adminSupabase
     .from('addresses')
     .delete()
     .eq('id', id)
@@ -140,12 +144,13 @@ export async function setDefaultAddress(id: string) {
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Unauthorized' }
+  const adminSupabase = createAdminClient()
 
   // Unset all others
-  await supabase.from('addresses').update({ is_default: false }).eq('user_id', user.id)
+  await adminSupabase.from('addresses').update({ is_default: false }).eq('user_id', user.id)
 
   // Set the target
-  const { error } = await supabase
+  const { error } = await adminSupabase
     .from('addresses')
     .update({ is_default: true })
     .eq('id', id)

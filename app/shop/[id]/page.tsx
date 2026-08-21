@@ -380,14 +380,17 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const { data: reviewsData } = await supabase
     .from('reviews')
     .select(`
-      id, rating, comment, created_at,
+      id, rating, review_text, created_at,
       profiles:user_id ( full_name )
     `)
     .eq('product_id', productData.id)
     .eq('is_approved', true)
     .order('created_at', { ascending: false });
 
-  const reviews = reviewsData || [];
+  const reviews = (reviewsData || []).map((review: any) => ({
+    ...review,
+    comment: review.review_text,
+  }));
 
   return renderProductPage(productData, categoryName, similarProducts, reviews)
 }

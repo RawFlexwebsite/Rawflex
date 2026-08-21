@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export type ActionResult = {
@@ -19,6 +20,7 @@ export async function submitReview(
     if (authError || !user) {
       return { error: 'You must be logged in to submit a review.' }
     }
+    const adminSupabase = createAdminClient()
 
     const productId = formData.get('product_id') as string
     const rating = parseInt(formData.get('rating') as string)
@@ -32,14 +34,14 @@ export async function submitReview(
       return { error: 'Please select a valid rating between 1 and 5.' }
     }
 
-    const { error: insertError } = await supabase
+    const { error: insertError } = await adminSupabase
       .from('reviews')
       .insert({
         id: crypto.randomUUID(),
         product_id: productId,
         user_id: user.id,
         rating,
-        comment: comment ? comment.trim() : null,
+        review_text: comment ? comment.trim() : null,
         is_approved: false // Reviews must be approved by admin
       })
 

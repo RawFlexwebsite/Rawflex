@@ -25,7 +25,7 @@ export default async function ShopPage({
     .select(`
       id, name, slug, category_id, is_active, badge, rating, price, oldPrice, featured_image_url, color_group_id, color_name, created_at,
       product_images ( image_url ),
-      product_variants ( price, original_price )
+      product_variants ( id, variant_name, price, original_price, stock_quantity, is_active )
     `)
     .eq("is_active", true)
     .order('created_at', { ascending: false });
@@ -64,6 +64,7 @@ export default async function ShopPage({
 
   const products = (productsData || []).map((p: any) => ({
     id: p.id,
+    variant_id: p.product_variants?.[0]?.id || null,
     name: p.name,
     slug: p.slug,
     category_id: p.category_id,
@@ -76,11 +77,13 @@ export default async function ShopPage({
     colorCount: p.color_group_id ? colorGroupCounts[p.color_group_id] || 1 : 1,
   }));
 
-  const selectedCategory = resolvedSearchParams.category || '';
-
   const allProducts = products;
 
   const categories = categoriesData || [];
+  const categoryParam = resolvedSearchParams.category || '';
+  const selectedCategory = categoryParam
+    ? categories.find((category: any) => category.id === categoryParam || category.slug === categoryParam)?.id || categoryParam
+    : '';
 
   return (
     <>

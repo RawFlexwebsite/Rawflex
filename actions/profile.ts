@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function updateProfile(formData: FormData) {
@@ -10,6 +11,7 @@ export async function updateProfile(formData: FormData) {
   if (!user) {
     return { success: false, error: 'Unauthorized' }
   }
+  const adminSupabase = createAdminClient()
 
   const fullName = formData.get('full_name')?.toString()
   const phone = formData.get('phone')?.toString()
@@ -18,7 +20,7 @@ export async function updateProfile(formData: FormData) {
     return { success: false, error: 'Full Name is required' }
   }
 
-  const { error } = await supabase
+  const { error } = await adminSupabase
     .from('profiles')
     .update({ 
       full_name: fullName,
@@ -50,9 +52,10 @@ export async function updateCustomerFullProfile(data: {
   if (!user) {
     return { success: false, error: 'Unauthorized' }
   }
+  const adminSupabase = createAdminClient()
 
   // 1. Update profiles table
-  const { error: profileError } = await supabase
+  const { error: profileError } = await adminSupabase
     .from('profiles')
     .update({
       full_name: data.fullName,
@@ -65,7 +68,7 @@ export async function updateCustomerFullProfile(data: {
   }
 
   // 2. Create or update addresses table
-  const { data: existingAddress } = await supabase
+  const { data: existingAddress } = await adminSupabase
     .from('addresses')
     .select('id')
     .eq('user_id', user.id)
@@ -74,7 +77,7 @@ export async function updateCustomerFullProfile(data: {
     .maybeSingle()
 
   if (existingAddress) {
-    const { error: addressError } = await supabase
+    const { error: addressError } = await adminSupabase
       .from('addresses')
       .update({
         full_name: data.fullName,
@@ -91,7 +94,7 @@ export async function updateCustomerFullProfile(data: {
       return { success: false, error: 'Failed to update address: ' + addressError.message }
     }
   } else {
-    const { error: addressError } = await supabase
+    const { error: addressError } = await adminSupabase
       .from('addresses')
       .insert({
         user_id: user.id,

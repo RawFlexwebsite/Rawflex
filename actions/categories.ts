@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -23,7 +24,9 @@ export async function createCategory(
   _prevState: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   const name = formData.get('name') as string
   const description = formData.get('description') as string
@@ -60,7 +63,9 @@ export async function updateCategory(
   _prevState: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   const id = formData.get('id') as string
   const name = formData.get('name') as string
@@ -97,7 +102,9 @@ export async function updateCategory(
 }
 
 export async function deleteCategory(id: string): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase.from('categories').delete().eq('id', id)
 
@@ -113,7 +120,9 @@ export async function toggleCategoryStatus(
   id: string,
   isActive: boolean
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase
     .from('categories')

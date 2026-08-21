@@ -7,11 +7,83 @@ import BestSellersLookbook from "@/components/BestSellersLookbook";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const PRODUCT_SELECT = `
   id, name, slug, category_id, is_featured, is_active, badge, rating, color_name,
   product_images ( image_url ),
-  product_variants ( price, original_price )
+  product_variants ( id, variant_name, price, original_price, stock_quantity, is_active )
 `;
+
+const HOME_CATEGORY_LIMIT = 7;
+
+function isOversizedTshirtCategory(category: any) {
+  const categoryText = `${category.id || ""} ${category.slug || ""} ${category.name || ""}`.toLowerCase();
+
+  return (
+    categoryText.includes("oversized") &&
+    (categoryText.includes("tee") ||
+      categoryText.includes("tshirt") ||
+      categoryText.includes("t-shirt"))
+  );
+}
+
+function isNewDropsCategory(category: any) {
+  const categoryText = `${category.id || ""} ${category.slug || ""} ${category.name || ""}`.toLowerCase();
+
+  return categoryText.includes("new") && categoryText.includes("drop");
+}
+
+function isBestSellersCategory(category: any) {
+  const categoryText = `${category.id || ""} ${category.slug || ""} ${category.name || ""}`.toLowerCase();
+
+  return categoryText.includes("best") && categoryText.includes("seller");
+}
+
+const DEFAULT_HERO_LEFT_TEXT = {
+  eyebrow: "NEW SEASON '24",
+  headline_top: "MADE FOR",
+  headline_accent: "THE STREETS",
+  subtitle: "Oversized silhouettes. Premium fabrics.\nDesigned to move with you.",
+  button_text: "SHOP NOW",
+  button_link: "/shop",
+};
+
+const DEFAULT_OVERSIZED_SECTION = {
+  background_image_url: "/OVERSIZED..png",
+  headline_top: "OVERSIZED.",
+  headline_accent: "ALWAYS.",
+  subtitle: "Relaxed fit. Maximum impact.",
+  button_text: "SHOP OVERSIZED",
+  button_link: "/shop?category=oversized-tees",
+};
+
+function heroLeftText(settings: any) {
+  const source = settings?.announcements?.hero_left_text || {};
+
+  return {
+    eyebrow: source.eyebrow || DEFAULT_HERO_LEFT_TEXT.eyebrow,
+    headline_top: source.headline_top || DEFAULT_HERO_LEFT_TEXT.headline_top,
+    headline_accent: source.headline_accent || DEFAULT_HERO_LEFT_TEXT.headline_accent,
+    subtitle: source.subtitle || DEFAULT_HERO_LEFT_TEXT.subtitle,
+    button_text: source.button_text || DEFAULT_HERO_LEFT_TEXT.button_text,
+    button_link: source.button_link || DEFAULT_HERO_LEFT_TEXT.button_link,
+  };
+}
+
+function oversizedSectionSettings(settings: any) {
+  const source = settings?.announcements?.oversized_section || {};
+
+  return {
+    background_image_url: source.background_image_url || DEFAULT_OVERSIZED_SECTION.background_image_url,
+    headline_top: source.headline_top || DEFAULT_OVERSIZED_SECTION.headline_top,
+    headline_accent: source.headline_accent || DEFAULT_OVERSIZED_SECTION.headline_accent,
+    subtitle: source.subtitle || DEFAULT_OVERSIZED_SECTION.subtitle,
+    button_text: source.button_text || DEFAULT_OVERSIZED_SECTION.button_text,
+    button_link: source.button_link || DEFAULT_OVERSIZED_SECTION.button_link,
+  };
+}
 
 export default async function Home() {
   const supabase = await createClient();
@@ -20,8 +92,11 @@ export default async function Home() {
     { data: categoriesData },
     { data: allProducts },
     { data: heroSlidesData },
+    { data: settingsData },
+    { data: homeBannerImagesData },
+    { data: lookbookImagesData, error: lookbookImagesError },
   ] = await Promise.all([
-    supabase.from("categories").select("*").eq("is_active", true),
+    supabase.from("categories").select("*"),
     supabase
       .from("products")
       .select(PRODUCT_SELECT)
@@ -33,6 +108,23 @@ export default async function Home() {
       .eq("is_active", true)
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: true }),
+    supabase
+      .from("settings")
+      .select("home_banner_enabled, announcements")
+      .eq("id", "site_settings")
+      .single(),
+    supabase
+      .from("home_banner_images")
+      .select("id, image_url, link_url")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true })
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("lookbook_images")
+      .select("id, image_url, link_url")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true })
+      .order("created_at", { ascending: true }),
   ]);
 
   // Product counts per category
@@ -41,13 +133,26 @@ export default async function Home() {
     return acc;
   }, {});
 
-  const categories = (categoriesData || []).map((c: any) => ({
+  const adminCategories = categoriesData || [];
+  const activeHomeCategories = adminCategories.filter(
+    (category: any) => category.is_active || isOversizedTshirtCategory(category)
+  );
+  const categories = activeHomeCategories.map((c: any) => ({
     ...c,
     count: `${productCounts[c.id] || 0} styles`,
   }));
+  const oversizedCategory = categories.find(isOversizedTshirtCategory);
+  const homeCategories = oversizedCategory
+    ? [
+        ...categories
+          .filter((category: any) => category.id !== oversizedCategory.id)
+          .slice(0, HOME_CATEGORY_LIMIT - 1),
+        oversizedCategory,
+      ]
+    : categories.slice(0, HOME_CATEGORY_LIMIT);
 
   const categoryName = (id: string) =>
-    (categoriesData || []).find((c: any) => c.id === id)?.name || id;
+    adminCategories.find((c: any) => c.id === id)?.name || id;
 
   const formatProducts = (rows: any[]) =>
     (rows || []).map((p: any) => {
@@ -56,6 +161,8 @@ export default async function Home() {
       const original = variant?.original_price || p.oldPrice || null;
       return {
         id: p.id,
+        variant_id: variant?.id || null,
+        category_id: p.category_id,
         slug: p.slug,
         name: p.name,
         price,
@@ -71,31 +178,49 @@ export default async function Home() {
 
   const products = formatProducts(allProducts || []);
 
-  // New drops: newest products
-  const newDrops = products.filter((p) => p.category_name === "New Drops");
-  const newDropItems = (newDrops.length >= 4 ? newDrops : products).slice(0, 4);
+  // New drops: products assigned to the admin "New Drops" category
+  const newDropsCategory = adminCategories.find(isNewDropsCategory);
+  const newDropItems = newDropsCategory
+    ? products.filter((p) => p.category_id === newDropsCategory.id).slice(0, 4)
+    : [];
 
-  // Best sellers: featured products (fallback newest)
-  const featuredProducts = products.filter((p) => p.is_featured);
-  const bestSellers = (featuredProducts.length >= 4 ? featuredProducts : products).slice(0, 6);
+  const bestSellersCategory = adminCategories.find(isBestSellersCategory);
+  const bestSellers = bestSellersCategory
+    ? products.filter((p) => p.category_id === bestSellersCategory.id).slice(0, 6)
+    : products.filter((p) => p.is_featured).slice(0, 6);
 
-  const heroSlides = (heroSlidesData || []).map((s: any) => ({
-    id: s.id,
-    image_url: s.image_url,
-    title: s.title,
-    subtitle: s.subtitle,
-    button_text: s.button_text,
-    button_link: s.button_link,
-  }));
+  const heroSlides = (heroSlidesData || [])
+    .filter((s: any) => !s.position || s.position === "right")
+    .map((s: any) => ({
+      id: s.id,
+      image_url: s.image_url,
+      title: s.title,
+      subtitle: s.subtitle,
+      button_text: s.button_text,
+      button_link: s.button_link,
+    }));
+  const homeBannerImages = homeBannerImagesData || [];
+  const showHomeBanner = !!settingsData?.home_banner_enabled && homeBannerImages.length > 0;
+  const heroText = heroLeftText(settingsData);
+  const oversizedSettings = oversizedSectionSettings(settingsData);
+  const lookbookImages = lookbookImagesError ? undefined : lookbookImagesData || [];
 
   return (
     <main className="overflow-x-hidden">
       <Header />
-      <Hero slides={heroSlides} />
-      <Categories categories={categories || []} />
-      <NewDrops products={newDropItems} />
-      <OversizedPromo />
-      <BestSellersLookbook products={bestSellers} />
+      <Hero
+        slides={heroSlides}
+        backgroundImages={showHomeBanner ? homeBannerImages : []}
+        leftText={heroText}
+      />
+      <Categories categories={homeCategories} />
+      <NewDrops products={newDropItems} categoryId={newDropsCategory?.id} />
+      <OversizedPromo settings={oversizedSettings} />
+      <BestSellersLookbook
+        products={bestSellers}
+        categoryId={bestSellersCategory?.id}
+        lookbookImages={lookbookImages}
+      />
       <Footer />
     </main>
   );

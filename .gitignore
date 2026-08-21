@@ -33,6 +33,7 @@ build/
 # local env files
 .env
 .env*.local
+Rawflex.env
 
 # vercel
 .vercel

@@ -6,6 +6,8 @@ import { useCart } from "@/context/CartContext";
 
 interface NewDropProduct {
   id: string;
+  variant_id?: string | null;
+  category_id?: string;
   slug?: string;
   name: string;
   price: number;
@@ -21,11 +23,14 @@ function formatINR(n: number) {
 
 export default function NewDrops({
   products = [],
+  categoryId,
 }: {
   products?: NewDropProduct[];
+  categoryId?: string;
 }) {
   const { addToCart } = useCart();
   const items = products.slice(0, 4);
+  const allDropsHref = categoryId ? `/shop?category=${categoryId}` : "/shop";
 
   return (
     <section id="new-drops" className="relative pt-4 pb-10 md:pt-5 md:pb-14 bg-[#0a0909]">
@@ -46,7 +51,7 @@ export default function NewDrops({
               it&apos;s gone.
             </p>
             <Link
-              href="/shop"
+              href={allDropsHref}
               className="mt-5 sm:mt-6 inline-flex items-center gap-2 text-[#D4A82C] font-bold text-[12px] sm:text-[13px] tracking-[0.12em] uppercase hover:gap-3 transition-all"
             >
               View all drops
@@ -92,6 +97,7 @@ export default function NewDrops({
                             price,
                             image_url: p.image_url,
                             category_name: p.category_name || "New Drops",
+                            variant_id: p.variant_id || undefined,
                           })
                         }
                         aria-label="Add to cart"

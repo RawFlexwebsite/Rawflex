@@ -3,6 +3,36 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+type HeroPosition = 'left' | 'right'
+
+export type HeroLeftText = {
+  eyebrow: string
+  headline_top: string
+  headline_accent: string
+  subtitle: string
+  button_text: string
+  button_link: string
+}
+
+const DEFAULT_HERO_LEFT_TEXT: HeroLeftText = {
+  eyebrow: "NEW SEASON '24",
+  headline_top: 'MADE FOR',
+  headline_accent: 'THE STREETS',
+  subtitle: 'Oversized silhouettes. Premium fabrics.\nDesigned to move with you.',
+  button_text: 'SHOP NOW',
+  button_link: '/shop',
+}
+
+function isMissingPositionColumnError(error: any) {
+  const message = `${error?.message || ''} ${error?.details || ''}`.toLowerCase()
+
+  return (
+    error?.code === 'PGRST204' &&
+    message.includes('position') &&
+    message.includes('hero_slides')
+  )
+}
+
 async function checkAdminAuth(supabase: any) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return false
@@ -28,30 +58,142 @@ export async function getHeroSlides() {
   return data || []
 }
 
-export async function createHeroSlide(imageUrl: string, position: 'left' | 'right' = 'right') {
+function parseHeroLeftText(settings: any): HeroLeftText {
+  const source = settings?.announcements?.hero_left_text || {}
+
+  return {
+    eyebrow: source.eyebrow || DEFAULT_HERO_LEFT_TEXT.eyebrow,
+    headline_top: source.headline_top || DEFAULT_HERO_LEFT_TEXT.headline_top,
+    headline_accent: source.headline_accent || DEFAULT_HERO_LEFT_TEXT.headline_accent,
+    subtitle: source.subtitle || DEFAULT_HERO_LEFT_TEXT.subtitle,
+    button_text: source.button_text || DEFAULT_HERO_LEFT_TEXT.button_text,
+    button_link: source.button_link || DEFAULT_HERO_LEFT_TEXT.button_link,
+  }
+}
+
+export async function getHeroLeftText(): Promise<HeroLeftText> {
+  const supabase = await createClient()
+
+  const { data } = await supabase
+    .from('settings')
+    .select('announcements')
+    .eq('id', 'site_settings')
+    .single()
+
+  return parseHeroLeftText(data)
+}
+
+export async function updateHeroLeftText(fields: HeroLeftText) {
   const supabase = await createClient()
   const isAdmin = await checkAdminAuth(supabase)
   if (!isAdmin) return { success: false, error: 'Unauthorized' }
 
-  // Check limit per position
-  const { count } = await supabase
+  const { data: settings } = await supabase
+    .from('settings')
+    .select('announcements')
+    .eq('id', 'site_settings')
+    .single()
+
+  const existingAnnouncements = settings?.announcements
+  const announcements =
+    existingAnnouncements && !Array.isArray(existingAnnouncements)
+      ? existingAnnouncements
+      : { items: existingAnnouncements || [] }
+
+  const heroLeftText = {
+    eyebrow: fields.eyebrow.trim() || DEFAULT_HERO_LEFT_TEXT.eyebrow,
+    headline_top: fields.headline_top.trim() || DEFAULT_HERO_LEFT_TEXT.headline_top,
+    headline_accent: fields.headline_accent.trim() || DEFAULT_HERO_LEFT_TEXT.headline_accent,
+    subtitle: fields.subtitle.trim() || DEFAULT_HERO_LEFT_TEXT.subtitle,
+    button_text: fields.button_text.trim() || DEFAULT_HERO_LEFT_TEXT.button_text,
+    button_link: fields.button_link.trim() || DEFAULT_HERO_LEFT_TEXT.button_link,
+  }
+
+  const { error } = await supabase
+    .from('settings')
+    .upsert(
+      {
+        id: 'site_settings',
+        announcements: {
+          ...announcements,
+          hero_left_text: heroLeftText,
+        },
+      },
+      { onConflict: 'id' }
+    )
+
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath('/')
+  revalidatePath('/admin/hero-slides')
+  return { success: true }
+}
+
+async function getHeroSlideCount(supabase: any, position: HeroPosition) {
+  const positionCountResult = await supabase
     .from('hero_slides')
-    .select('*', { count: 'exact', head: true })
+    .select('id', { count: 'exact', head: true })
     .eq('position', position)
 
+  if (!positionCountResult.error) {
+    return {
+      count: positionCountResult.count || 0,
+      hasPositionColumn: true,
+      error: null,
+    }
+  }
+
+  if (!isMissingPositionColumnError(positionCountResult.error)) {
+    return {
+      count: 0,
+      hasPositionColumn: true,
+      error: positionCountResult.error,
+    }
+  }
+
+  const totalCountResult = await supabase
+    .from('hero_slides')
+    .select('id', { count: 'exact', head: true })
+
+  return {
+    count: totalCountResult.count || 0,
+    hasPositionColumn: false,
+    error: totalCountResult.error,
+  }
+}
+
+export async function createHeroSlide(imageUrl: string, position: HeroPosition = 'right') {
+  const supabase = await createClient()
+  const isAdmin = await checkAdminAuth(supabase)
+  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+
+  const { count, hasPositionColumn, error: countError } = await getHeroSlideCount(supabase, position)
+
+  if (countError) return { success: false, error: countError.message }
+
   if (count && count >= 5) {
-    return { success: false, error: `Maximum 5 slides allowed for the ${position} side.` }
+    const limitScope = hasPositionColumn ? `the ${position} side` : 'hero section'
+    return { success: false, error: `Maximum 5 slides allowed for ${limitScope}.` }
+  }
+
+  if (!hasPositionColumn && position === 'left') {
+    return {
+      success: false,
+      error: 'The left hero area requires the hero_slides.position database migration. Right area slides can still be managed.',
+    }
+  }
+
+  const slide = {
+    id: crypto.randomUUID(),
+    image_url: imageUrl,
+    is_active: true,
+    display_order: count || 0,
+    ...(hasPositionColumn ? { position } : {}),
   }
 
   const { error } = await supabase
     .from('hero_slides')
-    .insert([{
-      id: crypto.randomUUID(),
-      image_url: imageUrl,
-      is_active: true,
-      display_order: count || 0,
-      position: position
-    }])
+    .insert([slide])
 
   if (error) return { success: false, error: error.message }
 
