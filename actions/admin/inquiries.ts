@@ -1,30 +1,13 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { revalidatePath } from 'next/cache'
 
-async function checkAdminAuth(supabase: any) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return false
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  return profile?.role === 'admin'
-}
-
 export async function getInquiries() {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return []
+  const admin = await requireAdmin()
+  if (admin.ok === false) return []
 
-  const { createAdminClient } = await import('@/lib/supabase/admin')
-  const adminClient = createAdminClient()
-
-  const { data } = await adminClient
+  const { data } = await admin.adminClient
     .from('contact_inquiries')
     .select('*')
     .order('created_at', { ascending: false })
@@ -33,14 +16,10 @@ export async function getInquiries() {
 }
 
 export async function markInquiryAsRead(id: string) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
 
-  const { createAdminClient } = await import('@/lib/supabase/admin')
-  const adminClient = createAdminClient()
-
-  const { error } = await adminClient
+  const { error } = await admin.adminClient
     .from('contact_inquiries')
     .update({ status: 'read' })
     .eq('id', id)
@@ -52,14 +31,10 @@ export async function markInquiryAsRead(id: string) {
 }
 
 export async function deleteInquiry(id: string) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
 
-  const { createAdminClient } = await import('@/lib/supabase/admin')
-  const adminClient = createAdminClient()
-
-  const { error } = await adminClient
+  const { error } = await admin.adminClient
     .from('contact_inquiries')
     .delete()
     .eq('id', id)

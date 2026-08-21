@@ -87,7 +87,7 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
       <button
         type="submit"
         disabled={pending}
-        className="w-full py-2.5 px-4 bg-gradient-to-r from-teal-700 to-teal-800 text-ink font-semibold rounded-xl shadow-md shadow-teal-700/20 hover:shadow-lg hover:from-teal-800 hover:to-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-700/40 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+        className="admin-primary-action w-full py-2.5 px-4 rounded-xl"
       >
         {pending ? (
           <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />

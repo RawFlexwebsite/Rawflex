@@ -10,8 +10,9 @@ import dbData from "@/lib/db.json";
 import { Search, User, ShoppingBag, LogOut, LayoutDashboard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getShippingSettings } from "@/actions/admin/shipping";
-import { logoutForClient } from "@/actions/auth";
+import { getCurrentUserForClient, logoutForClient } from "@/actions/auth";
 import AnnouncementBar from "./AnnouncementBar";
+import { getAnnouncement } from "@/actions/admin/announcements";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -20,17 +21,44 @@ export default function Header() {
   const [cartOpen, setCartOpen] = useState(false);
   const { cartCount } = useCart();
   const [user, setUser] = useState<any>(null);
-  const isAdmin = user && (user.email === 'admin@rawflex.in' || user.user_metadata?.role === 'admin');
+  const isAdmin = user && user.user_metadata?.role === 'admin';
   const [searchQuery, setSearchQuery] = useState("");
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showDesktopSearch, setShowDesktopSearch] = useState(false);
   const router = useRouter();
   const [shipping, setShipping] = useState<any>(null);
+  const [navCategories, setNavCategories] = useState<any[]>(dbData.categories || []);
+  const [announcementVisible, setAnnouncementVisible] = useState(true);
 
   useEffect(() => {
     getShippingSettings()
       .then((data) => setShipping(data))
       .catch((err) => console.error("Error loading header shipping settings:", err));
+
+    getAnnouncement()
+      .then((announcement) => setAnnouncementVisible(!!announcement?.is_active && !!announcement.message.trim()))
+      .catch(() => setAnnouncementVisible(false));
+  }, []);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from("categories")
+          .select("id, name")
+          .eq("is_active", true)
+          .order("name");
+
+        if (data && data.length > 0) {
+          setNavCategories(data);
+        }
+      } catch (err) {
+        console.error("Error loading header categories:", err);
+      }
+    };
+
+    loadCategories();
   }, []);
 
   useEffect(() => {
@@ -56,37 +84,28 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    const checkUserSession = () => {
-      const value = `; ${document.cookie}`
-      const parts = value.split(`; rawflex-user-session=`)
-      if (parts.length === 2) {
-        const val = parts.pop()?.split(';').shift()
-        if (val) {
-          try {
-            const session = JSON.parse(decodeURIComponent(val))
-            setUser({ id: session.id, email: session.email, user_metadata: { role: session.role, full_name: session.full_name } })
-            return
-          } catch (e) {}
+    const checkUserSession = async () => {
+      try {
+        const result = await getCurrentUserForClient()
+        if (result.user) {
+          setUser({
+            id: result.user.id,
+            email: result.user.email,
+            user_metadata: {
+              role: result.user.role,
+              full_name: result.user.full_name,
+            },
+          })
+          return
         }
-      }
-
-      const mockAdmin = document.cookie.includes('mock-admin-logged-in=true')
-      if (mockAdmin) {
-        setUser({ id: 'mock-admin-id', email: 'admin@rawflex.in', user_metadata: { role: 'admin' } })
-        return
+      } catch (error) {
+        console.error("Error loading user session:", error)
       }
 
       setUser(null)
     }
 
-    const supabase = createClient();
-    if (supabase) {
-      supabase.auth.getUser().then(({ data }) => {
-        if (data?.user) {
-          setUser(data.user);
-        }
-      }).catch(() => { });
-    }
+    checkUserSession()
 
     window.addEventListener('rawflex-login-status-change', checkUserSession)
     return () => {
@@ -102,7 +121,7 @@ export default function Header() {
     <>
       <AnnouncementBar />
       <header
-        className={`fixed top-9 inset-x-0 z-[99999] border-b border-[#D4A82C] transition-all duration-300 ${open
+        className={`fixed ${announcementVisible ? "top-9" : "top-0"} inset-x-0 z-[99999] border-b border-[#D4A82C] transition-all duration-300 ${open
             ? "bg-[#080909]"
             : scrolled
               ? "bg-cream/90 backdrop-blur-md shadow-[0_4px_24px_-8px_rgba(0,0,0,0.6)]"
@@ -183,7 +202,7 @@ export default function Header() {
                           <div>
                             <p className="px-1 mb-2 text-[11px] font-bold uppercase tracking-wider text-ink/40">Categories</p>
                             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                              {dbData.categories.map((cat: any) => (
+                              {navCategories.map((cat: any) => (
                                 <a
                                   key={cat.id}
                                   href={`/shop?category=${cat.id}`}
@@ -380,7 +399,7 @@ export default function Header() {
 
 {/* Mobile menu panel */}
         <div
-          className={`lg:hidden fixed inset-x-0 top-[100px] bottom-0 bg-[#080909] z-[9999] overflow-y-auto transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] ${open ? "block opacity-100 pointer-events-auto" : "hidden opacity-0 pointer-events-none"
+          className={`lg:hidden fixed inset-x-0 ${announcementVisible ? "top-[100px]" : "top-[64px]"} bottom-0 bg-[#080909] z-[9999] overflow-y-auto transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] ${open ? "block opacity-100 pointer-events-auto" : "hidden opacity-0 pointer-events-none"
             }`}
         >
           <nav className="flex flex-col px-6 pt-8 gap-1">
@@ -415,7 +434,7 @@ export default function Header() {
                     {mobileCollectionOpen && (
                       <div className="pl-4 mt-3 space-y-4 animate-fade-in flex flex-col">
                         <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                          {dbData.categories.map((cat: any) => (
+                          {navCategories.map((cat: any) => (
                             <a
                               key={cat.id}
                               href={`/shop?category=${cat.id}`}

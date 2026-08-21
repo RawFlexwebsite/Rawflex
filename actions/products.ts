@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/adminAuth'
+import { v2 as cloudinary } from 'cloudinary'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -18,6 +19,24 @@ function slugify(text: string): string {
     .replace(/[\s_]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '')
+}
+
+function configureCloudinary() {
+  if (
+    !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
+    !process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY ||
+    !process.env.CLOUDINARY_API_SECRET
+  ) {
+    return false
+  }
+
+  cloudinary.config({
+    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  })
+
+  return true
 }
 
 // Resolves the color_group_id to store for a product, given the "group with"
@@ -232,7 +251,8 @@ export async function saveProductInformation(
 export async function addProductImage(
   productId: string,
   imageUrl: string,
-  colorName?: string | null
+  colorName?: string | null,
+  cloudinaryPublicId?: string | null
 ): Promise<ActionResult> {
   const admin = await requireAdmin()
   if (admin.ok === false) return { error: admin.error }
@@ -252,6 +272,7 @@ export async function addProductImage(
   const { error } = await supabase.from('product_images').insert({
     product_id: productId,
     image_url: imageUrl,
+    cloudinary_public_id: cloudinaryPublicId || null,
     sort_order: nextSort,
     color_name: colorName || null,
   })
@@ -280,9 +301,21 @@ export async function deleteProductImage(imageId: string, productId: string): Pr
   // Check if this is the featured image before deleting
   const { data: image } = await supabase
     .from('product_images')
-    .select('image_url')
+    .select('image_url, cloudinary_public_id')
     .eq('id', imageId)
     .single()
+
+  if (image?.cloudinary_public_id && !configureCloudinary()) {
+    return { error: 'Cloudinary is not configured, so this image cannot be deleted safely.' }
+  }
+
+  if (image?.cloudinary_public_id) {
+    try {
+      await cloudinary.uploader.destroy(image.cloudinary_public_id, { resource_type: 'image' })
+    } catch (error: any) {
+      return { error: error?.message || 'Failed to delete image from Cloudinary' }
+    }
+  }
 
   const { error } = await supabase.from('product_images').delete().eq('id', imageId)
 

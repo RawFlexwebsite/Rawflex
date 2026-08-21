@@ -46,7 +46,19 @@ export default async function CustomerProfilePage() {
 
     const { data: userOrders } = await adminSupabase
       .from('orders')
-      .select('*')
+      .select(`
+        *,
+        order_items (
+          id,
+          product_id,
+          variant_id,
+          product_name,
+          variant_name,
+          price_at_purchase,
+          quantity,
+          line_total
+        )
+      `)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
     

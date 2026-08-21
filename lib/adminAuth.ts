@@ -13,7 +13,8 @@ export async function requireAdmin(): Promise<AdminAuthResult> {
     return { ok: false, error: 'Unauthorized' }
   }
 
-  const { data: profile, error } = await supabase
+  const adminClient = createAdminClient()
+  const { data: profile, error } = await adminClient
     .from('profiles')
     .select('role, is_active')
     .eq('id', user.id)
@@ -26,6 +27,6 @@ export async function requireAdmin(): Promise<AdminAuthResult> {
   return {
     ok: true,
     userId: user.id,
-    adminClient: createAdminClient(),
+    adminClient,
   }
 }

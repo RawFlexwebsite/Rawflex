@@ -97,11 +97,99 @@ CREATE TABLE product_variants (
 
 CREATE INDEX idx_product_variants_product_id ON product_variants(product_id);
 
+CREATE OR REPLACE FUNCTION decrement_product_variant_stock(
+  variant_id_input UUID,
+  quantity_input INTEGER
+)
+RETURNS VOID AS $$
+DECLARE
+  current_stock INTEGER;
+BEGIN
+  IF quantity_input <= 0 THEN
+    RAISE EXCEPTION 'Quantity must be greater than zero';
+  END IF;
+
+  SELECT stock_quantity
+  INTO current_stock
+  FROM product_variants
+  WHERE id = variant_id_input
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Product variant not found';
+  END IF;
+
+  IF current_stock < quantity_input THEN
+    RAISE EXCEPTION 'Not enough stock available';
+  END IF;
+
+  UPDATE product_variants
+  SET stock_quantity = current_stock - quantity_input,
+      updated_at = timezone('utc'::text, now())
+  WHERE id = variant_id_input;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+CREATE OR REPLACE FUNCTION decrement_order_stock_once(order_id_input UUID)
+RETURNS BOOLEAN AS $$
+DECLARE
+  existing_stock_decremented_at TIMESTAMP WITH TIME ZONE;
+  item RECORD;
+  current_stock INTEGER;
+BEGIN
+  SELECT stock_decremented_at
+  INTO existing_stock_decremented_at
+  FROM orders
+  WHERE id = order_id_input
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Order not found';
+  END IF;
+
+  IF existing_stock_decremented_at IS NOT NULL THEN
+    RETURN false;
+  END IF;
+
+  FOR item IN
+    SELECT variant_id, quantity, product_name
+    FROM order_items
+    WHERE order_id = order_id_input
+  LOOP
+    SELECT stock_quantity
+    INTO current_stock
+    FROM product_variants
+    WHERE id = item.variant_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Product variant not found for %', item.product_name;
+    END IF;
+
+    IF current_stock < item.quantity THEN
+      RAISE EXCEPTION 'Not enough stock available for %', item.product_name;
+    END IF;
+
+    UPDATE product_variants
+    SET stock_quantity = current_stock - item.quantity,
+        updated_at = timezone('utc'::text, now())
+    WHERE id = item.variant_id;
+  END LOOP;
+
+  UPDATE orders
+  SET stock_decremented_at = timezone('utc'::text, now())
+  WHERE id = order_id_input;
+
+  RETURN true;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 -- 6. Product Images Table
 CREATE TABLE product_images (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   product_id TEXT REFERENCES products(id) ON DELETE CASCADE NOT NULL,
   image_url TEXT NOT NULL,
+  cloudinary_public_id TEXT,
   sort_order INTEGER DEFAULT 0,
   color_name TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -170,7 +258,12 @@ CREATE TABLE orders (
   payment_method TEXT,
   razorpay_order_id TEXT,
   razorpay_payment_id TEXT,
+  courier_name TEXT,
+  tracking_number TEXT,
+  tracking_url TEXT,
+  shipment_notes TEXT,
   paid_at TIMESTAMP WITH TIME ZONE,
+  stock_decremented_at TIMESTAMP WITH TIME ZONE,
   shipped_at TIMESTAMP WITH TIME ZONE,
   delivered_at TIMESTAMP WITH TIME ZONE,
   cancelled_at TIMESTAMP WITH TIME ZONE,
@@ -386,7 +479,7 @@ RETURNS BOOLEAN AS $$
       AND role = 'admin'
       AND is_active = true
   );
-$$ LANGUAGE SQL SECURITY DEFINER STABLE;
+$$ LANGUAGE SQL SECURITY DEFINER STABLE SET search_path = public;
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE addresses ENABLE ROW LEVEL SECURITY;
@@ -406,6 +499,7 @@ ALTER TABLE hero_slides ENABLE ROW LEVEL SECURITY;
 ALTER TABLE coupons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE home_banner_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lookbook_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE email_otps ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Profiles are readable by owner or admin" ON profiles;
@@ -494,6 +588,10 @@ DROP POLICY IF EXISTS "Public can read active home banner images" ON home_banner
 CREATE POLICY "Public can read active home banner images" ON home_banner_images
   FOR SELECT USING (is_active = true OR is_admin());
 
+DROP POLICY IF EXISTS "Public can view active lookbook images" ON lookbook_images;
+CREATE POLICY "Public can view active lookbook images" ON lookbook_images
+  FOR SELECT USING (is_active = true OR is_admin());
+
 DROP POLICY IF EXISTS "Admins can manage lookbook images" ON lookbook_images;
 CREATE POLICY "Admins can manage lookbook images" ON lookbook_images FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
@@ -509,6 +607,15 @@ CREATE POLICY "Admins can manage product variants" ON product_variants FOR ALL U
 DROP POLICY IF EXISTS "Admins can manage product images" ON product_images;
 CREATE POLICY "Admins can manage product images" ON product_images FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
+DROP POLICY IF EXISTS "Admins can manage product information" ON product_information;
+CREATE POLICY "Admins can manage product information" ON product_information FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+
+DROP POLICY IF EXISTS "Admins can manage product FAQs" ON product_faqs;
+CREATE POLICY "Admins can manage product FAQs" ON product_faqs FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+
+DROP POLICY IF EXISTS "Admins can manage global FAQs" ON global_faqs;
+CREATE POLICY "Admins can manage global FAQs" ON global_faqs FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+
 DROP POLICY IF EXISTS "Admins can manage settings" ON settings;
 CREATE POLICY "Admins can manage settings" ON settings FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
@@ -520,3 +627,6 @@ CREATE POLICY "Admins can manage home banner images" ON home_banner_images FOR A
 
 DROP POLICY IF EXISTS "Admins can manage coupons" ON coupons;
 CREATE POLICY "Admins can manage coupons" ON coupons FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+
+DROP POLICY IF EXISTS "Admins can manage reviews" ON reviews;
+CREATE POLICY "Admins can manage reviews" ON reviews FOR ALL USING (is_admin()) WITH CHECK (is_admin());

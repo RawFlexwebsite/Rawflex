@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { revalidatePath } from 'next/cache'
 
 export async function getGlobalFaqs() {
@@ -19,7 +20,9 @@ export async function getGlobalFaqs() {
 }
 
 export async function addGlobalFaq(formData: FormData) {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
   
   const question = formData.get('question')?.toString()
   const answer = formData.get('answer')?.toString()
@@ -58,7 +61,9 @@ export async function addGlobalFaq(formData: FormData) {
 }
 
 export async function updateGlobalFaq(id: string, formData: FormData) {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
   
   const question = formData.get('question')?.toString()
   const answer = formData.get('answer')?.toString()
@@ -83,7 +88,9 @@ export async function updateGlobalFaq(id: string, formData: FormData) {
 }
 
 export async function deleteGlobalFaq(id: string) {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
   
   const { error } = await supabase
     .from('global_faqs')
@@ -100,7 +107,9 @@ export async function deleteGlobalFaq(id: string) {
 }
 
 export async function updateGlobalFaqOrders(orders: { id: string; display_order: number }[]) {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   // Supabase doesn't have a built-in bulk update for different values on same query cleanly via RPC without creating one.
   // We'll update them individually since it's a small array.

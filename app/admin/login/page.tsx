@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                placeholder="admin@rawflex.in"
+                placeholder="Admin email"
                 className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-cream-deep text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all duration-200"
               />
             </div>

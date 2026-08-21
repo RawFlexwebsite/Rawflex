@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -16,7 +16,11 @@ export default async function AdminOrderDetailsPage({
 }) {
   const resolvedParams = await params
   const orderId = resolvedParams.id
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) {
+    notFound()
+  }
+  const supabase = admin.adminClient
 
   // Fetch Order Details
   const { data: order, error: orderError } = await supabase
@@ -209,6 +213,12 @@ export default async function AdminOrderDetailsPage({
             orderId={order.id} 
             initialOrderStatus={order.order_status}
             initialPaymentStatus={order.payment_status}
+            initialTracking={{
+              courier_name: order.courier_name,
+              tracking_number: order.tracking_number,
+              tracking_url: order.tracking_url,
+              shipment_notes: order.shipment_notes,
+            }}
           />
 
           <div className="bg-panel rounded-2xl shadow-sm border border-cream-line p-6">
@@ -240,6 +250,37 @@ export default async function AdminOrderDetailsPage({
               <p className="text-xs font-semibold text-ink/60 uppercase tracking-wider mb-2">Payment Method</p>
               <p className="text-sm font-medium text-ink">{order.payment_method}</p>
             </div>
+
+            {(order.courier_name || order.tracking_number || order.tracking_url || order.shipment_notes) && (
+              <div className="mt-6 pt-6 border-t border-cream-line space-y-3">
+                <p className="text-xs font-semibold text-ink/60 uppercase tracking-wider">Delivery Tracking</p>
+                {order.courier_name && (
+                  <div className="flex justify-between gap-4 text-sm">
+                    <span className="text-ink/60">Courier</span>
+                    <span className="font-medium text-ink text-right">{order.courier_name}</span>
+                  </div>
+                )}
+                {order.tracking_number && (
+                  <div className="flex justify-between gap-4 text-sm">
+                    <span className="text-ink/60">Tracking No.</span>
+                    <span className="font-medium text-ink text-right">{order.tracking_number}</span>
+                  </div>
+                )}
+                {order.tracking_url && (
+                  <a
+                    href={order.tracking_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex text-sm font-bold text-orange-600 hover:text-orange-700"
+                  >
+                    Open tracking link
+                  </a>
+                )}
+                {order.shipment_notes && (
+                  <p className="rounded-xl bg-cream-deep p-3 text-sm text-ink/70">{order.shipment_notes}</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Timeline Section */}

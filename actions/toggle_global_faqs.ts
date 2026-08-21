@@ -1,10 +1,13 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { revalidatePath } from 'next/cache'
 
 export async function toggleUseGlobalFaqs(productId: string, useGlobalFaqs: boolean) {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
+
   const { error } = await supabase
     .from('products')
     .update({ use_global_faqs: useGlobalFaqs })

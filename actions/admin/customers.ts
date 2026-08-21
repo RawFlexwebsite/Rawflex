@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { revalidatePath } from 'next/cache'
 
 export type AdminActionResult = {
@@ -9,22 +9,11 @@ export type AdminActionResult = {
 }
 
 export async function getCustomers() {
-  const supabase = await createClient()
-
-  // Ensure admin auth
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) return []
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.role !== 'admin') return []
+  const admin = await requireAdmin()
+  if (admin.ok === false) return []
 
   // Fetch customers
-  const { data: customers } = await supabase
+  const { data: customers } = await admin.adminClient
     .from('profiles')
     .select('*')
     .eq('role', 'customer')
@@ -37,20 +26,10 @@ export async function toggleCustomerStatus(
   id: string,
   isActive: boolean
 ): Promise<AdminActionResult> {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { error: admin.error }
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Unauthorized' }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.role !== 'admin') return { error: 'Unauthorized' }
-
-  const { error } = await supabase
+  const { error } = await admin.adminClient
     .from('profiles')
     .update({ is_active: isActive })
     .eq('id', id)

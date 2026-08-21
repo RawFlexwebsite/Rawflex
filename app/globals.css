@@ -230,6 +230,38 @@ body {
 .admin-shell .shadow-stone-200\/50 { --tw-shadow-color: rgba(10, 11, 10, 0.9) !important; }
 
 /* ---- Buttons: primary CTAs become gold ---- */
+.admin-shell .admin-primary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(228, 216, 196, 0.7);
+  background: linear-gradient(135deg, #f0e9dc 0%, #c7b79e 100%);
+  color: #080909 !important;
+  font-weight: 800;
+  box-shadow: 0 12px 26px -16px rgba(240, 233, 220, 0.75);
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+.admin-shell .admin-primary-action:hover:not(:disabled) {
+  background: linear-gradient(135deg, #fff8ea 0%, #e4d8c4 100%);
+  border-color: rgba(240, 233, 220, 0.95);
+  box-shadow: 0 16px 32px -18px rgba(240, 233, 220, 0.9);
+  transform: translateY(-1px);
+}
+.admin-shell .admin-primary-action:focus-visible {
+  outline: 2px solid #e4d8c4;
+  outline-offset: 2px;
+}
+.admin-shell .admin-primary-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  transform: none;
+}
+.admin-shell .admin-primary-action svg,
+.admin-shell .admin-primary-action span {
+  color: inherit !important;
+}
+
 .admin-shell .bg-stone-900 { background-color: #c7b79e !important; }
 .admin-shell .bg-stone-900.text-white,
 .admin-shell .bg-stone-900 .text-white { color: #080909 !important; }

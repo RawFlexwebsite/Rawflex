@@ -2,23 +2,11 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import {
   DEFAULT_ABOUT_SECTION,
   type AboutSectionSettings,
 } from '@/lib/aboutSection'
-
-async function checkAdminAuth(supabase: any) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return false
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  return profile?.role === 'admin'
-}
 
 function settingsFromRow(settings: any): AboutSectionSettings {
   const source = settings?.announcements?.about_section || {}
@@ -54,9 +42,9 @@ export async function getAboutSectionSettings(): Promise<AboutSectionSettings> {
 }
 
 export async function updateAboutSectionSettings(fields: AboutSectionSettings) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { data: settings } = await supabase
     .from('settings')

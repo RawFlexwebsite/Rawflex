@@ -113,7 +113,7 @@ export default function CouponForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full py-2.5 bg-gradient-to-r from-teal-700 to-teal-800 text-ink text-xs font-semibold rounded-xl hover:from-teal-800 hover:to-teal-900 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+        className="admin-primary-action w-full py-2.5 text-xs rounded-xl"
       >
         {pending ? (
           <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />

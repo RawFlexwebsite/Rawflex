@@ -10,6 +10,7 @@ type ProductImage = {
   id: string
   product_id: string
   image_url: string
+  cloudinary_public_id?: string | null
   sort_order: number
   color_name?: string | null
 }
@@ -43,7 +44,7 @@ export function ProductImagesEditor({
       startTransition(async () => {
         const currentActiveTab = activeTabRef.current
         const uploadColor = currentActiveTab === 'All' || currentActiveTab === 'Default' ? null : currentActiveTab
-        await addProductImage(product.id, result.info.secure_url, uploadColor)
+        await addProductImage(product.id, result.info.secure_url, uploadColor, result.info.public_id || null)
       })
     }
   }
@@ -105,7 +106,7 @@ export function ProductImagesEditor({
                 type="button"
                 onClick={() => open()}
                 disabled={uploading || isPending}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-ink bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="admin-primary-action px-4 py-2 text-sm rounded-md"
               >
                 {uploading || isPending ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

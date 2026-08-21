@@ -1,36 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function proxy(request: NextRequest) {
-  const hasMockCookie = request.cookies.get('mock-admin-logged-in')?.value === 'true'
-  const hasCustomCookie = request.cookies.get('rawflex-user-session')?.value
-  const hasCustomCookieSignature = request.cookies.get('rawflex-user-session-sig')?.value
-  
-  // Check if any supabase auth cookie exists (standard naming format is sb-<project-id>-auth-token)
-  const hasSupabaseCookie = request.cookies.getAll().some(
-    (c) => c.name.startsWith('sb-') && c.name.includes('-auth-token')
-  )
-
-  const loggedIn = hasMockCookie || hasSupabaseCookie || (!!hasCustomCookie && !!hasCustomCookieSignature)
-
-  // Protected paths
-  // Note: /checkout is intentionally not gated here — it collects the
-  // address and creates/logs the account inline as part of the form.
-  const isProtectedPath = request.nextUrl.pathname.startsWith('/account')
-  const isAdminPath =
-    request.nextUrl.pathname.startsWith('/admin') &&
-    request.nextUrl.pathname !== '/admin/login'
-
-  if ((isProtectedPath || isAdminPath) && !loggedIn) {
-    const url = request.nextUrl.clone()
-    if (isAdminPath) {
-      url.pathname = '/admin/login'
-    } else {
-      url.pathname = '/login'
-      url.searchParams.set('redirect', request.nextUrl.pathname)
-    }
-    return NextResponse.redirect(url)
-  }
-
+export async function proxy(_request: NextRequest) {
+  // Authorization is enforced in server layouts/actions where signed custom
+  // sessions and roles can be verified. Middleware must not trust cookie
+  // presence as proof of authentication.
   return NextResponse.next()
 }
 

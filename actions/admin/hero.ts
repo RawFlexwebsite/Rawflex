@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { revalidatePath } from 'next/cache'
 
 type HeroPosition = 'left' | 'right'
@@ -31,19 +32,6 @@ function isMissingPositionColumnError(error: any) {
     message.includes('position') &&
     message.includes('hero_slides')
   )
-}
-
-async function checkAdminAuth(supabase: any) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return false
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  return profile?.role === 'admin'
 }
 
 export async function getHeroSlides() {
@@ -84,9 +72,9 @@ export async function getHeroLeftText(): Promise<HeroLeftText> {
 }
 
 export async function updateHeroLeftText(fields: HeroLeftText) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { data: settings } = await supabase
     .from('settings')
@@ -163,9 +151,9 @@ async function getHeroSlideCount(supabase: any, position: HeroPosition) {
 }
 
 export async function createHeroSlide(imageUrl: string, position: HeroPosition = 'right') {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { count, hasPositionColumn, error: countError } = await getHeroSlideCount(supabase, position)
 
@@ -203,9 +191,9 @@ export async function createHeroSlide(imageUrl: string, position: HeroPosition =
 }
 
 export async function deleteHeroSlide(id: string) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase
     .from('hero_slides')
@@ -229,9 +217,9 @@ export async function updateHeroSlide(
     display_order?: number
   }
 ) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase
     .from('hero_slides')
@@ -246,9 +234,9 @@ export async function updateHeroSlide(
 }
 
 export async function toggleHeroSlideStatus(id: string, isActive: boolean) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase
     .from('hero_slides')

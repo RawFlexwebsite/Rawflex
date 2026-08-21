@@ -6,6 +6,7 @@ import NewDrops from "@/components/NewDrops";
 import BestSellersLookbook from "@/components/BestSellersLookbook";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -21,12 +22,7 @@ const HOME_CATEGORY_LIMIT = 7;
 function isOversizedTshirtCategory(category: any) {
   const categoryText = `${category.id || ""} ${category.slug || ""} ${category.name || ""}`.toLowerCase();
 
-  return (
-    categoryText.includes("oversized") &&
-    (categoryText.includes("tee") ||
-      categoryText.includes("tshirt") ||
-      categoryText.includes("t-shirt"))
-  );
+  return categoryText.includes("oversize");
 }
 
 function isNewDropsCategory(category: any) {
@@ -87,6 +83,7 @@ function oversizedSectionSettings(settings: any) {
 
 export default async function Home() {
   const supabase = await createClient();
+  const adminSupabase = createAdminClient();
 
   const [
     { data: categoriesData },
@@ -96,7 +93,7 @@ export default async function Home() {
     { data: homeBannerImagesData },
     { data: lookbookImagesData, error: lookbookImagesError },
   ] = await Promise.all([
-    supabase.from("categories").select("*"),
+    adminSupabase.from("categories").select("*"),
     supabase
       .from("products")
       .select(PRODUCT_SELECT)

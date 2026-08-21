@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import type { Metadata } from 'next'
 import ProductForm from '../_components/ProductForm'
 
@@ -7,15 +7,18 @@ export const metadata: Metadata = {
 }
 
 export default async function NewProductPage() {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  const supabase = admin.ok ? admin.adminClient : null
 
-  const [{ data: categories }, { data: otherProducts }] = await Promise.all([
-    supabase.from('categories').select('*').eq('is_active', true).order('name'),
-    supabase
-      .from('products')
-      .select('id, name, color_group_id, color_name')
-      .order('name'),
-  ])
+  const [{ data: categories }, { data: otherProducts }] = supabase
+    ? await Promise.all([
+        supabase.from('categories').select('*').order('name'),
+        supabase
+          .from('products')
+          .select('id, name, color_group_id, color_name')
+          .order('name'),
+      ])
+    : [{ data: [] }, { data: [] }]
 
   return (
     <div className="max-w-6xl space-y-6">

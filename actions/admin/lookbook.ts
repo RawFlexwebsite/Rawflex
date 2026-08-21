@@ -1,8 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 
 const LOOKBOOK_TABLE_MIGRATION_ERROR =
   'Supabase is missing the lookbook_images table. Run the Lookbook SQL migration in Supabase, then try again.'
@@ -27,33 +27,8 @@ function lookbookActionError(error: any) {
     : error?.message || 'Something went wrong while updating the Lookbook.'
 }
 
-function createLookbookDbClient(fallbackClient: any) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!url || !key || url.includes('placeholder')) {
-    return fallbackClient
-  }
-
-  return createAdminClient()
-}
-
-async function checkAdminAuth(supabase: any) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return false
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  return profile?.role === 'admin'
-}
-
 export async function getLookbookImages() {
-  const authClient = await createClient()
-  const supabase = createLookbookDbClient(authClient)
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('lookbook_images')
@@ -67,10 +42,9 @@ export async function getLookbookImages() {
 }
 
 export async function createLookbookImage(imageUrl: string, linkUrl: string) {
-  const authClient = await createClient()
-  const isAdmin = await checkAdminAuth(authClient)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
-  const supabase = createLookbookDbClient(authClient)
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const countResult = await supabase
     .from('lookbook_images')
@@ -101,10 +75,9 @@ export async function createLookbookImage(imageUrl: string, linkUrl: string) {
 }
 
 export async function updateLookbookImageLink(id: string, linkUrl: string) {
-  const authClient = await createClient()
-  const isAdmin = await checkAdminAuth(authClient)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
-  const supabase = createLookbookDbClient(authClient)
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase
     .from('lookbook_images')
@@ -118,10 +91,9 @@ export async function updateLookbookImageLink(id: string, linkUrl: string) {
 }
 
 export async function toggleLookbookImageStatus(id: string, isActive: boolean) {
-  const authClient = await createClient()
-  const isAdmin = await checkAdminAuth(authClient)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
-  const supabase = createLookbookDbClient(authClient)
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase
     .from('lookbook_images')
@@ -135,10 +107,9 @@ export async function toggleLookbookImageStatus(id: string, isActive: boolean) {
 }
 
 export async function deleteLookbookImage(id: string) {
-  const authClient = await createClient()
-  const isAdmin = await checkAdminAuth(authClient)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
-  const supabase = createLookbookDbClient(authClient)
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase
     .from('lookbook_images')

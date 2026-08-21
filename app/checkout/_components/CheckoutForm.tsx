@@ -4,20 +4,28 @@ import React, { useState, useEffect, useTransition } from 'react'
 import { useCart } from '@/context/CartContext'
 import { useToast } from '@/context/ToastContext'
 import { validateCoupon } from '@/actions/admin/coupons'
-import { processCheckout, verifyRazorpayPayment } from '@/actions/checkout'
-import { sendEmailOtp, verifyEmailOtp } from '@/actions/auth'
+import { calculateCheckoutTotals, processCheckout, verifyRazorpayPayment } from '@/actions/checkout'
+import { getCurrentCustomerProfileForClient, sendEmailOtp, verifyEmailOtp } from '@/actions/auth'
 import { SITE } from '@/lib/data'
 import { Truck, Tag, CreditCard, ShoppingBag, ShieldCheck, CheckCircle2, Lock, Eye, EyeOff, Plus, Minus, X, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import Script from 'next/script'
-import { createClient } from '@/lib/supabase/client'
 
 type ShippingSettings = {
   flat_rate: number
   free_threshold: number
   cod_charge?: number
   online_discount?: number
+}
+
+type CheckoutQuote = {
+  subtotal: number
+  shipping_cost: number
+  cod_cost: number
+  coupon_discount: number
+  online_discount_amount: number
+  total_amount: number
 }
 
 export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false }: { shipping: ShippingSettings, isLoggedIn: boolean, hasCoupons?: boolean }) {
@@ -87,6 +95,8 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
   const [activeCoupon, setActiveCoupon] = useState<any>(null)
   const [couponError, setCouponError] = useState('')
   const [couponSuccess, setCouponSuccess] = useState('')
+  const [serverQuote, setServerQuote] = useState<CheckoutQuote | null>(null)
+  const [quoteError, setQuoteError] = useState('')
 
   // Payment Method
   const [paymentMethod, setPaymentMethod] = useState<'Cash on Delivery' | 'Online Payment (Razorpay)'>('Cash on Delivery')
@@ -121,60 +131,89 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
   // Load user profile and default address from database if logged in
   useEffect(() => {
     if (isLoggedIn) {
-      const supabase = createClient()
-      if (supabase) {
-        supabase.auth.getUser().then(async ({ data }) => {
-          if (data?.user) {
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', data.user.id)
-              .single()
-              
-            const { data: addressData } = await supabase
-              .from('addresses')
-              .select('*')
-              .eq('user_id', data.user.id)
-              .order('is_default', { ascending: false })
-              .limit(1)
-              .maybeSingle()
-
-            setProfile({
-              fullName: profileData?.full_name || '',
-              email: data.user.email || '',
-              phone: addressData?.phone || profileData?.phone || '',
-              alternatePhone: addressData?.alternate_phone || '',
-              street: addressData?.address_line_1 || '',
-              city: addressData?.city || '',
-              state: addressData?.state || '',
-              zipCode: addressData?.postal_code || '',
-            })
+      getCurrentCustomerProfileForClient()
+        .then((result) => {
+          if (result.profile) {
+            setProfile(result.profile)
           }
-        }).catch((err) => console.error('Failed to load profile in checkout:', err))
-      }
+        })
+        .catch((err) => console.error('Failed to load profile in checkout:', err))
     }
   }, [isLoggedIn])
 
-  // Calculate checkout details
-  const subtotal = cartTotal
-  const shippingFee = subtotal >= (shipping.free_threshold ?? 1999) ? 0 : (shipping.flat_rate ?? 99)
-  const codFee = paymentMethod === 'Cash on Delivery' ? (shipping.cod_charge ?? 50) : 0
+  // Calculate checkout details. Server quote wins once available.
+  const clientSubtotal = cartTotal
+  const clientShippingFee = clientSubtotal >= (shipping.free_threshold ?? 1999) ? 0 : (shipping.flat_rate ?? 99)
+  const clientCodFee = paymentMethod === 'Cash on Delivery' ? (shipping.cod_charge ?? 50) : 0
   
-  let discount = 0
+  let clientDiscount = 0
   if (activeCoupon) {
     if (activeCoupon.type === 'percentage') {
-      discount = Math.round((subtotal * activeCoupon.value) / 100)
+      clientDiscount = Math.round((clientSubtotal * activeCoupon.value) / 100)
     } else {
-      discount = activeCoupon.value
+      clientDiscount = activeCoupon.value
     }
   }
 
   const onlineDiscountPercent = shipping.online_discount ?? 0
-  const onlineDiscountAmount = paymentMethod === 'Online Payment (Razorpay)'
-    ? Math.round((subtotal * onlineDiscountPercent) / 100)
+  const clientOnlineDiscountAmount = paymentMethod === 'Online Payment (Razorpay)'
+    ? Math.round((clientSubtotal * onlineDiscountPercent) / 100)
     : 0
 
-  const grandTotal = Math.max(0, subtotal + shippingFee + codFee - discount - onlineDiscountAmount)
+  const clientGrandTotal = Math.max(
+    0,
+    clientSubtotal + clientShippingFee + clientCodFee - clientDiscount - clientOnlineDiscountAmount
+  )
+
+  const subtotal = serverQuote?.subtotal ?? clientSubtotal
+  const shippingFee = serverQuote?.shipping_cost ?? clientShippingFee
+  const codFee = serverQuote?.cod_cost ?? clientCodFee
+  const discount = serverQuote?.coupon_discount ?? clientDiscount
+  const onlineDiscountAmount = serverQuote?.online_discount_amount ?? clientOnlineDiscountAmount
+  const grandTotal = serverQuote?.total_amount ?? clientGrandTotal
+
+  useEffect(() => {
+    let active = true
+
+    const refreshQuote = async () => {
+      if (cart.length === 0) {
+        setServerQuote(null)
+        setQuoteError('')
+        return
+      }
+
+      const method = paymentMethod === 'Online Payment (Razorpay)' ? 'RAZORPAY' : 'COD'
+      const result = await calculateCheckoutTotals(cart, method, activeCoupon ? couponCode : undefined)
+      if (!active) return
+
+      if (result.success === false) {
+        setServerQuote(null)
+        setQuoteError(result.error || 'Could not calculate checkout total.')
+        return
+      }
+
+      setQuoteError('')
+      setServerQuote({
+        subtotal: result.subtotal,
+        shipping_cost: result.shipping_cost,
+        cod_cost: result.cod_cost,
+        coupon_discount: result.coupon_discount,
+        online_discount_amount: result.online_discount_amount,
+        total_amount: result.total_amount,
+      })
+    }
+
+    refreshQuote().catch((error) => {
+      if (!active) return
+      console.error('Failed to calculate server checkout quote:', error)
+      setServerQuote(null)
+      setQuoteError('Could not calculate checkout total.')
+    })
+
+    return () => {
+      active = false
+    }
+  }, [cart, paymentMethod, activeCoupon, couponCode])
 
   // Handle Coupon Apply
   const handleApplyCoupon = async () => {
@@ -684,9 +723,15 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
             </div>
           </div>
 
+          {quoteError && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+              {quoteError}
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={pending || otpPending}
+            disabled={pending || otpPending || !!quoteError}
             className="w-full py-4 px-6 bg-ink text-cream font-body font-bold rounded-full shadow-card hover:bg-gold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {pending || otpPending ? (

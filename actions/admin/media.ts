@@ -1,52 +1,48 @@
 'use server'
 
+import { requireAdmin } from '@/lib/adminAuth'
+
 export type MediaItem = { folder: string; name: string; url: string }
 
 export async function listMediaImages(): Promise<MediaItem[]> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key || url.includes('placeholder')) return []
-
-  const headers = {
-    apikey: key,
-    Authorization: `Bearer ${key}`,
-    'Content-Type': 'application/json',
+  const admin = await requireAdmin()
+  if (admin.ok === false) {
+    throw new Error(admin.error)
   }
 
-  const list = async (prefix: string): Promise<any[]> => {
-    try {
-      const res = await fetch(`${url}/storage/v1/object/list/rawflex`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ prefix, limit: 1000, offset: 0 }),
-        cache: 'no-store',
-      })
-      if (!res.ok) return []
-      return await res.json()
-    } catch {
-      return []
-    }
-  }
-
-  const publicUrl = (segments: string[]) =>
-    `${url}/storage/v1/object/public/rawflex/${segments.map(encodeURIComponent).join('/')}`
-
+  const storage = admin.adminClient.storage.from('rawflex')
   const items: MediaItem[] = []
-  const topFolders = ['categories', 'hero', 'lookbook', 'site', 'samples']
 
-  const walk = async (prefix: string, segments: string[], label: string) => {
-    const entries = await list(prefix)
-    for (const e of entries || []) {
-      if (!e.id) {
-        await walk(`${prefix}${e.name}/`, [...segments, e.name], `${label} / ${e.name}`)
-      } else {
-        items.push({ folder: label, name: e.name, url: publicUrl([...segments, e.name]) })
+  const walk = async (path: string, label: string) => {
+    const { data, error } = await storage.list(path, {
+      limit: 1000,
+      offset: 0,
+    })
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    for (const entry of data || []) {
+      const childPath = path ? `${path}/${entry.name}` : entry.name
+      const childLabel = path ? `${label} / ${entry.name}` : entry.name
+
+      if (!entry.id) {
+        await walk(childPath, childLabel)
+        continue
       }
+
+      const { data: publicUrl } = storage.getPublicUrl(childPath)
+      items.push({
+        folder: label,
+        name: entry.name,
+        url: publicUrl.publicUrl,
+      })
     }
   }
 
-  for (const folder of topFolders) {
-    await walk(`${folder}/`, [folder], folder)
+  for (const folder of ['categories', 'hero', 'lookbook', 'site', 'samples']) {
+    await walk(folder, folder)
   }
 
   return items

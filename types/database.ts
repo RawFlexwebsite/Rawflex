@@ -61,7 +61,7 @@ export interface Product {
   color_group_id: string | null
   color_name: string | null
   color_hex: string | null
-  average_rating: number
+  rating: number
   review_count: number
   is_active: boolean
   is_featured: boolean
@@ -90,6 +90,7 @@ export interface ProductImage {
   id: string
   product_id: string
   image_url: string
+  cloudinary_public_id: string | null
   sort_order: number
   color_name?: string | null
   created_at: string
@@ -148,6 +149,11 @@ export interface Order {
   payment_method: string | null
   razorpay_order_id: string | null
   razorpay_payment_id: string | null
+  courier_name: string | null
+  tracking_number: string | null
+  tracking_url: string | null
+  shipment_notes: string | null
+  stock_decremented_at: string | null
   created_at: string
   updated_at: string
 }

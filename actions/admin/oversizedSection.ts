@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { revalidatePath } from 'next/cache'
 
 export type OversizedSectionSettings = {
@@ -19,19 +20,6 @@ const DEFAULT_OVERSIZED_SECTION: OversizedSectionSettings = {
   subtitle: 'Relaxed fit. Maximum impact.',
   button_text: 'SHOP OVERSIZED',
   button_link: '/shop?category=oversized-tees',
-}
-
-async function checkAdminAuth(supabase: any) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return false
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  return profile?.role === 'admin'
 }
 
 function settingsFromRow(settings: any): OversizedSectionSettings {
@@ -60,9 +48,9 @@ export async function getOversizedSectionSettings(): Promise<OversizedSectionSet
 }
 
 export async function updateOversizedSectionSettings(fields: OversizedSectionSettings) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { data: settings } = await supabase
     .from('settings')

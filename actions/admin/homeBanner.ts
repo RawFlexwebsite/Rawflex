@@ -1,24 +1,12 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { revalidatePath } from 'next/cache'
 
 function revalidateHomeBannerPaths() {
   revalidatePath('/')
   revalidatePath('/admin/home-banner')
-}
-
-async function checkAdminAuth(supabase: any) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return false
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  return profile?.role === 'admin'
 }
 
 export async function getHomeBannerEnabled(): Promise<boolean> {
@@ -33,9 +21,9 @@ export async function getHomeBannerEnabled(): Promise<boolean> {
 }
 
 export async function setHomeBannerEnabled(enabled: boolean) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase
     .from('settings')
@@ -63,9 +51,9 @@ export async function getHomeBannerImages() {
 }
 
 export async function createHomeBannerImage(imageUrl: string, linkUrl: string) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { count } = await supabase
     .from('home_banner_images')
@@ -92,9 +80,9 @@ export async function createHomeBannerImage(imageUrl: string, linkUrl: string) {
 }
 
 export async function updateHomeBannerImageLink(id: string, linkUrl: string) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase
     .from('home_banner_images')
@@ -108,9 +96,9 @@ export async function updateHomeBannerImageLink(id: string, linkUrl: string) {
 }
 
 export async function toggleHomeBannerImageStatus(id: string, isActive: boolean) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase
     .from('home_banner_images')
@@ -124,9 +112,9 @@ export async function toggleHomeBannerImageStatus(id: string, isActive: boolean)
 }
 
 export async function deleteHomeBannerImage(id: string) {
-  const supabase = await createClient()
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
   const { error } = await supabase
     .from('home_banner_images')

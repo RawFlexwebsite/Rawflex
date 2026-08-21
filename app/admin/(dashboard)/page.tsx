@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import {
   ShoppingCart,
   Users,
@@ -14,7 +14,11 @@ export const metadata: Metadata = {
 }
 
 async function getStats() {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) {
+    return { totalOrders: 0, totalRevenue: 0, totalCustomers: 0, totalProducts: 0, recentOrders: [] }
+  }
+  const supabase = admin.adminClient
 
   const [ordersRes, customersRes, productsRes, recentOrdersRes] =
     await Promise.all([

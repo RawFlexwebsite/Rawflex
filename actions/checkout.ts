@@ -189,24 +189,70 @@ async function calculateCouponDiscount(supabase: any, couponCode: string | undef
   }
 }
 
-async function decrementStock(supabase: any, items: ResolvedOrderItem[]) {
-  for (const item of items) {
-    const { data: variant } = await supabase
-      .from('product_variants')
-      .select('stock_quantity')
-      .eq('id', item.variant_id)
-      .single()
+async function decrementOrderStockOnce(supabase: any, orderId: string) {
+  const { error } = await supabase.rpc('decrement_order_stock_once', {
+    order_id_input: orderId,
+  })
 
-    if (!variant || Number(variant.stock_quantity) < item.quantity) {
-      throw new Error(`${item.product_name} is out of stock.`)
-    }
+  if (error) throw new Error(error.message)
+}
 
-    const { error } = await supabase
-      .from('product_variants')
-      .update({ stock_quantity: Number(variant.stock_quantity) - item.quantity })
-      .eq('id', item.variant_id)
+async function calculateResolvedTotals(
+  supabase: any,
+  resolved: { subtotal: number },
+  paymentMethod: 'COD' | 'RAZORPAY',
+  couponCode?: string
+) {
+  const shippingSettings = await getShippingSettings(supabase)
+  const flatRate = Number(shippingSettings.flat_rate ?? 99)
+  const freeThreshold = Number(shippingSettings.free_threshold ?? 1999)
+  const codCharge = Number(shippingSettings.cod_charge ?? 50)
+  const onlineDiscountPercent = Number(shippingSettings.online_discount ?? 0)
+  const coupon = await calculateCouponDiscount(supabase, couponCode, resolved.subtotal)
+  if (coupon.error) return { error: coupon.error }
 
-    if (error) throw new Error(error.message)
+  const shipping_cost = resolved.subtotal >= freeThreshold ? 0 : flatRate
+  const cod_cost = paymentMethod === 'COD' ? codCharge : 0
+  const online_discount_amount = paymentMethod === 'RAZORPAY'
+    ? Math.round((resolved.subtotal * onlineDiscountPercent) / 100)
+    : 0
+  const total_amount = Math.max(
+    0,
+    resolved.subtotal + shipping_cost + cod_cost - coupon.discount - online_discount_amount
+  )
+
+  return {
+    error: null,
+    couponId: coupon.couponId,
+    subtotal: resolved.subtotal,
+    shipping_cost,
+    cod_cost,
+    coupon_discount: coupon.discount,
+    online_discount_amount,
+    total_amount,
+  }
+}
+
+export async function calculateCheckoutTotals(
+  cartItemsFromFrontend: CheckoutCartItem[],
+  paymentMethod: 'COD' | 'RAZORPAY',
+  couponCode?: string
+) {
+  const adminSupabase = createAdminClient()
+  const resolved = await resolveOrderItems(adminSupabase, cartItemsFromFrontend || [])
+  if (resolved.error) return { success: false, error: resolved.error }
+
+  const totals = await calculateResolvedTotals(adminSupabase, resolved, paymentMethod, couponCode)
+  if (totals.error) return { success: false, error: totals.error }
+
+  return {
+    success: true,
+    subtotal: totals.subtotal,
+    shipping_cost: totals.shipping_cost,
+    cod_cost: totals.cod_cost,
+    coupon_discount: totals.coupon_discount,
+    online_discount_amount: totals.online_discount_amount,
+    total_amount: totals.total_amount,
   }
 }
 
@@ -233,20 +279,9 @@ export async function createOrder(
   const resolved = await resolveOrderItems(adminSupabase, cartItemsFromFrontend || [])
   if (resolved.error) return { success: false, error: resolved.error }
 
-  const shippingSettings = await getShippingSettings(adminSupabase)
-  const flatRate = Number(shippingSettings.flat_rate ?? 99)
-  const freeThreshold = Number(shippingSettings.free_threshold ?? 1999)
-  const codCharge = Number(shippingSettings.cod_charge ?? 50)
-  const onlineDiscountPercent = Number(shippingSettings.online_discount ?? 0)
-  const coupon = await calculateCouponDiscount(adminSupabase, couponCode, resolved.subtotal)
-  if (coupon.error) return { success: false, error: coupon.error }
+  const totals = await calculateResolvedTotals(adminSupabase, resolved, paymentMethod, couponCode)
+  if (totals.error) return { success: false, error: totals.error }
 
-  const shipping_cost = resolved.subtotal >= freeThreshold ? 0 : flatRate
-  const cod_cost = paymentMethod === 'COD' ? codCharge : 0
-  const online_discount_amount = paymentMethod === 'RAZORPAY'
-    ? Math.round((resolved.subtotal * onlineDiscountPercent) / 100)
-    : 0
-  const total_amount = Math.max(0, resolved.subtotal + shipping_cost + cod_cost - coupon.discount - online_discount_amount)
   const order_number = `AM-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
   const actualPaymentMethod = paymentMethod === 'RAZORPAY' ? 'Online Payment (Razorpay)' : 'Cash on Delivery'
 
@@ -256,9 +291,9 @@ export async function createOrder(
       order_number,
       user_id: user.id,
       address_id: addressId,
-      subtotal: resolved.subtotal,
-      shipping_cost,
-      total_amount,
+      subtotal: totals.subtotal,
+      shipping_cost: totals.shipping_cost,
+      total_amount: totals.total_amount,
       payment_status: 'pending',
       order_status: 'pending',
       payment_method: actualPaymentMethod,
@@ -279,17 +314,17 @@ export async function createOrder(
     return { success: false, error: 'Failed to create order items' }
   }
 
-  if (coupon.couponId) {
+  if (totals.couponId) {
     const { data: currentCoupon } = await adminSupabase
       .from('coupons')
       .select('used_count')
-      .eq('id', coupon.couponId)
+      .eq('id', totals.couponId)
       .single()
 
     await adminSupabase
       .from('coupons')
       .update({ used_count: Number(currentCoupon?.used_count || 0) + 1 })
-      .eq('id', coupon.couponId)
+      .eq('id', totals.couponId)
   }
 
   if (paymentMethod === 'RAZORPAY') {
@@ -300,7 +335,7 @@ export async function createOrder(
 
     try {
       const options = {
-        amount: Math.round(total_amount * 100),
+        amount: Math.round(totals.total_amount * 100),
         currency: 'INR',
         receipt: order.id,
         payment_capture: 1,
@@ -319,7 +354,7 @@ export async function createOrder(
         orderId: order.id,
         orderNumber: order.order_number,
         amount: options.amount,
-        totalAmount: total_amount,
+        totalAmount: totals.total_amount,
       }
     } catch {
       await adminSupabase.from('orders').update({ payment_status: 'failed' }).eq('id', order.id)
@@ -328,7 +363,7 @@ export async function createOrder(
   }
 
   try {
-    await decrementStock(adminSupabase, resolved.items)
+    await decrementOrderStockOnce(adminSupabase, order.id)
   } catch (error: any) {
     await adminSupabase.from('orders').update({ order_status: 'cancelled' }).eq('id', order.id)
     return { success: false, error: error.message || 'Failed to update stock.' }
@@ -344,7 +379,7 @@ export async function createOrder(
   revalidatePath('/profile')
   revalidatePath('/admin/orders')
 
-  return { success: true, isRazorpay: false, order_number: order.order_number, orderId: order.id, totalAmount: total_amount }
+  return { success: true, isRazorpay: false, order_number: order.order_number, orderId: order.id, totalAmount: totals.total_amount }
 }
 
 export async function verifyRazorpayPayment(
@@ -394,21 +429,8 @@ export async function verifyRazorpayPayment(
     }
   }
 
-  const { data: orderItems } = await supabase
-    .from('order_items')
-    .select('variant_id, product_name, quantity')
-    .eq('order_id', internal_order_id)
-
   try {
-    await decrementStock(supabase, (orderItems || []).map((item: any) => ({
-      product_id: '',
-      variant_id: item.variant_id,
-      product_name: item.product_name,
-      variant_name: '',
-      price_at_purchase: 0,
-      quantity: Number(item.quantity),
-      line_total: 0,
-    })))
+    await decrementOrderStockOnce(supabase, internal_order_id)
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to update stock.' }
   }

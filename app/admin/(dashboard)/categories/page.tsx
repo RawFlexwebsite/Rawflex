@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import Link from 'next/link'
 import { Plus, FolderTree } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -9,12 +9,15 @@ export const metadata: Metadata = {
 }
 
 export default async function CategoriesPage() {
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  const supabase = admin.ok ? admin.adminClient : null
 
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('*')
-    .order('created_at', { ascending: false })
+  const { data: categories } = supabase
+    ? await supabase
+        .from('categories')
+        .select('*')
+        .order('created_at', { ascending: false })
+    : { data: [] }
 
   return (
     <div className="space-y-6">
@@ -28,7 +31,7 @@ export default async function CategoriesPage() {
         </div>
         <Link
           href="/admin/categories/new"
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-ink text-sm font-semibold rounded-xl shadow-md shadow-orange-500/20 hover:shadow-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200"
+          className="admin-primary-action px-4 py-2.5 text-sm rounded-xl"
         >
           <Plus className="w-4 h-4" />
           Add Category

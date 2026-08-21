@@ -255,7 +255,7 @@ export function ProductVariantsEditor({
             type="button"
             onClick={initializeBulkForm}
             disabled={isPending}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-ink bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50 shadow-sm"
+            className="admin-primary-action px-4 py-2 text-sm rounded-md"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Size Options
@@ -377,7 +377,7 @@ export function ProductVariantsEditor({
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="inline-flex items-center px-5 py-2 text-sm font-bold text-ink bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                  className="admin-primary-action px-5 py-2 text-sm rounded-md"
                 >
                   {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Save Changes
@@ -415,7 +415,7 @@ export function ProductVariantsEditor({
               <button
                 type="button"
                 onClick={handleApplyToAllColors}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-ink text-xs font-semibold rounded-lg transition-colors shadow-sm"
+                className="admin-primary-action px-4 py-2 text-xs rounded-lg"
               >
                 ✨ Apply for All Colors
               </button>
@@ -528,7 +528,7 @@ export function ProductVariantsEditor({
             <button
               type="submit"
               disabled={isPending || bulkData.length === 0}
-              className="inline-flex items-center px-6 py-2 text-sm font-bold text-ink bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="admin-primary-action px-6 py-2 text-sm rounded-md"
             >
               {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Save All Sizes

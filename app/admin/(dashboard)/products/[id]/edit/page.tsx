@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import ProductForm from '../../_components/ProductForm'
@@ -17,14 +17,17 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createClient()
+  const admin = await requireAdmin()
+  if (admin.ok === false) {
+    notFound()
+  }
+  const supabase = admin.adminClient
 
   const [productRes, categoriesRes, otherProductsRes, infoRes, faqRes, variantsRes, imagesRes] = await Promise.all([
     supabase.from('products').select('*').eq('id', id).single(),
     supabase
       .from('categories')
       .select('*')
-      .eq('is_active', true)
       .order('name'),
     supabase
       .from('products')

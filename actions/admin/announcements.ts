@@ -1,61 +1,76 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { revalidatePath } from 'next/cache'
 
-async function checkAdminAuth(supabase: any) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return false
+type Announcement = {
+  message: string
+  is_active: boolean
+}
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+const DEFAULT_ANNOUNCEMENT: Announcement = {
+  message: 'Free Shipping on Orders Above Rs. 1,099',
+  is_active: true,
+}
 
-  return profile?.role === 'admin'
+function parseAnnouncement(settings: any): Announcement {
+  const source = settings?.announcements?.global_announcement || {}
+
+  return {
+    message: source.message || DEFAULT_ANNOUNCEMENT.message,
+    is_active: typeof source.is_active === 'boolean' ? source.is_active : DEFAULT_ANNOUNCEMENT.is_active,
+  }
 }
 
 export async function getAnnouncement() {
   const supabase = await createClient()
-  
-  // Try to get the latest announcement
+
   const { data } = await supabase
-    .from('announcements')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(1)
+    .from('settings')
+    .select('announcements')
+    .eq('id', 'site_settings')
     .single()
 
-  return data
+  return parseAnnouncement(data)
 }
 
 export async function saveAnnouncement(message: string, isActive: boolean) {
-  const supabase = await createClient()
-  
-  const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  const admin = await requireAdmin()
+  if (admin.ok === false) return { success: false, error: admin.error }
+  const supabase = admin.adminClient
 
-  // Check if one exists
-  const existing = await getAnnouncement()
+  const { data: settings } = await supabase
+    .from('settings')
+    .select('announcements')
+    .eq('id', 'site_settings')
+    .single()
 
-  if (existing) {
-    const { error } = await supabase
-      .from('announcements')
-      .update({ message, is_active: isActive, updated_at: new Date().toISOString() })
-      .eq('id', existing.id)
+  const existingAnnouncements = settings?.announcements
+  const announcements =
+    existingAnnouncements && !Array.isArray(existingAnnouncements)
+      ? existingAnnouncements
+      : { items: existingAnnouncements || [] }
 
-    if (error) return { success: false, error: error.message }
-  } else {
-    const { error } = await supabase
-      .from('announcements')
-      .insert([{ message, is_active: isActive }])
+  const { error } = await supabase
+    .from('settings')
+    .upsert(
+      {
+        id: 'site_settings',
+        announcements: {
+          ...announcements,
+          global_announcement: {
+            message: message.trim(),
+            is_active: isActive,
+          },
+        },
+      },
+      { onConflict: 'id' }
+    )
 
-    if (error) return { success: false, error: error.message }
-  }
+  if (error) return { success: false, error: error.message }
 
-  revalidatePath('/', 'layout') // Revalidate everything since announcement is global
+  revalidatePath('/', 'layout')
   revalidatePath('/admin/announcements')
-  
   return { success: true }
 }

@@ -25,7 +25,7 @@ import {
   Tag,
   X,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAdminSidebar } from '@/context/AdminSidebarContext'
 
 const navItems = [
@@ -52,7 +52,12 @@ const navItems = [
 export default function AdminSidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { mobileOpen, setMobileOpen } = useAdminSidebar()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <>
@@ -94,7 +99,7 @@ export default function AdminSidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
+          {mounted && navItems.map((item) => {
             const isActive =
               item.href === '/admin'
                 ? pathname === '/admin'

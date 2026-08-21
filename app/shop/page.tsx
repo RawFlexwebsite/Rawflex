@@ -2,11 +2,16 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ShopGrid from './_components/ShopGrid'
 import { createClient } from "@/lib/supabase/server";
-import Image from 'next/image'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const metadata = {
   title: 'Shop Collection | RAWFLEX',
   description: 'Browse the RAWFLEX collection — oversized tees, acid wash edits, gym wear and limited streetwear drops.',
+}
+
+function isOversizedCategory(category: any) {
+  const categoryText = `${category.id || ''} ${category.slug || ''} ${category.name || ''}`.toLowerCase()
+  return categoryText.includes('oversize')
 }
 
 export default async function ShopPage({
@@ -15,6 +20,7 @@ export default async function ShopPage({
   searchParams: { category?: string; search?: string; featured?: string }
 }) {
   const supabase = await createClient();
+  const adminSupabase = createAdminClient();
 
   const resolvedSearchParams = await searchParams;
   const searchQuery = resolvedSearchParams.search || '';
@@ -40,10 +46,10 @@ export default async function ShopPage({
 
   const { data: productsData } = await productsQuery;
 
-  const { data: categoriesData } = await supabase
+  const { data: categoriesData } = await adminSupabase
     .from("categories")
     .select("*")
-    .eq("is_active", true);
+    .order('name');
 
   const colorGroupCounts = (productsData || []).reduce((acc: any, p: any) => {
     if (p.color_group_id) acc[p.color_group_id] = (acc[p.color_group_id] || 0) + 1;
@@ -68,6 +74,7 @@ export default async function ShopPage({
     name: p.name,
     slug: p.slug,
     category_id: p.category_id,
+    is_active: p.is_active,
     image_url: p.product_images?.[0]?.image_url || p.featured_image_url || "/image.png",
     price: p.product_variants?.[0]?.price || p.price || 0,
     oldPrice: p.product_variants?.[0]?.original_price || p.oldPrice || undefined,
@@ -79,7 +86,9 @@ export default async function ShopPage({
 
   const allProducts = products;
 
-  const categories = categoriesData || [];
+  const categories = (categoriesData || []).filter(
+    (category: any) => category.is_active || isOversizedCategory(category)
+  );
   const categoryParam = resolvedSearchParams.category || '';
   const selectedCategory = categoryParam
     ? categories.find((category: any) => category.id === categoryParam || category.slug === categoryParam)?.id || categoryParam

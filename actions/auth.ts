@@ -17,17 +17,28 @@ async function setRawflexSessionCookie(session: RawflexSession) {
   const signedSession = createSignedRawflexSession(session)
   const options = {
     path: '/',
-    httpOnly: false,
+    httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax' as const,
     maxAge: 30 * 24 * 60 * 60,
   }
 
   cookieStore.set(rawflexSessionCookieNames.session, signedSession.payload, options)
-  cookieStore.set(rawflexSessionCookieNames.signature, signedSession.signature, {
-    ...options,
+  cookieStore.set(rawflexSessionCookieNames.signature, signedSession.signature, options)
+}
+
+async function clearRawflexSessionCookie() {
+  const cookieStore = await cookies()
+  const options = {
+    path: '/',
     httpOnly: true,
-  })
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    maxAge: 0,
+  }
+
+  cookieStore.set(rawflexSessionCookieNames.session, '', options)
+  cookieStore.set(rawflexSessionCookieNames.signature, '', options)
 }
 
 export async function login(
@@ -52,6 +63,8 @@ export async function login(
   if (error) {
     return { error: 'Invalid email or password' }
   }
+
+  await clearRawflexSessionCookie()
 
   const redirectTo = formData.get('redirect_to') as string
   revalidatePath('/', 'layout')
@@ -120,6 +133,8 @@ export async function register(
     return { error: 'Account created but failed to log in automatically.' }
   }
 
+  await clearRawflexSessionCookie()
+
   const redirectTo = formData.get('redirect_to') as string
   revalidatePath('/', 'layout')
   redirect(redirectTo && redirectTo.startsWith('/') ? redirectTo : '/')
@@ -176,8 +191,7 @@ export async function sendEmailOtp(
   const senderName = process.env.BREVO_SENDER_NAME || 'RAWFLEX'
 
   if (!brevoApiKey) {
-    console.log(`[DEV MODE OTP] Email: ${email}, OTP: ${otp}`)
-    return { success: true }
+    return { error: 'Email service is not configured. Please contact support.' }
   }
 
   try {
@@ -280,29 +294,6 @@ export async function verifyEmailOtp(
 
   // OTP verified, delete it
   await adminSupabase.from('email_otps').delete().eq('email', email)
-
-  const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
-  if (isMock) {
-    const mockProfileId = 'mock-user-' + Math.random().toString(36).substring(2, 9)
-
-    await adminSupabase.from('profiles').insert({
-      id: mockProfileId,
-      email,
-      full_name: fullName || record.full_name || 'Customer',
-      role: 'customer',
-      phone: phone || null
-    })
-
-    await setRawflexSessionCookie({
-      id: mockProfileId,
-      email,
-      full_name: fullName || record.full_name || 'Customer',
-      role: 'customer'
-    })
-
-    revalidatePath('/', 'layout')
-    redirect(redirectTo && redirectTo.startsWith('/') ? redirectTo : '/')
-  }
 
   // Real Supabase Auth Flow
   const adminAuth = adminSupabase.auth.admin
@@ -440,7 +431,12 @@ export async function adminLogin(
   let error = signInRes.error
 
   let adminClient: any = null
-  if (error && email.toLowerCase() === adminEmail.toLowerCase() && password === adminPassword) {
+  if (
+    error &&
+    process.env.NODE_ENV !== 'production' &&
+    email.toLowerCase() === adminEmail.toLowerCase() &&
+    password === adminPassword
+  ) {
     try {
       const { createAdminClient } = await import('@/lib/supabase/admin')
       adminClient = createAdminClient()
@@ -470,8 +466,13 @@ export async function adminLogin(
     return { error: error?.message || 'Invalid credentials' }
   }
 
-  // Verify this user is actually an admin
-  let { data: profile } = await supabase
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const adminDbClient = adminClient || createAdminClient()
+
+  // Verify this user is actually an admin. Use the service-role client here
+  // because admin login is authenticated by password first, while table RLS may
+  // still hide the profile row from the anon client.
+  let { data: profile } = await adminDbClient
     .from('profiles')
     .select('*')
     .eq('id', data.user.id)
@@ -479,11 +480,6 @@ export async function adminLogin(
 
   if (email.toLowerCase() === adminEmail.toLowerCase()) {
     try {
-      // Use the admin (service-role) client for profile writes so RLS / anon
-      // key restrictions can never block the admin seed.
-      const { createAdminClient } = await import('@/lib/supabase/admin')
-      const adminDbClient = adminClient || createAdminClient()
-
       if (!profile) {
         const { data: newProfile, error: insertError } = await adminDbClient
           .from('profiles')
@@ -523,6 +519,7 @@ export async function adminLogin(
 
   if (!profile || profile.role !== 'admin') {
     await supabase.auth.signOut()
+    await clearRawflexSessionCookie()
     return { error: 'You do not have admin access' }
   }
 
@@ -540,6 +537,7 @@ export async function adminLogin(
 export async function logout() {
   const supabase = await createClient()
   await supabase.auth.signOut()
+  await clearRawflexSessionCookie()
   revalidatePath('/', 'layout')
   redirect('/login')
 }
@@ -547,7 +545,67 @@ export async function logout() {
 export async function logoutForClient(): Promise<AuthResult> {
   const supabase = await createClient()
   await supabase.auth.signOut()
+  await clearRawflexSessionCookie()
   revalidatePath('/', 'layout')
   return { success: true }
+}
+
+export async function getCurrentUserForClient() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { user: null }
+  }
+
+  return {
+    user: {
+      id: user.id,
+      email: user.email || null,
+      full_name: (user.user_metadata?.full_name as string | undefined) || null,
+      role: (user.user_metadata?.role as string | undefined) || null,
+    },
+  }
+}
+
+export async function getCurrentCustomerProfileForClient() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { profile: null }
+  }
+
+  const adminSupabase = createAdminClient()
+  const { data: profileData } = await adminSupabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const { data: addressData } = await adminSupabase
+    .from('addresses')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('is_default', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  return {
+    profile: {
+      fullName: profileData?.full_name || user.user_metadata?.full_name || '',
+      email: user.email || profileData?.email || '',
+      phone: addressData?.phone || profileData?.phone || '',
+      alternatePhone: addressData?.alternate_phone || '',
+      street: addressData?.address_line_1 || '',
+      city: addressData?.city || '',
+      state: addressData?.state || '',
+      zipCode: addressData?.postal_code || '',
+    },
+  }
 }
 
