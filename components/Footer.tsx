@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Instagram, Mail, Music2, Youtube } from "lucide-react";
+import { Facebook, Instagram, Mail, Youtube } from "lucide-react";
+import { IconWhatsapp } from "@/components/Icons";
 import { SITE } from "@/lib/data";
 
 const shopLinks = [
@@ -35,6 +36,30 @@ const infoLinks = [
 ];
 
 const payments = ["VISA", "MC", "UPI", "Paytm"];
+
+const socialLinks = [
+  {
+    label: "Instagram",
+    href: `https://www.instagram.com/${SITE.instagram.replace("@", "")}`,
+    icon: Instagram,
+  },
+  {
+    label: "YouTube",
+    href: "https://www.youtube.com/@rawflex",
+    icon: Youtube,
+    className: "h-6 w-6 sm:h-7 sm:w-7",
+  },
+  {
+    label: "Facebook",
+    href: `https://www.facebook.com/${SITE.facebook.replace(/\s+/g, "")}`,
+    icon: Facebook,
+  },
+  {
+    label: "WhatsApp",
+    href: `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(SITE.whatsappMessage)}`,
+    icon: IconWhatsapp,
+  },
+];
 
 export default function Footer() {
   return (
@@ -88,36 +113,22 @@ export default function Footer() {
               Worn by the culture.
             </p>
             <div className="mt-4 sm:mt-6 flex items-center gap-4 sm:gap-5 text-white">
-              <a
-                href={`https://www.instagram.com/${SITE.instagram.replace("@", "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="transition-colors hover:text-[#D4A82C]"
-              >
-                <Instagram className="h-5 sm:h-6 w-5 sm:w-6" />
-              </a>
-              <a
-                href="/"
-                aria-label="TikTok"
-                className="transition-colors hover:text-[#D4A82C]"
-              >
-                <Music2 className="h-5 sm:h-6 w-5 sm:w-6" />
-              </a>
-              <a
-                href="/"
-                aria-label="YouTube"
-                className="transition-colors hover:text-[#D4A82C]"
-              >
-                <Youtube className="h-6 sm:h-7 w-6 sm:w-7" />
-              </a>
-              <a
-                href="/"
-                aria-label="Pinterest"
-                className="font-display text-xl sm:text-2xl font-black leading-none transition-colors hover:text-[#D4A82C]"
-              >
-                P
-              </a>
+              {socialLinks.map((social) => {
+                const Icon = social.icon;
+
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    className="transition-colors hover:text-[#D4A82C]"
+                  >
+                    <Icon className={social.className ?? "h-5 w-5 sm:h-6 sm:w-6"} />
+                  </a>
+                );
+              })}
             </div>
             <p className="mt-5 sm:mt-7 text-[10px] sm:text-xs font-semibold text-white/45">
               (c) {new Date().getFullYear()} RAWFLEX. All rights reserved.
