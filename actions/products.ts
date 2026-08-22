@@ -89,9 +89,13 @@ export async function createProduct(
   const isActive = formData.get('is_active') === 'on'
   const isFeatured = formData.get('is_featured') === 'on'
   const imageUrl = formData.get('image_url') as string
+  const price = formData.get('price') as string
 
   if (!name) {
     return { error: 'Product name is required' }
+  }
+  if (!price) {
+    return { error: 'Base price is required' }
   }
 
   const slug = slugify(name)
@@ -102,6 +106,7 @@ export async function createProduct(
     name,
     slug,
     category_id: categoryId || null,
+    price: parseFloat(price),
     short_description: shortDescription || null,
     description: description || null,
     fabric: fabric || null,
@@ -151,9 +156,13 @@ export async function updateProduct(
   const colorName = formData.get('color_name') as string
   const isActive = formData.get('is_active') === 'on'
   const isFeatured = formData.get('is_featured') === 'on'
+  const price = formData.get('price') as string
 
   if (!id || !name) {
     return { error: 'Product ID and name are required' }
+  }
+  if (!price) {
+    return { error: 'Base price is required' }
   }
 
   const slug = slugify(name)
@@ -164,6 +173,7 @@ export async function updateProduct(
       name,
       slug,
       category_id: categoryId || null,
+      price: parseFloat(price),
       short_description: shortDescription || null,
       description: description || null,
       fabric: fabric || null,
