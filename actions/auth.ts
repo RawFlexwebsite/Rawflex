@@ -467,7 +467,7 @@ export async function adminLogin(
   }
 
   const { createAdminClient } = await import('@/lib/supabase/admin')
-  const adminDbClient = adminClient || createAdminClient()
+const adminDbClient = adminClient || createAdminClient()
 
   // Verify this user is actually an admin. Use the service-role client here
   // because admin login is authenticated by password first, while table RLS may
@@ -498,10 +498,10 @@ export async function adminLogin(
         } else {
           console.error('Admin profile upsert failed:', insertError)
         }
-      } else if (profile.role !== 'admin') {
+      } else if (profile.role !== 'admin' || profile.is_active === false) {
         const { data: updatedProfile, error: updateError } = await adminDbClient
           .from('profiles')
-          .update({ role: 'admin' })
+          .update({ role: 'admin', is_active: true })
           .eq('id', data.user.id)
           .select('*')
           .single()
@@ -509,7 +509,7 @@ export async function adminLogin(
         if (!updateError) {
           profile = updatedProfile
         } else {
-          console.error('Admin role update failed:', updateError)
+          console.error('Admin profile update failed:', updateError)
         }
       }
     } catch (e) {
@@ -517,7 +517,7 @@ export async function adminLogin(
     }
   }
 
-  if (!profile || profile.role !== 'admin') {
+  if (!profile || profile.role !== 'admin' || profile.is_active === false) {
     await supabase.auth.signOut()
     await clearRawflexSessionCookie()
     return { error: 'You do not have admin access' }
