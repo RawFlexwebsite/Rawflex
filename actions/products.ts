@@ -140,6 +140,16 @@ export async function createProduct(
     })
   }
 
+  // Create a default variant using the base price so price shows on frontend
+  await supabase.from('product_variants').insert({
+    product_id: id,
+    variant_name: 'Default',
+    price: parseFloat(price),
+    original_price: null,
+    stock_quantity: 0,
+    is_active: true,
+  })
+
   revalidatePath('/admin/products')
   redirect(`/admin/products/${product.id}/edit`)
 }
