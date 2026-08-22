@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
-import { Facebook, Instagram, Mail, Youtube } from "lucide-react";
+import { Facebook, Instagram, Mail, Youtube, Loader2 } from "lucide-react";
 import { IconWhatsapp } from "@/components/Icons";
 import { SITE } from "@/lib/data";
+import { useState } from "react";
+import { useToast } from "@/context/ToastContext";
 
 const shopLinks = [
   { label: "New Drops", href: "/shop?category=new-drops" },
@@ -24,15 +28,12 @@ const helpLinks = [
 const companyLinks = [
   { label: "About Us", href: "/about" },
   { label: "Our Story", href: "/about" },
-  { label: "Careers", href: "/contact" },
   { label: "Privacy Policy", href: "/policies/privacy" },
   { label: "Terms & Conditions", href: "/policies/terms" },
 ];
 
 const infoLinks = [
-  { label: "Store Locator", href: "/contact" },
   { label: "Contact Us", href: "/contact" },
-  { label: "Affiliates", href: "/contact" },
 ];
 
 const payments = ["VISA", "MC", "UPI", "Paytm"];
@@ -62,12 +63,51 @@ const socialLinks = [
 ];
 
 export default function Footer() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { showToast } = useToast()
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (isSubmitting) return
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+
+    if (!email || !email.includes('@')) {
+      showToast('Please enter a valid email address', 'error')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const res = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        showToast(data.error || 'Failed to subscribe. Please try again.', 'error')
+        return
+      }
+
+      showToast('Successfully subscribed to newsletter!', 'success')
+      e.currentTarget.reset()
+    } catch {
+      showToast('Something went wrong. Please try again.', 'error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <footer className="relative bg-[#0a0909] pb-8 pt-3">
       <div className="max-w-wrap mx-auto px-4 sm:px-5 md:px-8">
         <section className="border border-[#D4A82C]/30 bg-[#090a09] px-4 sm:px-5 py-4 sm:py-5 md:px-8 md:py-5 lg:px-10 shadow-[0_0_0_1px_rgba(212,168,44,0.08)]">
-          <div className="grid items-center gap-4 sm:gap-6 lg:grid-cols-[1fr_1.08fr]">
-            <div className="flex items-center gap-4 sm:gap-5">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 justify-between">
+            <div className="flex items-center gap-4 sm:gap-5 text-center sm:text-left">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center text-[#D4A82C] md:h-14 md:w-14">
                 <Mail className="h-10 w-10 stroke-[1.6] md:h-11 md:w-11" />
               </div>
@@ -81,19 +121,20 @@ export default function Footer() {
               </div>
             </div>
 
-            <form className="flex min-w-0 flex-col sm:flex-row" action="/shop">
+            <form className="flex min-w-0 flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto flex-1 justify-center" onSubmit={handleSubmit}>
               <input
                 type="email"
                 name="email"
                 placeholder="Enter your email"
                 aria-label="Email address"
-                className="h-10 sm:h-12 min-w-0 flex-1 border border-[#D4A82C]/35 bg-[#070807] px-4 sm:px-5 text-xs sm:text-sm font-semibold text-white outline-none placeholder:text-white/45 focus:border-[#D4A82C] md:h-14"
+                className="w-full min-w-0 sm:w-[300px] border border-[#D4A82C]/35 bg-[#070807] px-4 py-3 text-sm font-semibold text-center text-white outline-none placeholder:text-white/45 placeholder:text-center focus:border-[#D4A82C] rounded-xl transition-colors"
               />
               <button
                 type="submit"
-                className="h-10 sm:h-12 shrink-0 bg-[#D4A82C] px-5 sm:px-7 lg:px-10 text-[10px] sm:text-xs font-black uppercase text-[#0a0909] transition-colors hover:bg-[#e2bd50] md:h-14"
+                disabled={isSubmitting}
+                className="w-full sm:w-auto shrink-0 bg-[#D4A82C] px-6 py-3 text-sm font-black uppercase text-[#0a0909] rounded-xl transition-colors hover:bg-[#e2bd50] whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Join the List
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Join the List'}
               </button>
             </form>
           </div>

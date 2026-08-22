@@ -63,6 +63,7 @@ export function OversizedSectionForm({
             options={{
               maxFiles: 1,
               resourceType: 'image',
+              folder: "rawflex/oversized",
               clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
             }}
             onSuccess={handleUploadSuccess}

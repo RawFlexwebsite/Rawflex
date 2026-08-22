@@ -57,6 +57,7 @@ export async function addGlobalFaq(formData: FormData) {
 
   revalidatePath('/admin/settings/faqs')
   revalidatePath('/product/[slug]', 'page')
+  revalidatePath('/contact')
   return { success: true, data: data[0] }
 }
 
@@ -84,6 +85,7 @@ export async function updateGlobalFaq(id: string, formData: FormData) {
 
   revalidatePath('/admin/settings/faqs')
   revalidatePath('/product/[slug]', 'page')
+  revalidatePath('/contact')
   return { success: true, data: data[0] }
 }
 

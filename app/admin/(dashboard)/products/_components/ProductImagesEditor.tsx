@@ -98,6 +98,9 @@ export function ProductImagesEditor({
           options={{
             multiple: true,
             maxFiles: 5,
+            folder: "rawflex/products",
+            resourceType: "image",
+            clientAllowedFormats: ["jpg", "jpeg", "png", "webp"]
           }}
         >
           {({ open }) => {

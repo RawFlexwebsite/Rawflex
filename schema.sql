@@ -416,6 +416,15 @@ CREATE TABLE email_otps (
 CREATE INDEX idx_email_otps_email ON email_otps(email);
 CREATE INDEX idx_email_otps_expires_at ON email_otps(expires_at);
 
+-- 17b. Newsletter Subscriptions Table
+CREATE TABLE newsletter_subscriptions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX idx_newsletter_subscriptions_email ON newsletter_subscriptions(email);
+
 -- 18. Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$

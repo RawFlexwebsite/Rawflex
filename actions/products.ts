@@ -88,6 +88,7 @@ export async function createProduct(
   const colorName = formData.get('color_name') as string
   const isActive = formData.get('is_active') === 'on'
   const isFeatured = formData.get('is_featured') === 'on'
+  const imageUrl = formData.get('image_url') as string
 
   if (!name) {
     return { error: 'Product name is required' }
@@ -114,6 +115,7 @@ export async function createProduct(
     color_group_id: null,
     is_active: isActive,
     is_featured: isFeatured,
+    featured_image_url: imageUrl || null,
   }).select('id').single()
 
   if (error) {

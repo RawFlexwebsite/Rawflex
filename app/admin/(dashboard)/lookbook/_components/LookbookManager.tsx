@@ -95,6 +95,7 @@ export function LookbookManager({
               options={{
                 maxFiles: 1,
                 resourceType: 'image',
+                folder: "rawflex/lookbook",
                 clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
               }}
               onSuccess={handleUploadSuccess}

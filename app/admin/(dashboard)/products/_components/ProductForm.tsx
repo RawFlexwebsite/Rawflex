@@ -1,13 +1,11 @@
 'use client'
 
 import { useTransition, useActionState, useState } from 'react'
-import {
-  createProduct,
-  updateProduct,
-  type ActionResult,
-} from '@/actions/products'
+import { createProduct, updateProduct, type ActionResult } from '@/actions/products'
 import Link from 'next/link'
-import { Save, ArrowLeft } from 'lucide-react'
+import Image from 'next/image'
+import { Save, ArrowLeft, Image as ImageIcon, Loader2, X } from 'lucide-react'
+import { CldUploadWidget } from 'next-cloudinary'
 import type { Category, Product } from '@/types/database'
 
 type OtherProduct = Pick<Product, 'id' | 'name' | 'color_group_id' | 'color_name'>
@@ -27,6 +25,8 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
     {}
   )
   const [pending, startTransition] = useTransition()
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   // Parse initial colors from JSON or legacy format
   const initialColors = (() => {
@@ -116,7 +116,6 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 <select
                   id="product-category"
                   name="category_id"
-                  required
                   defaultValue={product?.category_id || ''}
                   className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
                 >
@@ -413,6 +412,71 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
         </div>
       </div>
       </div>
+
+      {/* Actions */}
+{/* Product Images */}
+        <div className="mt-6 bg-panel rounded-xl border border-cream-line p-6 space-y-5">
+          <h2 className="text-base font-semibold text-ink">Product Images</h2>
+          <p className="text-xs text-ink/40">
+            Upload product images. The first image will be set as the featured image.
+          </p>
+          <div>
+            <label className="block text-sm font-medium text-ink/80 mb-1.5">
+              Category Image (Optional)
+            </label>
+            <input type="hidden" name="image_url" value={''} />
+            
+            {imageUrl ? (
+              <div className="relative w-full max-w-sm aspect-video rounded-xl border border-cream-line overflow-hidden bg-cream-deep">
+                <Image 
+                  src={imageUrl} 
+                  alt="Product Image Preview" 
+                  fill 
+                  className="object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setImageUrl(null)}
+                  className="absolute top-2 right-2 p-1.5 bg-panel/90 hover:bg-panel2 text-ink/80 hover:text-red-600 rounded-lg shadow-sm backdrop-blur-sm transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <CldUploadWidget 
+                signatureEndpoint="/api/cloudinary/sign"
+                options={{
+                  maxFiles: 1,
+                  resourceType: "image",
+                  folder: "rawflex/products",
+                  clientAllowedFormats: ["jpg", "jpeg", "png", "webp"]
+                }}
+                onSuccess={(result: any) => {
+                  setImageUrl(result.info.secure_url)
+                  setIsUploading(false)
+                }}
+                onOpen={() => setIsUploading(true)}
+                onError={() => setIsUploading(false)}
+              >
+                {({ open }) => (
+                  <button
+                    type="button"
+                    onClick={() => open()}
+                    disabled={isUploading || pending}
+                    className="w-full max-w-sm aspect-video flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-cream-line bg-cream-deep text-ink/60 hover:bg-panel2 hover:border-orange-400 hover:text-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                    ) : (
+                      <ImageIcon className="w-6 h-6" />
+                    )}
+                    <span className="text-sm font-medium">Click to upload an image</span>
+                  </button>
+                )}
+              </CldUploadWidget>
+            )}
+          </div>
+        </div>
 
       {/* Actions */}
       <div className="flex items-center justify-between">

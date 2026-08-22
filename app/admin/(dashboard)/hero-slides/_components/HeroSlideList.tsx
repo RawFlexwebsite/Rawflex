@@ -101,6 +101,7 @@ export function HeroSlideList({
             options={{
               maxFiles: 1,
               resourceType: "image",
+              folder: "rawflex/hero-slides",
               clientAllowedFormats: ["jpg", "jpeg", "png", "webp"]
             }}
             onSuccess={handleUploadSuccess}

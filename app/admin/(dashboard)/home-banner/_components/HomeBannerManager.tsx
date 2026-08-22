@@ -124,6 +124,7 @@ export function HomeBannerManager({
               options={{
                 maxFiles: 1,
                 resourceType: 'image',
+                folder: "rawflex/home-banner",
                 clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
               }}
               onSuccess={handleUploadSuccess}

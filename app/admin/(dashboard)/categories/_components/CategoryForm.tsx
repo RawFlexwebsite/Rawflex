@@ -112,6 +112,7 @@ export default function CategoryForm({ category }: CategoryFormProps) {
               options={{
                 maxFiles: 1,
                 resourceType: "image",
+                folder: "rawflex/categories",
                 clientAllowedFormats: ["jpg", "jpeg", "png", "webp"]
               }}
               onSuccess={(result: any) => {

@@ -35,7 +35,7 @@ export default function OversizedPromo({
           {/* Person image only — natural height, no blank space */}
           <div className="relative w-full pt-5 px-2">
             <Image
-              src={settings.background_image_url}
+              src="/OVERSIZED_person.png"
               alt="Model wearing an oversized black RAWFLEX tee"
               width={800}
               height={900}

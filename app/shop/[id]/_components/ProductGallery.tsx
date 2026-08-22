@@ -60,7 +60,8 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
               <Image
                 src={img}
                 alt={`Thumbnail ${index + 1}`}
-                fill
+                width={80}
+                height={110}
                 sizes="90px"
                 className="object-cover"
               />
@@ -71,17 +72,18 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
 
       {/* Main Image */}
       <div 
-        className="order-1 md:order-2 relative w-full aspect-[4/5] rounded-[32px] overflow-hidden shadow-soft border border-gold/15 bg-cream-deep cursor-crosshair"
+        className="order-1 md:order-2 relative inline-block rounded-[24px] overflow-hidden shadow-soft border border-gold/15 bg-cream-deep cursor-crosshair"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
         <Image
           src={displayImages[activeIndex]}
           alt={`${productName} - Image ${activeIndex + 1}`}
-          fill
+          width={600}
+          height={800}
           sizes="(max-width: 768px) 100vw, 600px"
           style={zoomStyle}
-          className={`object-cover transition-transform ease-out ${isZooming ? 'duration-100' : 'duration-300'}`}
+          className={`object-contain object-center transition-transform ease-out ${isZooming ? 'duration-100' : 'duration-300'}`}
           priority
         />
         {badge && (

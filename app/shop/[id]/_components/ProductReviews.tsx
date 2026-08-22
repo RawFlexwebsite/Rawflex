@@ -90,7 +90,7 @@ export default function ProductReviews({
                       <Star key={star} className={`w-3.5 h-3.5 ${star <= review.rating ? 'fill-gold' : 'fill-cream-deep text-cream-line'}`} />
                     ))}
                   </div>
-                  <span className="text-sm font-semibold text-ink ml-1">{review.profiles?.full_name || 'Anonymous'}</span>
+                  <span className="text-sm font-semibold text-ink ml-1">{review.profiles?.full_name || review.profiles?.email?.split('@')[0] || 'Customer'}</span>
                   <span className="text-xs text-ink/40 ml-auto">{new Date(review.created_at).toLocaleDateString()}</span>
                 </div>
                 {review.comment && (

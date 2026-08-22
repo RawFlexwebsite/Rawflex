@@ -136,13 +136,13 @@ export default function ProductDetailActions({ product, selectedColor = null }: 
             )}
           </div>
           
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             {filteredVariants.map(variant => (
               <button
                 key={variant.id}
                 onClick={() => setSelectedVariant(variant)}
                 disabled={variant.stock_quantity <= 0}
-                className={`relative min-w-[3.5rem] h-12 px-4 rounded-xl text-[15px] font-bold flex items-center justify-center transition-all duration-300 border-2 overflow-hidden ${
+                className={`relative min-w-[3rem] h-10 px-3 rounded-lg text-[13px] font-bold flex items-center justify-center transition-all duration-300 border-2 overflow-hidden ${
                   selectedVariant?.id === variant.id
                     ? "border-emerald text-emerald bg-emerald/5 shadow-sm scale-[1.02]"
                     : "border-cream-line text-ink/80 hover:border-emerald/40 hover:bg-emerald/5 hover:text-emerald"
@@ -150,7 +150,7 @@ export default function ProductDetailActions({ product, selectedColor = null }: 
               >
                 {getDisplayName(variant.variant_name)}
                 {selectedVariant?.id === variant.id && (
-                  <div className="absolute top-0 right-0 w-3 h-3 bg-emerald rounded-bl-xl" />
+                  <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-emerald rounded-bl-lg" />
                 )}
               </button>
             ))}
@@ -189,21 +189,21 @@ export default function ProductDetailActions({ product, selectedColor = null }: 
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
           <button
             onClick={handleAdd}
             disabled={product.variants.length > 0 && !selectedVariant}
-            className="w-full py-3.5 px-4 bg-emerald text-cream font-body font-semibold rounded-full shadow-card hover:bg-emerald-deep hover:text-emerald transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 px-3 bg-emerald text-cream font-body font-semibold rounded-full shadow-card hover:bg-emerald-deep hover:text-emerald transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <ShoppingBag className="w-5 h-5" /> Add to Cart
+            <ShoppingBag className="w-4 h-4" /> Add to Cart
           </button>
 
           <button
             onClick={handleBuyNow}
             disabled={product.variants.length > 0 && !selectedVariant}
-            className="w-full py-3.5 px-4 border-2 border-emerald text-emerald font-body font-semibold rounded-full hover:bg-emerald hover:text-cream transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 px-3 border-2 border-emerald text-emerald font-body font-semibold rounded-full hover:bg-emerald hover:text-cream transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <CreditCard className="w-5 h-5" /> Buy Now
+            <CreditCard className="w-4 h-4" /> Buy Now
           </button>
         </div>
       </div>

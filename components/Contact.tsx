@@ -5,7 +5,14 @@ import Reveal from "./Reveal";
 import { SITE } from "@/lib/data";
 import { submitInquiry } from "@/actions/contact";
 
-export default function Contact() {
+interface FAQ {
+  id: string;
+  question: string;
+  answer: string;
+  display_order: number;
+}
+
+export default function Contact({ faqs = [] }: { faqs?: FAQ[] }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -209,56 +216,36 @@ export default function Contact() {
         </Reveal>
 
         {/* FAQs */}
-        <div className="mt-20 max-w-3xl mx-auto">
-          <Reveal>
-            <div className="eyebrow justify-center inline-flex items-center gap-2 mb-3">
-              <span className="h-px w-6 bg-gold" />
-              Support
-              <span className="h-px w-6 bg-gold" />
-            </div>
-            <h3 className="font-display font-bold text-2xl md:text-3xl text-ink text-center mb-10">
-              Frequently Asked Questions
-            </h3>
-          </Reveal>
-
-          <Reveal delay={1} className="space-y-4">
-            <details className="group bg-panel rounded-2xl border border-cream-line shadow-sm overflow-hidden transition-colors duration-300">
-              <summary className="font-display font-semibold text-ink text-[15px] md:text-base px-6 py-5 cursor-pointer flex justify-between items-center outline-none list-none hover:text-emerald transition-colors">
-                Do you ship pan-India?
-                <span className="w-8 h-8 rounded-full bg-cream-deep flex items-center justify-center transition-transform group-open:rotate-180 group-open:bg-emerald/10 group-open:text-emerald text-ink/50">
-                  <svg fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="20"><polyline points="6 9 12 15 18 9"/></svg>
-                </span>
-              </summary>
-              <div className="px-6 pb-6 text-ink/70 text-sm md:text-[15px] leading-relaxed border-t border-cream-line/50 mx-6 pt-4">
-                Yes, we ship across all of India. Delivery typically takes 2-4 business days for metro cities and 5-7 business days for the rest.
+        {faqs.length > 0 && (
+          <div className="mt-20 max-w-3xl mx-auto">
+            <Reveal>
+              <div className="eyebrow justify-center inline-flex items-center gap-2 mb-3">
+                <span className="h-px w-6 bg-gold" />
+                Support
+                <span className="h-px w-6 bg-gold" />
               </div>
-            </details>
+              <h3 className="font-display font-bold text-2xl md:text-3xl text-ink text-center mb-10">
+                Frequently Asked Questions
+              </h3>
+            </Reveal>
 
-            <details className="group bg-panel rounded-2xl border border-cream-line shadow-sm overflow-hidden transition-colors duration-300">
-              <summary className="font-display font-semibold text-ink text-[15px] md:text-base px-6 py-5 cursor-pointer flex justify-between items-center outline-none list-none hover:text-emerald transition-colors">
-                What is your return policy?
-                <span className="w-8 h-8 rounded-full bg-cream-deep flex items-center justify-center transition-transform group-open:rotate-180 group-open:bg-emerald/10 group-open:text-emerald text-ink/50">
-                  <svg fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="20"><polyline points="6 9 12 15 18 9"/></svg>
-                </span>
-              </summary>
-              <div className="px-6 pb-6 text-ink/70 text-sm md:text-[15px] leading-relaxed border-t border-cream-line/50 mx-6 pt-4">
-                We offer a 7-day exchange window for unworn items with all tags intact. Refer to our Refund & Cancellation policy for details.
-              </div>
-            </details>
-
-            <details className="group bg-panel rounded-2xl border border-cream-line shadow-sm overflow-hidden transition-colors duration-300">
-              <summary className="font-display font-semibold text-ink text-[15px] md:text-base px-6 py-5 cursor-pointer flex justify-between items-center outline-none list-none hover:text-emerald transition-colors">
-                How do I pick the right size?
-                <span className="w-8 h-8 rounded-full bg-cream-deep flex items-center justify-center transition-transform group-open:rotate-180 group-open:bg-emerald/10 group-open:text-emerald text-ink/50">
-                  <svg fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="20"><polyline points="6 9 12 15 18 9"/></svg>
-                </span>
-              </summary>
-              <div className="px-6 pb-6 text-ink/70 text-sm md:text-[15px] leading-relaxed border-t border-cream-line/50 mx-6 pt-4">
-                Our oversized fits run true to label. Message us on WhatsApp with your height and weight and we'll recommend the perfect size.
-              </div>
-            </details>
-          </Reveal>
-        </div>
+            <Reveal delay={1} className="space-y-4">
+              {faqs.map((faq: FAQ) => (
+                <details key={faq.id} className="group bg-panel rounded-2xl border border-cream-line shadow-sm overflow-hidden transition-colors duration-300">
+                  <summary className="font-display font-semibold text-ink text-[15px] md:text-base px-6 py-5 cursor-pointer flex justify-between items-center outline-none list-none hover:text-emerald transition-colors">
+                    {faq.question}
+                    <span className="w-8 h-8 rounded-full bg-cream-deep flex items-center justify-center transition-transform group-open:rotate-180 group-open:bg-emerald/10 group-open:text-emerald text-ink/50">
+                      <svg fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="20"><polyline points="6 9 12 15 18 9"/></svg>
+                    </span>
+                  </summary>
+                  <div className="px-6 pb-6 text-ink/70 text-sm md:text-[15px] leading-relaxed border-t border-cream-line/50 mx-6 pt-4">
+                    {faq.answer}
+                  </div>
+                </details>
+              ))}
+            </Reveal>
+          </div>
+        )}
       </div>
     </section>
   );

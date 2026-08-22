@@ -381,7 +381,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     .from('reviews')
     .select(`
       id, rating, review_text, created_at,
-      profiles:user_id ( full_name )
+      profiles:user_id ( full_name, email )
     `)
     .eq('product_id', productData.id)
     .eq('is_approved', true)

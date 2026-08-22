@@ -1,13 +1,31 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Contact from "@/components/Contact";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
   title: 'Contact Us | RAWFLEX',
   description: 'Get in touch with RAWFLEX for any queries, custom orders, or feedback.',
 }
 
-export default function ContactPage() {
+async function getGlobalFaqs() {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('global_faqs')
+    .select('*')
+    .order('display_order', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching global FAQs:', error)
+    return []
+  }
+
+  return data || []
+}
+
+export default async function ContactPage() {
+  const faqs = await getGlobalFaqs()
+
   return (
     <main className="overflow-x-hidden pt-[108px] md:pt-[120px] bg-cream min-h-screen flex flex-col">
       <Header />
@@ -32,7 +50,7 @@ export default function ContactPage() {
       </section>
 
       <div className="flex-1">
-        <Contact />
+        <Contact faqs={faqs} />
       </div>
       <Footer />
     </main>

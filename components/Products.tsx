@@ -65,31 +65,30 @@ export default function Products({
             const categoryName = categories.find(c => c.id === p.category_id)?.name || p.category_id || "Uncategorized";
             return (
               <Reveal key={p.id} delay={(i % 5) as any} className="flex-none w-[calc(50%-0.5rem)] md:w-[calc(33.333%-1rem)] lg:w-[calc(20%-1.2rem)]">
-                <div className="lift group bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-md hover:shadow-lg border border-[#E6DAC4] h-full flex flex-col">
-                  <div className="relative aspect-[4/5] overflow-hidden bg-[#F0EAE0]">
-                    <Image
-                      src={p.image_url}
-                      alt={p.name}
-                      fill
-                      sizes="(max-width: 768px) 50vw, 280px"
-                      className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                    />
-                    {p.badge && (
-                      <span className="absolute top-3 left-3 bg-[#D2A546] text-[#080909] text-[9px] md:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-sm">
-                        {p.badge}
+                <Link href={`/shop/${p.id}`} className="block">
+                  <div className="lift group bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-md hover:shadow-lg border border-[#E6DAC4] h-full flex flex-col">
+                    <div className="relative aspect-[4/5] overflow-hidden bg-[#F0EAE0]">
+                      <Image
+                        src={p.image_url}
+                        alt={p.name}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 280px"
+                        className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                      />
+                      {p.badge && (
+                        <span className="absolute top-3 left-3 bg-[#D2A546] text-[#080909] text-[9px] md:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-sm">
+                          {p.badge}
+                        </span>
+                      )}
+                      <span className="absolute bottom-3 right-3 bg-[#1E1B17] text-[#E4E0DD] text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded shadow-sm">
+                        {categoryName}
                       </span>
-                    )}
-                    <span className="absolute bottom-3 right-3 bg-[#1E1B17] text-[#E4E0DD] text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded shadow-sm">
-                      {categoryName}
-                    </span>
-                  </div>
-                  <div className="p-3 md:p-4 flex flex-col flex-1">
-                    <div className="flex-1">
-                      <Link href={`/shop/${p.id}`} className="hover:text-[#B9893F] transition-colors">
-                        <h3 className="font-display font-semibold text-[#1A1A1A] text-[13px] md:text-[15px] leading-snug line-clamp-2">
+                    </div>
+                    <div className="p-3 md:p-4 flex flex-col flex-1">
+                      <div className="flex-1">
+                        <h3 className="font-display font-semibold text-[#1A1A1A] text-[13px] md:text-[15px] leading-snug line-clamp-2 hover:text-[#B9893F] transition-colors">
                           {p.name}
                         </h3>
-                      </Link>
                       {p.colors && p.colors.length > 0 ? (
                         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                           {p.colors.slice(0, 5).map((colorObj) => (
@@ -126,19 +125,23 @@ export default function Products({
                     </div>
                     <div className="mt-3 grid grid-cols-1 gap-2">
                       <button
-                        onClick={() => addToCart({
-                          id: p.id,
-                          name: p.name,
-                          price: p.price,
-                          image_url: p.image_url,
-                          category_name: categoryName
-                        })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart({
+                            id: p.id,
+                            name: p.name,
+                            price: p.price,
+                            image_url: p.image_url,
+                            category_name: categoryName
+                          });
+                        }}
                         className="w-full text-center rounded-lg border border-[#0C0E0D]/40 text-[#0C0E0D] text-[13px] md:text-sm font-bold py-2.5 hover:bg-[#0C0E0D] hover:border-[#0C0E0D] hover:text-[#F2EFEA] transition-colors flex items-center justify-center"
                       >
                         Add to cart
                       </button>
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           addToCart({
                             id: p.id,
                             name: p.name,
@@ -154,7 +157,8 @@ export default function Products({
                       </button>
                     </div>
                   </div>
-                </div>
+                  </div>
+                </Link>
               </Reveal>
             );
           })}

@@ -8,6 +8,13 @@ const ALLOWED_SIGN_PARAMS = new Set([
   'upload_preset',
   'tags',
   'context',
+  'source',
+  'use_filename',
+  'unique_filename',
+  'overwrite',
+  'resource_type',
+  'type',
+  'access_mode',
 ])
 
 export async function POST(request: Request) {

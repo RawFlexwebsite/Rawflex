@@ -56,22 +56,22 @@ export default function ProductViewSection({
   const displayImages = filteredImages.length > 0 ? filteredImages : (images.map(img => img.image_url) || ['/image.png'])
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-start">
       {/* Left: Product Image Gallery */}
       <ProductGallery images={displayImages} productName={product.name} badge={product.badge || undefined} />
 
       {/* Right: Product Details & Purchase Form */}
-      <div className="space-y-8">
+      <div className="space-y-6">
         <div>
           <span className="text-xs uppercase tracking-wider text-gold font-bold">
             {categoryName}
           </span>
-          <h1 className="font-display font-bold text-3xl md:text-4xl lg:text-5xl text-ink mt-2 leading-tight">
+          <h1 className="font-display font-bold text-2xl md:text-3xl lg:text-4xl text-ink mt-2 leading-tight">
             {product.name}
           </h1>
 
           {!!product.rating && (
-            <div className="mt-3 flex items-center gap-1.5 text-sm text-ink/60">
+            <div className="mt-2 flex items-center gap-1.5 text-sm text-ink/60">
               <div className="flex text-gold">★★★★★</div>
               <span className="font-semibold text-ink">{product.rating} ★</span>
               <span className="text-ink/30">|</span>
@@ -83,13 +83,13 @@ export default function ProductViewSection({
         {/* Dynamic Color Selector */}
         {uniqueColors.length > 0 && (
           <div>
-            <p className="text-[13px] uppercase tracking-wider font-bold text-ink/70 mb-3">
+            <p className="text-[12px] uppercase tracking-wider font-bold text-ink/70 mb-2">
               Color {selectedColor ? ` — ${selectedColor}` : ''}
               <span className="ml-1.5 font-semibold normal-case text-emerald">
                 ({uniqueColors.length} colors available)
               </span>
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {uniqueColors.map((colorObj) => {
                 const isSelected = selectedColor?.toLowerCase().trim() === colorObj.name.toLowerCase().trim()
                 return (
@@ -98,7 +98,7 @@ export default function ProductViewSection({
                     type="button"
                     onClick={() => setSelectedColor(colorObj.name)}
                     title={colorObj.name}
-                    className={`relative w-11 h-11 rounded-full border-2 overflow-hidden shrink-0 transition-all ${
+                    className={`relative w-9 h-9 rounded-full border-2 overflow-hidden shrink-0 transition-all ${
                       isSelected
                         ? 'border-emerald scale-110 shadow-md ring-2 ring-emerald/20'
                         : 'border-cream-line hover:border-emerald/50'
@@ -126,17 +126,17 @@ export default function ProductViewSection({
         />
 
         {product.short_description && (
-          <div className="font-body text-ink/80 text-lg leading-relaxed pt-2">
+          <div className="font-body text-ink/80 text-base leading-relaxed pt-2">
             <p>{product.short_description}</p>
           </div>
         )}
 
         {/* Dynamic Information Section */}
         {information.length > 0 && (
-          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-cream-line/50">
+          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-cream-line/50">
             {information.map((info, idx) => (
-              <div key={idx} className="p-4 bg-panel rounded-2xl border border-cream-line shadow-sm">
-                <p className="text-[11px] font-bold text-ink/50 uppercase tracking-wider">{info.label}</p>
+              <div key={idx} className="p-3 bg-panel rounded-xl border border-cream-line shadow-sm">
+                <p className="text-[10px] font-bold text-ink/50 uppercase tracking-wider">{info.label}</p>
                 <p className="text-sm font-semibold text-emerald mt-1">{info.value}</p>
               </div>
             ))}
