@@ -54,6 +54,7 @@ export interface Product {
   category_id: string | null
   name: string
   slug: string
+  price: number
   short_description: string | null
   description: string | null
   featured_image_url: string | null
