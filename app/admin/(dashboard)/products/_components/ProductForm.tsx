@@ -105,29 +105,53 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 </p>
               </div>
 
-              {/* Base Price */}
+              {/* Category */}
               <div>
                 <label
-                  htmlFor="product-price"
+                  htmlFor="product-category"
                   className="block text-sm font-medium text-ink/80 mb-1.5"
                 >
-                  Base Price (₹) <span className="text-red-500">*</span>
+                  Category <span className="text-red-500">*</span>
                 </label>
-                <input
-                  id="product-price"
-                  name="price"
-                  type="number"
+                <select
+                  id="product-category"
+                  name="category_id"
                   required
-                  step="0.01"
-                  min="0"
-                  defaultValue={product?.price || ''}
-                  placeholder="e.g. 1499"
-                  className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
-                />
-                <p className="text-xs text-ink/40 mt-1.5">
-                  Base price for the product. Variants can have their own prices.
-                </p>
+                  defaultValue={product?.category_id || ''}
+                  className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
               </div>
+            </div>
+
+            {/* Base Price */}
+            <div>
+              <label
+                htmlFor="product-price"
+                className="block text-sm font-medium text-ink/80 mb-1.5"
+              >
+                Base Price (₹) <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="product-price"
+                name="price"
+                type="number"
+                required
+                step="0.01"
+                min="0"
+                defaultValue={product?.price || ''}
+                placeholder="e.g. 1499"
+                className="w-full px-4 py-2.5 rounded-xl border border-cream-line bg-panel text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+              />
+              <p className="text-xs text-ink/40 mt-1.5">
+                Base price for the product. Variants can have their own prices.
+              </p>
             </div>
 
             {/* Short Description */}
