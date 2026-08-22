@@ -217,6 +217,13 @@ export async function updateProduct(
     return { error: error.message }
   }
 
+  // Update default variant price to match base price
+  await supabase
+    .from('product_variants')
+    .update({ price: parseFloat(price) })
+    .eq('product_id', id)
+    .eq('variant_name', 'Default')
+
   revalidatePath('/admin/products')
   revalidatePath(`/admin/products/${id}/edit`)
   redirect(`/admin/products/${id}/edit`)
