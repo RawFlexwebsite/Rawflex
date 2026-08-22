@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronRight, Star } from "lucide-react";
 
 const BASE = "https://bwudwdyzqkvpbymheybq.supabase.co/storage/v1/object/public/rawflex";
@@ -139,6 +142,7 @@ export default function BestSellersLookbook({
   categoryId?: string;
   lookbookImages?: LookbookImage[];
 }) {
+  const router = useRouter();
   const items =
     products.length > 0
       ? products.map((p: any) => ({
@@ -162,11 +166,12 @@ export default function BestSellersLookbook({
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
             {items.map((item, index) => {
               const isLast = index === items.length - 1;
+              const productHref = item.slug ? `/shop/${item.slug}` : "/shop";
               return (
-                <Link
+                <div
                   key={item.slug || item.name + index}
-                  href={item.slug ? `/shop/${item.slug}` : "/shop"}
-                  className="group block min-w-0 relative"
+                  className="group block min-w-0 relative cursor-pointer"
+                  onClick={() => router.push(productHref)}
                 >
                   <div className="relative aspect-[4/5] overflow-hidden border border-white/10 bg-[#f1efeb] hover:border-[#D4A82C]/50 transition-colors">
                     <Image
@@ -182,6 +187,7 @@ export default function BestSellersLookbook({
                       href={bestSellersHref}
                       aria-label="View best sellers"
                       className="absolute right-[-20px] top-[calc(50%-4rem)] hidden h-10 w-10 items-center justify-center rounded-full border border-[#D4A82C]/60 bg-[#0a0909]/90 text-[#D4A82C] shadow-[0_0_0_3px_rgba(0,0,0,0.7)] transition-colors hover:bg-[#D4A82C] hover:text-[#0a0909] lg:flex z-10"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <ChevronRight className="h-5 w-5" />
                     </Link>
@@ -195,7 +201,7 @@ export default function BestSellersLookbook({
                     </p>
                     <Rating reviews={item.reviews} />
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>
