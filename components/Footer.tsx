@@ -21,7 +21,7 @@ const helpLinks = [
   { label: "Track Order", href: `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent("Hi RAWFLEX! Can you help me track my order?")}` },
   { label: "Shipping", href: "/policies/shipping" },
   { label: "Returns", href: "/policies/refund" },
-  { label: "FAQ", href: "/contact#faq" },
+  { label: "FAQ", href: "/faq" },
   { label: "Size Guide", href: "/shop" },
 ];
 

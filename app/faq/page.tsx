@@ -30,20 +30,20 @@ export default async function FAQPage() {
       <Header />
       
       {/* Hero Banner for FAQ Page */}
-      <section className="relative w-full py-16 md:py-24 bg-emerald-deep flex items-center justify-center overflow-hidden border-b border-cream-line">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-deep via-[#0f2118] to-[#0a1610] opacity-90" />
-        
+      <section className="relative w-full py-10 md:py-14 bg-black flex items-center justify-center overflow-hidden border-b border-cream-line">
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-[#111111] to-[#0d0d0d] opacity-90" />
+
         <div className="relative z-10 text-center px-5">
           <div className="eyebrow justify-center inline-flex items-center gap-2 mb-3 text-gold-light">
             <span className="h-px w-6 bg-gold-light/50" />
-            Here to Help
+            Support
             <span className="h-px w-6 bg-gold-light/50" />
           </div>
-          <h1 className="font-display font-semibold text-3xl md:text-5xl text-cream tracking-tight">
+          <h1 className="font-display font-semibold text-3xl md:text-5xl text-white tracking-tight">
             Frequently Asked Questions
           </h1>
-          <p className="mt-4 text-cream/80 max-w-lg mx-auto text-sm md:text-base leading-relaxed">
-            Quick answers to common questions about our products, shipping, returns, and more.
+          <p className="mt-4 text-gold-light/75 max-w-lg mx-auto text-sm md:text-base leading-relaxed">
+            Quick answers about our products, shipping, returns, sizing, and orders.
           </p>
         </div>
       </section>
@@ -52,14 +52,6 @@ export default async function FAQPage() {
         <section id="faqs" className="relative py-12 md:py-16 bg-cream-deep/60">
           <div className="max-w-wrap mx-auto px-5 md:px-8">
             <div className="max-w-3xl mx-auto">
-              <div className="eyebrow justify-center inline-flex items-center gap-2 mb-3">
-                <span className="h-px w-6 bg-gold" />
-                Support
-                <span className="h-px w-6 bg-gold" />
-              </div>
-              <h3 className="font-display font-bold text-2xl md:text-3xl text-ink text-center mb-10">
-                Frequently Asked Questions
-              </h3>
 
               <div className="space-y-4">
                 {faqs.length > 0 ? (
