@@ -130,6 +130,16 @@ export async function createProduct(
     return { error: error.message }
   }
 
+  // Also add the image to product_images table so it appears in the gallery
+  if (imageUrl) {
+    await supabase.from('product_images').insert({
+      product_id: id,
+      image_url: imageUrl,
+      sort_order: 0,
+      color_name: null,
+    })
+  }
+
   revalidatePath('/admin/products')
   redirect(`/admin/products/${product.id}/edit`)
 }

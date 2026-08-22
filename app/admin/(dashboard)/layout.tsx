@@ -4,12 +4,21 @@ import AdminHeader from '@/components/admin/Header'
 import { AdminSidebarProvider } from '@/context/AdminSidebarContext'
 import { requireAdmin } from '@/lib/adminAuth'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const admin = await requireAdmin()
+  let admin
+  try {
+    admin = await requireAdmin()
+  } catch (e) {
+    console.error('requireAdmin error:', e)
+    redirect('/admin/login')
+  }
+  
   if (admin.ok === false) {
     redirect('/admin/login')
   }

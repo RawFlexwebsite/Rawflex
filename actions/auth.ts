@@ -497,6 +497,7 @@ const adminDbClient = adminClient || createAdminClient()
           profile = newProfile
         } else {
           console.error('Admin profile upsert failed:', insertError)
+          return { error: `Failed to create admin profile: ${insertError.message}` }
         }
       } else if (profile.role !== 'admin' || profile.is_active === false) {
         const { data: updatedProfile, error: updateError } = await adminDbClient
@@ -510,10 +511,12 @@ const adminDbClient = adminClient || createAdminClient()
           profile = updatedProfile
         } else {
           console.error('Admin profile update failed:', updateError)
+          return { error: `Failed to update admin profile: ${updateError.message}` }
         }
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Admin profile seed error:', e)
+      return { error: `Admin profile error: ${e?.message || 'Unknown error'}` }
     }
   }
 

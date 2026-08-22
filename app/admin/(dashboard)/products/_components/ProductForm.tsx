@@ -425,7 +425,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
             <label className="block text-sm font-medium text-ink/80 mb-1.5">
               Category Image (Optional)
             </label>
-            <input type="hidden" name="image_url" value={''} />
+            <input type="hidden" name="image_url" value={imageUrl || ''} />
             
             {imageUrl ? (
               <div className="relative w-full max-w-sm aspect-video rounded-xl border border-cream-line overflow-hidden bg-cream-deep">
