@@ -9,7 +9,7 @@ interface Review {
   rating: number
   comment: string | null
   created_at: string
-  profiles: { full_name: string } | null
+  profiles: { full_name: string; email: string } | null
 }
 
 export default function ProductReviews({ 
