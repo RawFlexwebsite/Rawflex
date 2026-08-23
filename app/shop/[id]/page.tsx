@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { createClient } from "@/lib/supabase/server"
 import { getSampleImages } from '@/lib/samples'
+import { getProductSizeChart } from '@/actions/size-charts'
 
 const SAMPLE_CATEGORIES: Record<string, { name: string; description: string; price: number; originalPrice?: number }> = {
   'new-drops': {
@@ -149,7 +150,8 @@ function renderProductPage(
   productData: any,
   categoryName: string,
   similarProducts: any[],
-  reviews: any[]
+  reviews: any[],
+  sizeChart: { imageUrl: string; title: string } | null
 ) {
   // Compile image array
   let images: { image_url: string; color_name?: string | null }[] = []
@@ -233,6 +235,7 @@ function renderProductPage(
                 variants={variants}
                 information={information}
                 categoryName={categoryName}
+                sizeChart={sizeChart}
               />
             )
           })()}
@@ -311,14 +314,19 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   if (isSampleId(id)) {
     const sampleProduct = getSampleProductData(id)
     if (!sampleProduct) notFound()
-    return renderProductPage(sampleProduct, sampleProduct.category_id, [], [])
+    return renderProductPage(sampleProduct, sampleProduct.category_id, [], [], null)
   }
 
   // Try fetching by ID first, then fallback to slug if the URL uses a slug
-  let { data: productData } = await supabase
+  let productData = null;
+  let productError = null;
+
+  // First try with size chart columns (new schema)
+  const { data: dataWithSizeChart, error: errWithSizeChart } = await supabase
     .from("products")
     .select(`
       id, name, slug, category_id, is_active, badge, rating, short_description, description, fabric, stitching, featured_image_url, color_group_id, color_name, color_hex,
+      use_global_size_chart, size_chart_image_url, size_chart_cloudinary_public_id,
       product_images ( image_url, color_name ),
       product_variants ( id, variant_name, price, original_price, stock_quantity ),
       product_information ( label, value, display_order ),
@@ -327,8 +335,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     .eq("id", id)
     .single();
 
-  if (!productData) {
-    const { data: slugProduct } = await supabase
+  if (!errWithSizeChart) {
+    productData = dataWithSizeChart;
+  } else {
+    // Fallback: try without size chart columns (old schema)
+    const { data: dataWithoutSizeChart, error: errWithoutSizeChart } = await supabase
       .from("products")
       .select(`
         id, name, slug, category_id, is_active, badge, rating, short_description, description, fabric, stitching, featured_image_url, color_group_id, color_name, color_hex,
@@ -337,13 +348,66 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         product_information ( label, value, display_order ),
         product_faqs ( question, answer, display_order )
       `)
+      .eq("id", id)
+      .single();
+    
+    if (!errWithoutSizeChart) {
+      productData = dataWithoutSizeChart;
+      // Add default size chart fields for backward compatibility
+      productData.use_global_size_chart = true;
+      productData.size_chart_image_url = null;
+      productData.size_chart_cloudinary_public_id = null;
+    } else {
+      productError = errWithoutSizeChart;
+    }
+  }
+
+  if (!productData) {
+    // Try slug fallback with size chart columns
+    const { data: slugDataWithSizeChart, error: slugErrWithSizeChart } = await supabase
+      .from("products")
+      .select(`
+        id, name, slug, category_id, is_active, badge, rating, short_description, description, fabric, stitching, featured_image_url, color_group_id, color_name, color_hex,
+        use_global_size_chart, size_chart_image_url, size_chart_cloudinary_public_id,
+        product_images ( image_url, color_name ),
+        product_variants ( id, variant_name, price, original_price, stock_quantity ),
+        product_information ( label, value, display_order ),
+        product_faqs ( question, answer, display_order )
+      `)
       .eq("slug", id)
       .single();
 
-    productData = slugProduct;
+    if (!slugErrWithSizeChart) {
+      productData = slugDataWithSizeChart;
+    } else {
+      // Fallback: try slug without size chart columns
+      const { data: slugDataWithoutSizeChart, error: slugErrWithoutSizeChart } = await supabase
+        .from("products")
+        .select(`
+          id, name, slug, category_id, is_active, badge, rating, short_description, description, fabric, stitching, featured_image_url, color_group_id, color_name, color_hex,
+          product_images ( image_url, color_name ),
+          product_variants ( id, variant_name, price, original_price, stock_quantity ),
+          product_information ( label, value, display_order ),
+          product_faqs ( question, answer, display_order )
+        `)
+        .eq("slug", id)
+        .single();
+      
+      if (!slugErrWithoutSizeChart) {
+        productData = slugDataWithoutSizeChart;
+        productData.use_global_size_chart = true;
+        productData.size_chart_image_url = null;
+        productData.size_chart_cloudinary_public_id = null;
+      } else {
+        productError = slugErrWithoutSizeChart;
+      }
+    }
   }
 
-  if (!productData || !productData.is_active) notFound();
+  if (!productData || !productData.is_active) {
+    console.error('Product not found or inactive:', id, productError);
+    notFound();
+  }
 
   const { data: category } = await supabase
     .from("categories")
@@ -352,6 +416,16 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     .single();
 
   const categoryName = category?.name || productData.category_id;
+
+  // Fetch size chart
+  const sizeChartResult = await getProductSizeChart(productData.id)
+  let sizeChart = null
+  if (sizeChartResult.success && sizeChartResult.data) {
+    sizeChart = {
+      imageUrl: sizeChartResult.data.image_url,
+      title: sizeChartResult.data.name || 'Size Chart'
+    }
+  }
 
   // Fetch similar products
   const { data: similarProductsData } = await supabase
@@ -392,5 +466,5 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     comment: review.review_text,
   }));
 
-  return renderProductPage(productData, categoryName, similarProducts, reviews)
+  return renderProductPage(productData, categoryName, similarProducts, reviews, sizeChart)
 }

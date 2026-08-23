@@ -2,9 +2,10 @@
 
 import { useTransition, useActionState, useState } from 'react'
 import { createProduct, updateProduct, type ActionResult } from '@/actions/products'
+import { uploadSizeChartImage, type ActionResult as SizeChartActionResult } from '@/actions/size-charts'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Save, ArrowLeft, Image as ImageIcon, Loader2, X } from 'lucide-react'
+import { Save, ArrowLeft, Image as ImageIcon, Loader2, X, Ruler } from 'lucide-react'
 import { CldUploadWidget } from 'next-cloudinary'
 import type { Category, Product } from '@/types/database'
 
@@ -43,6 +44,25 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
   const [colorsList, setColorsList] = useState<{ name: string; hex: string }[]>(initialColors)
   const [colorInputName, setColorInputName] = useState('')
   const [colorInputHex, setColorInputHex] = useState('#1E3B2E')
+
+  // Size Chart state
+  const [useGlobalSizeChart, setUseGlobalSizeChart] = useState(product?.use_global_size_chart ?? true)
+  const [sizeChartImageUrl, setSizeChartImageUrl] = useState<string | null>(product?.size_chart_image_url || null)
+  const [sizeChartCloudinaryId, setSizeChartCloudinaryId] = useState<string | null>(product?.size_chart_cloudinary_public_id || null)
+  const [isSizeChartUploading, setIsSizeChartUploading] = useState(false)
+  const [sizeChartUploadState, sizeChartUploadAction] = useActionState<SizeChartActionResult, FormData>(
+    uploadSizeChartImage,
+    {}
+  )
+
+  const handleSizeChartUploadSuccess = (result: any) => {
+    setSizeChartImageUrl(result.info.secure_url)
+    setSizeChartCloudinaryId(result.info.public_id)
+    setIsSizeChartUploading(false)
+  }
+
+  const handleSizeChartUploadOpen = () => setIsSizeChartUploading(true)
+  const handleSizeChartUploadError = () => setIsSizeChartUploading(false)
 
   const handleAddColor = () => {
     const name = colorInputName.trim()
@@ -431,15 +451,132 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
                 </button>
               </div>
 
-              {/* Hidden field to submit JSON string to backend */}
+{/* Hidden field to submit JSON string to backend */}
               <input type="hidden" name="color_name" value={JSON.stringify(colorsList)} />
-          </div>
-        </div>
-      </div>
-      </div>
+           </div>
+         </div>
+       </div>
+       </div>
 
-      {/* Actions */}
-{/* Product Images */}
+       {/* Size Chart */}
+       <div className="bg-panel rounded-xl border border-cream-line p-6 space-y-5">
+         <div className="flex items-center gap-2">
+           <Ruler className="w-5 h-5 text-emerald" />
+           <h2 className="text-base font-semibold text-ink">Size Chart</h2>
+         </div>
+         <p className="text-xs text-ink/40">
+           Choose whether to use the global size chart or upload a specific size chart for this product.
+         </p>
+
+         {/* Size Chart Options */}
+         <div className="space-y-4">
+           <div className="flex items-center gap-3">
+             <input
+               id="use-global-size-chart"
+               type="radio"
+               name="size_chart_type"
+               value="global"
+               checked={useGlobalSizeChart}
+               onChange={() => setUseGlobalSizeChart(true)}
+               className="w-4 h-4 text-emerald border-cream-line focus:ring-emerald"
+             />
+             <label
+               htmlFor="use-global-size-chart"
+               className="text-sm font-medium text-ink/80 cursor-pointer"
+             >
+               Use Global Size Chart
+             </label>
+           </div>
+
+           <div className="flex items-center gap-3">
+             <input
+               id="use-custom-size-chart"
+               type="radio"
+               name="size_chart_type"
+               value="custom"
+               checked={!useGlobalSizeChart}
+               onChange={() => setUseGlobalSizeChart(false)}
+               className="w-4 h-4 text-emerald border-cream-line focus:ring-emerald"
+             />
+             <label
+               htmlFor="use-custom-size-chart"
+               className="text-sm font-medium text-ink/80 cursor-pointer"
+             >
+               Use Custom Size Chart for this Product
+             </label>
+           </div>
+         </div>
+
+         {/* Custom Size Chart Upload */}
+         {!useGlobalSizeChart && (
+           <div className="space-y-4 pt-4 border-t border-cream-line/50">
+             <label className="block text-sm font-medium text-ink/80 mb-1.5">
+               Custom Size Chart Image
+             </label>
+
+             {sizeChartImageUrl ? (
+               <div className="relative w-full max-w-md aspect-video rounded-xl border border-cream-line overflow-hidden bg-cream-deep">
+                 <Image
+                   src={sizeChartImageUrl}
+                   alt="Custom Size Chart Preview"
+                   fill
+                   className="object-cover"
+                 />
+                 <button
+                   type="button"
+                   onClick={() => {
+                     setSizeChartImageUrl(null)
+                     setSizeChartCloudinaryId(null)
+                   }}
+                   className="absolute top-2 right-2 p-1.5 bg-panel/90 hover:bg-panel2 text-ink/80 hover:text-red-600 rounded-lg shadow-sm backdrop-blur-sm transition-all"
+                 >
+                   <X className="w-4 h-4" />
+                 </button>
+               </div>
+             ) : (
+               <CldUploadWidget
+                 signatureEndpoint="/api/cloudinary/sign"
+                 options={{
+                   maxFiles: 1,
+                   resourceType: "image",
+                   folder: "rawflex/size-charts",
+                   clientAllowedFormats: ["jpg", "jpeg", "png", "webp"]
+                 }}
+                 onSuccess={handleSizeChartUploadSuccess}
+                 onOpen={handleSizeChartUploadOpen}
+                 onError={handleSizeChartUploadError}
+               >
+{({ open }) => (
+                    <button
+                      type="button"
+                      onClick={() => open()}
+                      disabled={isSizeChartUploading}
+                      className="w-full max-w-md aspect-video flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-cream-line bg-cream-deep text-ink/60 hover:bg-panel2 hover:border-orange-400 hover:text-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                     {isSizeChartUploading ? (
+                       <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                     ) : (
+                       <ImageIcon className="w-6 h-6" />
+                     )}
+                     <span className="text-sm font-medium">Click to upload custom size chart</span>
+                   </button>
+                 )}
+               </CldUploadWidget>
+             )}
+
+             {sizeChartUploadState.error && (
+               <p className="text-sm text-red-600">{sizeChartUploadState.error}</p>
+             )}
+           </div>
+         )}
+
+         {/* Hidden fields for form submission */}
+         <input type="hidden" name="use_global_size_chart" value={useGlobalSizeChart.toString()} />
+         <input type="hidden" name="size_chart_image_url" value={sizeChartImageUrl || ''} />
+         <input type="hidden" name="size_chart_cloudinary_public_id" value={sizeChartCloudinaryId || ''} />
+       </div>
+
+       {/* Product Images */}
         <div className="mt-6 bg-panel rounded-xl border border-cream-line p-6 space-y-5">
           <h2 className="text-base font-semibold text-ink">Product Images</h2>
           <p className="text-xs text-ink/40">

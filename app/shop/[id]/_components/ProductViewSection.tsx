@@ -30,6 +30,10 @@ type ProductViewSectionProps = {
   variants: ProductVariant[]
   information: { label: string; value: string }[]
   categoryName: string
+  sizeChart?: {
+    imageUrl: string
+    title: string
+  } | null
 }
 
 export default function ProductViewSection({
@@ -38,6 +42,7 @@ export default function ProductViewSection({
   variants,
   information,
   categoryName,
+  sizeChart = null,
 }: ProductViewSectionProps) {
   const uniqueColors = product.colors || []
 
@@ -121,6 +126,7 @@ export default function ProductViewSection({
             image_url: images[0]?.image_url || '/image.png',
             category_name: categoryName,
             variants: variants,
+            sizeChart: sizeChart,
           }}
           selectedColor={selectedColor}
         />

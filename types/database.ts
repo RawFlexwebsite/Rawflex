@@ -69,6 +69,11 @@ export interface Product {
   seo_title: string | null
   seo_description: string | null
   seo_keywords: string | null
+  fabric: string | null
+  stitching: string | null
+  use_global_size_chart: boolean
+  size_chart_image_url: string | null
+  size_chart_cloudinary_public_id: string | null
   created_at: string
   updated_at: string
 }
@@ -193,6 +198,18 @@ export interface HeroSlide {
   button_link: string | null
   position: 'left' | 'right' | null
   display_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+// ─── Size Charts ──────────────────────────────────────────────
+export interface SizeChart {
+  id: string
+  name: string
+  image_url: string
+  cloudinary_public_id: string | null
+  is_global: boolean
   is_active: boolean
   created_at: string
   updated_at: string

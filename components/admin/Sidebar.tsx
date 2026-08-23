@@ -24,6 +24,7 @@ import {
   Truck,
   Tag,
   X,
+  Ruler,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAdminSidebar } from '@/context/AdminSidebarContext'
@@ -32,6 +33,7 @@ const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Categories', href: '/admin/categories', icon: FolderTree },
   { label: 'Products', href: '/admin/products', icon: Package },
+  { label: 'Size Chart', href: '/admin/size-chart', icon: Ruler },
   { label: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { label: 'Customers', href: '/admin/customers', icon: Users },
   { label: 'Reviews', href: '/admin/reviews', icon: Star },

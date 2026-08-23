@@ -5,7 +5,8 @@ import { useCart } from '@/context/CartContext'
 import { useToast } from '@/context/ToastContext'
 import { useRouter } from 'next/navigation'
 import { SITE } from '@/lib/data'
-import { ShoppingBag, CreditCard, Plus, Minus } from 'lucide-react'
+import { ShoppingBag, CreditCard, Plus, Minus, Ruler } from 'lucide-react'
+import SizeChartPopup from './SizeChartPopup'
 
 export type ProductVariant = {
   id: string
@@ -21,6 +22,10 @@ type ProductItem = {
   image_url: string
   category_name?: string
   variants: ProductVariant[]
+  sizeChart?: {
+    imageUrl: string
+    title: string
+  } | null
 }
 
 export default function ProductDetailActions({ product, selectedColor = null }: { product: ProductItem, selectedColor?: string | null }) {
@@ -31,6 +36,7 @@ export default function ProductDetailActions({ product, selectedColor = null }: 
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     product.variants.length > 0 ? product.variants[0] : null
   )
+  const [showSizeChart, setShowSizeChart] = useState(false)
 
   // Filter variants based on selectedColor if they are named like "Color - Size" or "Color Size"
   const filteredVariants = React.useMemo(() => {
@@ -131,9 +137,21 @@ export default function ProductDetailActions({ product, selectedColor = null }: 
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <span className="text-[13px] uppercase tracking-wider font-bold text-ink/70">Select Size / Variant</span>
-            {selectedVariant && (
-              <span className="text-xs font-semibold text-emerald">{selectedVariant.stock_quantity > 0 ? "In Stock" : "Out of Stock"}</span>
-            )}
+            <div className="flex items-center gap-2">
+              {selectedVariant && (
+                <span className="text-xs font-semibold text-emerald">{selectedVariant.stock_quantity > 0 ? "In Stock" : "Out of Stock"}</span>
+              )}
+              {product.sizeChart && (
+                <button
+                  type="button"
+                  onClick={() => setShowSizeChart(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald bg-emerald/5 border border-emerald/20 rounded-full hover:bg-emerald/10 hover:border-emerald/40 transition-all"
+                >
+                  <Ruler className="w-3.5 h-3.5" />
+                  Size Chart
+                </button>
+              )}
+            </div>
           </div>
           
           <div className="flex flex-wrap gap-2">
@@ -207,6 +225,14 @@ export default function ProductDetailActions({ product, selectedColor = null }: 
           </button>
         </div>
       </div>
+      
+      {/* Size Chart Popup */}
+      <SizeChartPopup
+        isOpen={showSizeChart}
+        onClose={() => setShowSizeChart(false)}
+        imageUrl={product.sizeChart?.imageUrl || ''}
+        title={product.sizeChart?.title || 'Size Chart'}
+      />
     </div>
   )
 }

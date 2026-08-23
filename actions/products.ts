@@ -90,6 +90,9 @@ export async function createProduct(
   const isFeatured = formData.get('is_featured') === 'on'
   const imageUrl = formData.get('image_url') as string
   const price = formData.get('price') as string
+  const useGlobalSizeChart = formData.get('use_global_size_chart') === 'true'
+  const sizeChartImageUrl = formData.get('size_chart_image_url') as string
+  const sizeChartCloudinaryId = formData.get('size_chart_cloudinary_public_id') as string
 
   if (!name) {
     return { error: 'Product name is required' }
@@ -121,6 +124,9 @@ export async function createProduct(
     is_active: isActive,
     is_featured: isFeatured,
     featured_image_url: imageUrl || null,
+    use_global_size_chart: useGlobalSizeChart,
+    size_chart_image_url: useGlobalSizeChart ? null : (sizeChartImageUrl || null),
+    size_chart_cloudinary_public_id: useGlobalSizeChart ? null : (sizeChartCloudinaryId || null),
   }).select('id').single()
 
   if (error) {
@@ -140,15 +146,18 @@ export async function createProduct(
     })
   }
 
-  // Create a default variant using the base price so price shows on frontend
-  await supabase.from('product_variants').insert({
-    product_id: id,
-    variant_name: 'Default',
-    price: parseFloat(price),
-    original_price: null,
-    stock_quantity: 0,
-    is_active: true,
-  })
+  // Create standard size variants so they show on frontend immediately
+  const basePrice = parseFloat(price)
+  const sizeVariants = [
+    { variant_name: 'M', price: basePrice, original_price: null, stock_quantity: 10, is_active: true },
+    { variant_name: 'L', price: basePrice, original_price: null, stock_quantity: 15, is_active: true },
+    { variant_name: 'XL', price: basePrice, original_price: null, stock_quantity: 8, is_active: true },
+    { variant_name: 'XXL', price: basePrice, original_price: null, stock_quantity: 5, is_active: true },
+  ]
+
+  await supabase.from('product_variants').insert(
+    sizeVariants.map(v => ({ product_id: id, ...v }))
+  )
 
   revalidatePath('/admin/products')
   redirect(`/admin/products/${product.id}/edit`)
@@ -177,6 +186,9 @@ export async function updateProduct(
   const isActive = formData.get('is_active') === 'on'
   const isFeatured = formData.get('is_featured') === 'on'
   const price = formData.get('price') as string
+  const useGlobalSizeChart = formData.get('use_global_size_chart') === 'true'
+  const sizeChartImageUrl = formData.get('size_chart_image_url') as string
+  const sizeChartCloudinaryId = formData.get('size_chart_cloudinary_public_id') as string
 
   if (!id || !name) {
     return { error: 'Product ID and name are required' }
@@ -207,6 +219,9 @@ export async function updateProduct(
       color_group_id: null,
       is_active: isActive,
       is_featured: isFeatured,
+      use_global_size_chart: useGlobalSizeChart,
+      size_chart_image_url: useGlobalSizeChart ? null : (sizeChartImageUrl || null),
+      size_chart_cloudinary_public_id: useGlobalSizeChart ? null : (sizeChartCloudinaryId || null),
     })
     .eq('id', id)
 
