@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/adminAuth'
 import { v2 as cloudinary } from 'cloudinary'
 import { revalidatePath } from 'next/cache'
@@ -222,6 +223,60 @@ export async function getProductSizeChart(productId: string): Promise<ActionResu
   const admin = await requireAdmin()
   if (admin.ok === false) return { error: admin.error }
   const supabase = admin.adminClient
+
+  // First get the product's size chart settings
+  const { data: product, error: productError } = await supabase
+    .from('products')
+    .select('use_global_size_chart, size_chart_image_url, size_chart_cloudinary_public_id')
+    .eq('id', productId)
+    .single()
+
+  if (productError) {
+    return { error: productError.message }
+  }
+
+  // If using global size chart, fetch it
+  if (product.use_global_size_chart) {
+    const { data: globalChart, error: globalError } = await supabase
+      .from('size_charts')
+      .select('*')
+      .eq('is_global', true)
+      .eq('is_active', true)
+      .single()
+
+    if (globalError) {
+      if (globalError.code === 'PGRST116') {
+        return { error: 'No global size chart configured' }
+      }
+      return { error: globalError.message }
+    }
+
+    return { success: true, data: { ...globalChart, is_global: true } }
+  }
+
+  // Otherwise return product-specific size chart
+  if (product.size_chart_image_url) {
+    return {
+      success: true,
+      data: {
+        id: productId,
+        name: 'Product Specific Size Chart',
+        image_url: product.size_chart_image_url,
+        cloudinary_public_id: product.size_chart_cloudinary_public_id,
+        is_global: false,
+        is_active: true,
+        created_at: '',
+        updated_at: '',
+      }
+    }
+  }
+
+  return { error: 'No size chart available for this product' }
+}
+
+// Public version that doesn't require admin authentication
+export async function getProductSizeChartPublic(productId: string): Promise<ActionResult> {
+  const supabase = await createClient()
 
   // First get the product's size chart settings
   const { data: product, error: productError } = await supabase

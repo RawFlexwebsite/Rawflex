@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { createClient } from "@/lib/supabase/server"
 import { getSampleImages } from '@/lib/samples'
-import { getProductSizeChart } from '@/actions/size-charts'
+import { getProductSizeChartPublic } from '@/actions/size-charts'
 
 const SAMPLE_CATEGORIES: Record<string, { name: string; description: string; price: number; originalPrice?: number }> = {
   'new-drops': {
@@ -418,7 +418,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const categoryName = category?.name || productData.category_id;
 
   // Fetch size chart
-  const sizeChartResult = await getProductSizeChart(productData.id)
+  const sizeChartResult = await getProductSizeChartPublic(productData.id)
   let sizeChart = null
   if (sizeChartResult.success && sizeChartResult.data) {
     sizeChart = {

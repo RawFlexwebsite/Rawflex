@@ -402,6 +402,11 @@ export async function verifyEmailOtp(
   redirect(redirectTo && redirectTo.startsWith('/') ? redirectTo : '/')
 }
 
+function getAdminEmails(): string[] {
+  const emails = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || ''
+  return emails.split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
+}
+
 export async function adminLogin(
   _prevState: AuthResult,
   formData: FormData
@@ -415,12 +420,14 @@ export async function adminLogin(
     return { error: 'Email and password are required' }
   }
 
-  const adminEmail = process.env.ADMIN_EMAIL
+  const adminEmails = getAdminEmails()
   const adminPassword = process.env.ADMIN_PASSWORD
 
-  if (!adminEmail || !adminPassword) {
+  if (adminEmails.length === 0 || !adminPassword) {
     return { error: 'Admin credentials are not configured.' }
   }
+
+  const isAdminEmail = adminEmails.includes(email.toLowerCase())
 
   let signInRes = await supabase.auth.signInWithPassword({
     email,
@@ -434,7 +441,7 @@ export async function adminLogin(
   if (
     error &&
     process.env.NODE_ENV !== 'production' &&
-    email.toLowerCase() === adminEmail.toLowerCase() &&
+    isAdminEmail &&
     password === adminPassword
   ) {
     try {
@@ -467,18 +474,15 @@ export async function adminLogin(
   }
 
   const { createAdminClient } = await import('@/lib/supabase/admin')
-const adminDbClient = adminClient || createAdminClient()
+  const adminDbClient = adminClient || createAdminClient()
 
-  // Verify this user is actually an admin. Use the service-role client here
-  // because admin login is authenticated by password first, while table RLS may
-  // still hide the profile row from the anon client.
   let { data: profile } = await adminDbClient
     .from('profiles')
     .select('*')
     .eq('id', data.user.id)
     .maybeSingle()
 
-  if (email.toLowerCase() === adminEmail.toLowerCase()) {
+  if (isAdminEmail) {
     try {
       if (!profile) {
         const { data: newProfile, error: insertError } = await adminDbClient

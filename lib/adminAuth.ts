@@ -11,8 +11,11 @@ export async function requireAdmin(): Promise<AdminAuthResult> {
     const { data: { user }, error: userError } = await supabase.auth.getUser()
 
     if (userError || !user) {
+      console.log('requireAdmin: No authenticated user')
       return { ok: false, error: 'Unauthorized' }
     }
+
+    console.log('requireAdmin: Checking profile for user:', user.id, user.email)
 
     const adminClient = createAdminClient()
     const { data: profile, error } = await adminClient
@@ -21,7 +24,20 @@ export async function requireAdmin(): Promise<AdminAuthResult> {
       .eq('id', user.id)
       .maybeSingle()
 
-    if (error || !profile || profile?.role !== 'admin' || profile?.is_active === false) {
+    if (error) {
+      console.error('requireAdmin: Database error:', error)
+      return { ok: false, error: 'Unauthorized' }
+    }
+
+    if (!profile) {
+      console.log('requireAdmin: No profile found for user:', user.id)
+      return { ok: false, error: 'Unauthorized' }
+    }
+
+    console.log('requireAdmin: Profile found:', profile)
+
+    if (profile.role !== 'admin' || profile.is_active === false) {
+      console.log('requireAdmin: User is not admin or inactive:', profile)
       return { ok: false, error: 'Unauthorized' }
     }
 
