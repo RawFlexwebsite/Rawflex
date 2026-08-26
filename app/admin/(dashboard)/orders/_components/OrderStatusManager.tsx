@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { updateDeliveryTracking, updateOrderStatus, updatePaymentStatus } from '@/actions/admin/orders'
-import { Check, Loader2 } from 'lucide-react'
+import { assignShiprocketAwbToOrder, createShiprocketShipment, scheduleShiprocketPickupForOrder } from '@/actions/admin/shiprocket'
+import { Check, Loader2, PackageCheck, Truck } from 'lucide-react'
 
 const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
 const PAYMENT_STATUSES = ['pending', 'paid', 'failed', 'refunded']
@@ -12,6 +14,7 @@ export function OrderStatusManager({
   initialOrderStatus, 
   initialPaymentStatus,
   initialTracking,
+  initialShiprocket,
 }: { 
   orderId: string
   initialOrderStatus: string
@@ -22,10 +25,25 @@ export function OrderStatusManager({
     tracking_url?: string | null
     shipment_notes?: string | null
   }
+  initialShiprocket?: {
+    shiprocket_order_id?: string | null
+    shiprocket_shipment_id?: string | null
+    shiprocket_awb_code?: string | null
+    shiprocket_pickup_token?: string | null
+    shiprocket_pickup_scheduled_date?: string | null
+  }
 }) {
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [courierId, setCourierId] = useState('')
+  const [parcel, setParcel] = useState({
+    length: '10',
+    breadth: '10',
+    height: '10',
+    weight: '0.5',
+  })
   const [tracking, setTracking] = useState({
     courier_name: initialTracking?.courier_name || '',
     tracking_number: initialTracking?.tracking_number || '',
@@ -46,6 +64,7 @@ export function OrderStatusManager({
         setError(result.error)
       } else {
         setSuccess(true)
+        router.refresh()
         setTimeout(() => setSuccess(false), 2000)
       }
     })
@@ -62,6 +81,63 @@ export function OrderStatusManager({
         setError(result.error)
       } else {
         setSuccess(true)
+        router.refresh()
+        setTimeout(() => setSuccess(false), 2000)
+      }
+    })
+  }
+
+  const handleShiprocketCreate = () => {
+    setError(null)
+    setSuccess(false)
+
+    startTransition(async () => {
+      const result = await createShiprocketShipment(orderId, {
+        length: Number(parcel.length),
+        breadth: Number(parcel.breadth),
+        height: Number(parcel.height),
+        weight: Number(parcel.weight),
+      })
+
+      if (result.error) {
+        setError(result.error)
+      } else {
+        setSuccess(true)
+        router.refresh()
+        setTimeout(() => setSuccess(false), 2000)
+      }
+    })
+  }
+
+  const handleShiprocketAwb = () => {
+    setError(null)
+    setSuccess(false)
+
+    startTransition(async () => {
+      const result = await assignShiprocketAwbToOrder(orderId, courierId)
+
+      if (result.error) {
+        setError(result.error)
+      } else {
+        setSuccess(true)
+        router.refresh()
+        setTimeout(() => setSuccess(false), 2000)
+      }
+    })
+  }
+
+  const handleShiprocketPickup = () => {
+    setError(null)
+    setSuccess(false)
+
+    startTransition(async () => {
+      const result = await scheduleShiprocketPickupForOrder(orderId)
+
+      if (result.error) {
+        setError(result.error)
+      } else {
+        setSuccess(true)
+        router.refresh()
         setTimeout(() => setSuccess(false), 2000)
       }
     })
@@ -176,6 +252,126 @@ export function OrderStatusManager({
         >
           Save Tracking
         </button>
+      </div>
+
+      <div className="border-t border-cream-line pt-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <Truck className="h-4 w-4 text-ink/50" />
+          <h4 className="text-sm font-bold text-ink uppercase tracking-wide">Shiprocket</h4>
+        </div>
+
+        {(initialShiprocket?.shiprocket_order_id || initialShiprocket?.shiprocket_shipment_id || initialShiprocket?.shiprocket_awb_code) && (
+          <div className="space-y-2 rounded-xl bg-cream-deep p-3 text-xs text-ink/70">
+            {initialShiprocket?.shiprocket_order_id && (
+              <p><span className="font-bold text-ink">Order:</span> {initialShiprocket.shiprocket_order_id}</p>
+            )}
+            {initialShiprocket?.shiprocket_shipment_id && (
+              <p><span className="font-bold text-ink">Shipment:</span> {initialShiprocket.shiprocket_shipment_id}</p>
+            )}
+            {initialShiprocket?.shiprocket_awb_code && (
+              <p><span className="font-bold text-ink">AWB:</span> {initialShiprocket.shiprocket_awb_code}</p>
+            )}
+            {initialShiprocket?.shiprocket_pickup_token && (
+              <p><span className="font-bold text-ink">Pickup:</span> {initialShiprocket.shiprocket_pickup_token}</p>
+            )}
+            {initialShiprocket?.shiprocket_pickup_scheduled_date && (
+              <p><span className="font-bold text-ink">Scheduled:</span> {initialShiprocket.shiprocket_pickup_scheduled_date}</p>
+            )}
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-semibold text-ink/70 mb-1">Length cm</label>
+            <input
+              disabled={isPending || Boolean(initialShiprocket?.shiprocket_shipment_id)}
+              type="number"
+              min="1"
+              step="0.1"
+              value={parcel.length}
+              onChange={(event) => setParcel((prev) => ({ ...prev, length: event.target.value }))}
+              className="w-full bg-cream-deep border border-cream-line rounded-xl px-3 py-2 text-sm font-medium text-ink/80 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-ink/70 mb-1">Breadth cm</label>
+            <input
+              disabled={isPending || Boolean(initialShiprocket?.shiprocket_shipment_id)}
+              type="number"
+              min="1"
+              step="0.1"
+              value={parcel.breadth}
+              onChange={(event) => setParcel((prev) => ({ ...prev, breadth: event.target.value }))}
+              className="w-full bg-cream-deep border border-cream-line rounded-xl px-3 py-2 text-sm font-medium text-ink/80 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-ink/70 mb-1">Height cm</label>
+            <input
+              disabled={isPending || Boolean(initialShiprocket?.shiprocket_shipment_id)}
+              type="number"
+              min="1"
+              step="0.1"
+              value={parcel.height}
+              onChange={(event) => setParcel((prev) => ({ ...prev, height: event.target.value }))}
+              className="w-full bg-cream-deep border border-cream-line rounded-xl px-3 py-2 text-sm font-medium text-ink/80 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-ink/70 mb-1">Weight kg</label>
+            <input
+              disabled={isPending || Boolean(initialShiprocket?.shiprocket_shipment_id)}
+              type="number"
+              min="0.01"
+              step="0.01"
+              value={parcel.weight}
+              onChange={(event) => setParcel((prev) => ({ ...prev, weight: event.target.value }))}
+              className="w-full bg-cream-deep border border-cream-line rounded-xl px-3 py-2 text-sm font-medium text-ink/80 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          disabled={isPending || Boolean(initialShiprocket?.shiprocket_shipment_id)}
+          onClick={handleShiprocketCreate}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-sm font-bold text-cream transition-colors hover:bg-orange-600 disabled:opacity-50"
+        >
+          <PackageCheck className="h-4 w-4" />
+          Create Shipment
+        </button>
+
+        <div>
+          <label className="block text-sm font-semibold text-ink/80 mb-2">
+            Courier ID
+          </label>
+          <input
+            disabled={isPending || Boolean(initialShiprocket?.shiprocket_awb_code)}
+            value={courierId}
+            onChange={(event) => setCourierId(event.target.value)}
+            className="w-full bg-cream-deep border border-cream-line rounded-xl px-4 py-2.5 text-sm font-medium text-ink/80 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+            placeholder="Optional if default courier is configured"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            disabled={isPending || !initialShiprocket?.shiprocket_shipment_id || Boolean(initialShiprocket?.shiprocket_awb_code)}
+            onClick={handleShiprocketAwb}
+            className="rounded-xl bg-ink px-4 py-2.5 text-sm font-bold text-cream transition-colors hover:bg-orange-600 disabled:opacity-50"
+          >
+            Assign AWB
+          </button>
+          <button
+            type="button"
+            disabled={isPending || !initialShiprocket?.shiprocket_awb_code || Boolean(initialShiprocket?.shiprocket_pickup_token)}
+            onClick={handleShiprocketPickup}
+            className="rounded-xl bg-ink px-4 py-2.5 text-sm font-bold text-cream transition-colors hover:bg-orange-600 disabled:opacity-50"
+          >
+            Schedule Pickup
+          </button>
+        </div>
       </div>
     </div>
   )

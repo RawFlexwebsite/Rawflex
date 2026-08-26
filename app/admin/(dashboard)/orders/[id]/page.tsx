@@ -219,6 +219,13 @@ export default async function AdminOrderDetailsPage({
               tracking_url: order.tracking_url,
               shipment_notes: order.shipment_notes,
             }}
+            initialShiprocket={{
+              shiprocket_order_id: order.shiprocket_order_id,
+              shiprocket_shipment_id: order.shiprocket_shipment_id,
+              shiprocket_awb_code: order.shiprocket_awb_code,
+              shiprocket_pickup_token: order.shiprocket_pickup_token,
+              shiprocket_pickup_scheduled_date: order.shiprocket_pickup_scheduled_date,
+            }}
           />
 
           <div className="bg-panel rounded-2xl shadow-sm border border-cream-line p-6">
@@ -300,6 +307,33 @@ export default async function AdminOrderDetailsPage({
                 )}
                 {order.shipment_notes && (
                   <p className="rounded-xl bg-cream-deep p-3 text-sm text-ink/70">{order.shipment_notes}</p>
+                )}
+              </div>
+            )}
+
+            {(order.shiprocket_order_id || order.shiprocket_shipment_id || order.shiprocket_awb_code || order.shiprocket_pickup_token) && (
+              <div className="mt-6 pt-6 border-t border-cream-line space-y-3">
+                <p className="text-xs font-semibold text-ink/60 uppercase tracking-wider">Shiprocket Details</p>
+                {order.shiprocket_order_id && (
+                  <div className="flex justify-between gap-4 text-sm">
+                    <span className="text-ink/60">Order ID</span>
+                    <span className="font-medium text-ink text-right">{order.shiprocket_order_id}</span>
+                  </div>
+                )}
+                {order.shiprocket_shipment_id && (
+                  <div className="flex justify-between gap-4 text-sm">
+                    <span className="text-ink/60">Shipment ID</span>
+                    <span className="font-medium text-ink text-right">{order.shiprocket_shipment_id}</span>
+                  </div>
+                )}
+                {order.shiprocket_awb_code && (
+                  <div className="flex justify-between gap-4 text-sm">
+                    <span className="text-ink/60">AWB</span>
+                    <span className="font-medium text-ink text-right">{order.shiprocket_awb_code}</span>
+                  </div>
+                )}
+                {order.shiprocket_pickup_token && (
+                  <p className="rounded-xl bg-cream-deep p-3 text-sm text-ink/70">{order.shiprocket_pickup_token}</p>
                 )}
               </div>
             )}

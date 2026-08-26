@@ -159,6 +159,12 @@ export interface Order {
   tracking_number: string | null
   tracking_url: string | null
   shipment_notes: string | null
+  shiprocket_order_id: string | null
+  shiprocket_shipment_id: string | null
+  shiprocket_awb_code: string | null
+  shiprocket_courier_company_id: string | null
+  shiprocket_pickup_token: string | null
+  shiprocket_pickup_scheduled_date: string | null
   stock_decremented_at: string | null
   created_at: string
   updated_at: string
