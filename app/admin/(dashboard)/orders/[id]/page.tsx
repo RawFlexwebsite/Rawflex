@@ -251,6 +251,28 @@ export default async function AdminOrderDetailsPage({
               <p className="text-sm font-medium text-ink">{order.payment_method}</p>
             </div>
 
+            {(order.razorpay_order_id || order.razorpay_payment_id) && (
+              <div className="mt-6 pt-6 border-t border-cream-line space-y-3">
+                <p className="text-xs font-semibold text-ink/60 uppercase tracking-wider">Razorpay Details</p>
+                {order.razorpay_order_id && (
+                  <div className="space-y-1">
+                    <p className="text-xs text-ink/60">Order ID</p>
+                    <p className="break-all rounded-lg bg-cream-deep px-3 py-2 text-xs font-medium text-ink">
+                      {order.razorpay_order_id}
+                    </p>
+                  </div>
+                )}
+                {order.razorpay_payment_id && (
+                  <div className="space-y-1">
+                    <p className="text-xs text-ink/60">Payment ID</p>
+                    <p className="break-all rounded-lg bg-cream-deep px-3 py-2 text-xs font-medium text-ink">
+                      {order.razorpay_payment_id}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {(order.courier_name || order.tracking_number || order.tracking_url || order.shipment_notes) && (
               <div className="mt-6 pt-6 border-t border-cream-line space-y-3">
                 <p className="text-xs font-semibold text-ink/60 uppercase tracking-wider">Delivery Tracking</p>
