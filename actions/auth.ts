@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { createSignedRawflexSession, rawflexSessionCookieNames, type RawflexSession } from '@/lib/auth/session'
+import { sendTransactionalEmail } from '@/lib/email'
 
 export type AuthResult = {
   error?: string
@@ -186,27 +187,11 @@ export async function sendEmailOtp(
     return { error: 'Failed to generate verification code. Please try again.' }
   }
 
-  const brevoApiKey = process.env.BREVO_API_KEY
-  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'noreply@rawflex.in'
-  const senderName = process.env.BREVO_SENDER_NAME || 'RAWFLEX'
-
-  if (!brevoApiKey) {
-    return { error: 'Email service is not configured. Please contact support.' }
-  }
-
   try {
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'api-key': brevoApiKey,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        sender: { name: senderName, email: senderEmail },
-        to: [{ email }],
-        subject: 'Your Verification Code - RAWFLEX',
-        htmlContent: `
+    await sendTransactionalEmail({
+      to: { email },
+      subject: 'Your Verification Code - RAWFLEX',
+      htmlContent: `
           <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 32px; border: 1px solid #262926; border-radius: 12px; background-color: #0a0909; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
             <!-- Logo Header -->
             <div style="margin-bottom: 24px;">
@@ -241,15 +226,8 @@ export async function sendEmailOtp(
               &copy; ${new Date().getFullYear()} RAWFLEX. All rights reserved.
             </p>
           </div>
-        `
-      })
+        `,
     })
-
-    if (!response.ok) {
-      const errText = await response.text()
-      console.error('Brevo API Error:', errText)
-      return { error: 'Failed to send verification email.' }
-    }
 
     return { success: true }
   } catch (e: any) {

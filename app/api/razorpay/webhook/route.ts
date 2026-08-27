@@ -1,6 +1,8 @@
 import crypto from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { trySendOrderConfirmationEmail } from '@/lib/orderConfirmationEmail'
+import { tryCreateShiprocketShipmentAndAssignAwbForOrder } from '@/lib/shiprocketOrder'
 
 function verifyWebhookSignature(body: string, signature: string | null) {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET
@@ -101,6 +103,9 @@ export async function POST(request: Request) {
     if (cartError) {
       return Response.json({ error: 'Failed to clear cart' }, { status: 500 })
     }
+
+    await tryCreateShiprocketShipmentAndAssignAwbForOrder(supabase, order.id)
+    await trySendOrderConfirmationEmail(supabase, order.id)
 
     revalidatePath('/cart')
     revalidatePath('/checkout')

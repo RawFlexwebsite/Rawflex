@@ -5,6 +5,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import Razorpay from 'razorpay'
 import crypto from 'crypto'
+import { trySendOrderConfirmationEmail } from '@/lib/orderConfirmationEmail'
+import { tryCreateShiprocketShipmentAndAssignAwbForOrder } from '@/lib/shiprocketOrder'
 
 type CheckoutResult =
   | { success: false; error: string }
@@ -374,6 +376,9 @@ export async function createOrder(
     .delete()
     .eq('user_id', user.id)
 
+  await tryCreateShiprocketShipmentAndAssignAwbForOrder(adminSupabase, order.id)
+  await trySendOrderConfirmationEmail(adminSupabase, order.id)
+
   revalidatePath('/cart')
   revalidatePath('/checkout')
   revalidatePath('/profile')
@@ -454,6 +459,9 @@ export async function verifyRazorpayPayment(
     .from('cart_items')
     .delete()
     .eq('user_id', user.id)
+
+  await tryCreateShiprocketShipmentAndAssignAwbForOrder(supabase, internal_order_id)
+  await trySendOrderConfirmationEmail(supabase, internal_order_id)
 
   revalidatePath('/cart')
   revalidatePath('/checkout')

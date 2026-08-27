@@ -165,6 +165,7 @@ export interface Order {
   shiprocket_courier_company_id: string | null
   shiprocket_pickup_token: string | null
   shiprocket_pickup_scheduled_date: string | null
+  order_confirmation_email_sent_at: string | null
   stock_decremented_at: string | null
   created_at: string
   updated_at: string

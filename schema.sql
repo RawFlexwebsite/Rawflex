@@ -268,6 +268,7 @@ CREATE TABLE orders (
   shiprocket_courier_company_id TEXT,
   shiprocket_pickup_token TEXT,
   shiprocket_pickup_scheduled_date TEXT,
+  order_confirmation_email_sent_at TIMESTAMP WITH TIME ZONE,
   paid_at TIMESTAMP WITH TIME ZONE,
   stock_decremented_at TIMESTAMP WITH TIME ZONE,
   shipped_at TIMESTAMP WITH TIME ZONE,
