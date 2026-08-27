@@ -9,6 +9,7 @@ import { ChevronRight } from 'lucide-react'
 import { createClient } from "@/lib/supabase/server"
 import { getSampleImages } from '@/lib/samples'
 import { getProductSizeChartPublic } from '@/actions/size-charts'
+import { selectDisplayVariant } from '@/lib/productVariants'
 
 const SAMPLE_CATEGORIES: Record<string, { name: string; description: string; price: number; originalPrice?: number }> = {
   'new-drops': {
@@ -328,7 +329,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       id, name, slug, category_id, is_active, badge, rating, short_description, description, fabric, stitching, featured_image_url, color_group_id, color_name, color_hex,
       use_global_size_chart, size_chart_image_url, size_chart_cloudinary_public_id,
       product_images ( image_url, color_name ),
-      product_variants ( id, variant_name, price, original_price, stock_quantity ),
+      product_variants ( id, variant_name, price, original_price, stock_quantity, is_active ),
       product_information ( label, value, display_order ),
       product_faqs ( question, answer, display_order )
     `)
@@ -344,7 +345,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       .select(`
         id, name, slug, category_id, is_active, badge, rating, short_description, description, fabric, stitching, featured_image_url, color_group_id, color_name, color_hex,
         product_images ( image_url, color_name ),
-        product_variants ( id, variant_name, price, original_price, stock_quantity ),
+        product_variants ( id, variant_name, price, original_price, stock_quantity, is_active ),
         product_information ( label, value, display_order ),
         product_faqs ( question, answer, display_order )
       `)
@@ -370,7 +371,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         id, name, slug, category_id, is_active, badge, rating, short_description, description, fabric, stitching, featured_image_url, color_group_id, color_name, color_hex,
         use_global_size_chart, size_chart_image_url, size_chart_cloudinary_public_id,
         product_images ( image_url, color_name ),
-        product_variants ( id, variant_name, price, original_price, stock_quantity ),
+        product_variants ( id, variant_name, price, original_price, stock_quantity, is_active ),
         product_information ( label, value, display_order ),
         product_faqs ( question, answer, display_order )
       `)
@@ -386,7 +387,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         .select(`
           id, name, slug, category_id, is_active, badge, rating, short_description, description, fabric, stitching, featured_image_url, color_group_id, color_name, color_hex,
           product_images ( image_url, color_name ),
-          product_variants ( id, variant_name, price, original_price, stock_quantity ),
+          product_variants ( id, variant_name, price, original_price, stock_quantity, is_active ),
           product_information ( label, value, display_order ),
           product_faqs ( question, answer, display_order )
         `)
@@ -433,22 +434,26 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     .select(`
       id, name, slug, category_id, is_active, badge, rating, featured_image_url,
       product_images ( image_url ),
-      product_variants ( price, original_price )
+      product_variants ( id, price, original_price, stock_quantity, is_active )
     `)
     .eq("is_active", true)
     .eq("category_id", productData.category_id)
     .neq("id", productData.id)
     .limit(4);
 
-  const similarProducts = similarProductsData?.map((p: any) => ({
-    id: p.id,
-    name: p.name,
-    category_id: p.category_id,
-    image_url: p.featured_image_url || (p.product_images?.[0]?.image_url) || "/image.png",
-    badge: p.badge,
-    price: p.product_variants?.[0]?.price || 0,
-    oldPrice: p.product_variants?.[0]?.original_price || undefined
-  })) || [];
+  const similarProducts = similarProductsData?.map((p: any) => {
+    const variant = selectDisplayVariant(p.product_variants)
+
+    return {
+      id: p.id,
+      name: p.name,
+      category_id: p.category_id,
+      image_url: p.featured_image_url || (p.product_images?.[0]?.image_url) || "/image.png",
+      badge: p.badge,
+      price: variant?.price || 0,
+      oldPrice: variant?.original_price || undefined
+    }
+  }) || [];
 
   // Fetch Reviews
   const { data: reviewsData } = await supabase

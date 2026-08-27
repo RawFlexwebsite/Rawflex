@@ -39,6 +39,58 @@ function configureCloudinary() {
   return true
 }
 
+type ProductVariantInput = {
+  variant_name: string
+  price: number
+  original_price: number | null
+  stock_quantity: number
+  is_active: boolean
+}
+
+type ProductVariantIdentity = {
+  id: string
+  variant_name: string
+}
+
+function normalizeVariantName(name: string): string {
+  return name.trim().replace(/\s+/g, ' ').toLowerCase()
+}
+
+function uniqueVariantsByName(variants: ProductVariantInput[]): ProductVariantInput[] {
+  const byName = new Map<string, ProductVariantInput>()
+
+  for (const variant of variants) {
+    const variantName = variant.variant_name.trim()
+    const normalizedName = normalizeVariantName(variantName)
+
+    if (!normalizedName) continue
+    byName.set(normalizedName, { ...variant, variant_name: variantName })
+  }
+
+  return Array.from(byName.values())
+}
+
+async function revalidateProductVariantPaths(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  productId: string
+) {
+  revalidatePath('/admin/products')
+  revalidatePath(`/admin/products/${productId}/edit`)
+  revalidatePath('/shop')
+  revalidatePath(`/shop/${productId}`)
+  revalidatePath('/')
+
+  const { data: product } = await supabase
+    .from('products')
+    .select('slug')
+    .eq('id', productId)
+    .single()
+
+  if (product?.slug) {
+    revalidatePath(`/shop/${product.slug}`)
+  }
+}
+
 // Resolves the color_group_id to store for a product, given the "group with"
 // selection from the admin form (another product's ID to share colors with).
 async function resolveColorGroupId(
@@ -485,57 +537,145 @@ export async function createProductVariant(
   const stockQuantity = formData.get('stock_quantity') as string
   const isActive = formData.get('is_active') === 'on'
 
-  if (!productId || !variantName || !price) {
+  if (!productId || !variantName.trim() || !price) {
     return { error: 'Product ID, Variant Name, and Price are required' }
   }
 
-  const { error } = await supabase.from('product_variants').insert({
-    product_id: productId,
-    variant_name: variantName,
+  const normalizedVariantName = normalizeVariantName(variantName)
+  const { data: existingVariants, error: existingError } = await supabase
+    .from('product_variants')
+    .select('id, variant_name')
+    .eq('product_id', productId)
+
+  if (existingError) {
+    return { error: existingError.message }
+  }
+
+  const matchingVariants = (existingVariants || []).filter(
+    (variant: ProductVariantIdentity) => normalizeVariantName(variant.variant_name) === normalizedVariantName
+  )
+
+  const payload = {
+    variant_name: variantName.trim(),
     price: parseFloat(price),
     original_price: originalPrice ? parseFloat(originalPrice) : null,
     stock_quantity: parseInt(stockQuantity || '0', 10),
     is_active: isActive,
-  })
-
-  if (error) {
-    return { error: error.message }
   }
 
-  revalidatePath(`/admin/products/${productId}/edit`)
+  if (matchingVariants.length > 0) {
+    const [primaryVariant, ...duplicateVariants] = matchingVariants
+    const { error } = await supabase
+      .from('product_variants')
+      .update(payload)
+      .eq('id', primaryVariant.id)
+      .eq('product_id', productId)
+
+    if (error) {
+      return { error: error.message }
+    }
+
+    if (duplicateVariants.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('product_variants')
+        .delete()
+        .in('id', duplicateVariants.map((variant: ProductVariantIdentity) => variant.id))
+
+      if (deleteError) {
+        return { error: deleteError.message }
+      }
+    }
+  } else {
+    const { error } = await supabase.from('product_variants').insert({
+      product_id: productId,
+      ...payload,
+    })
+
+    if (error) {
+      return { error: error.message }
+    }
+  }
+
+  await revalidateProductVariantPaths(supabase, productId)
   return { success: true }
 }
 
 export async function bulkCreateProductVariants(
   productId: string,
-  variants: {
-    variant_name: string
-    price: number
-    original_price: number | null
-    stock_quantity: number
-    is_active: boolean
-  }[]
+  variants: ProductVariantInput[]
 ): Promise<ActionResult> {
   const admin = await requireAdmin()
   if (admin.ok === false) return { error: admin.error }
   const supabase = admin.adminClient
 
-  if (!productId || variants.length === 0) {
+  const uniqueVariants = uniqueVariantsByName(variants)
+
+  if (!productId || uniqueVariants.length === 0) {
     return { error: 'Invalid data' }
   }
 
-  const rows = variants.map(v => ({
-    product_id: productId,
-    ...v
-  }))
+  const { data: existingVariants, error: existingError } = await supabase
+    .from('product_variants')
+    .select('id, variant_name')
+    .eq('product_id', productId)
 
-  const { error } = await supabase.from('product_variants').insert(rows)
-
-  if (error) {
-    return { error: error.message }
+  if (existingError) {
+    return { error: existingError.message }
   }
 
-  revalidatePath(`/admin/products/${productId}/edit`)
+  const duplicateIdsToDelete: string[] = []
+  const rowsToInsert: Array<ProductVariantInput & { product_id: string }> = []
+
+  for (const variant of uniqueVariants) {
+    const normalizedVariantName = normalizeVariantName(variant.variant_name)
+    const matchingVariants = (existingVariants || []).filter(
+      (existingVariant: ProductVariantIdentity) =>
+        normalizeVariantName(existingVariant.variant_name) === normalizedVariantName
+    )
+
+    if (matchingVariants.length > 0) {
+      const [primaryVariant, ...duplicateVariants] = matchingVariants
+      const { error } = await supabase
+        .from('product_variants')
+        .update(variant)
+        .eq('id', primaryVariant.id)
+        .eq('product_id', productId)
+
+      if (error) {
+        return { error: error.message }
+      }
+
+      duplicateIdsToDelete.push(
+        ...duplicateVariants.map((duplicateVariant: ProductVariantIdentity) => duplicateVariant.id)
+      )
+    } else {
+      rowsToInsert.push({
+        product_id: productId,
+        ...variant,
+      })
+    }
+  }
+
+  if (rowsToInsert.length > 0) {
+    const { error } = await supabase.from('product_variants').insert(rowsToInsert)
+
+    if (error) {
+      return { error: error.message }
+    }
+  }
+
+  if (duplicateIdsToDelete.length > 0) {
+    const { error } = await supabase
+      .from('product_variants')
+      .delete()
+      .in('id', duplicateIdsToDelete)
+
+    if (error) {
+      return { error: error.message }
+    }
+  }
+
+  await revalidateProductVariantPaths(supabase, productId)
   return { success: true }
 }
 
@@ -555,26 +695,66 @@ export async function updateProductVariant(
   const stockQuantity = formData.get('stock_quantity') as string
   const isActive = formData.get('is_active') === 'on'
 
-  if (!id || !variantName || !price) {
-    return { error: 'Variant ID, Name, and Price are required' }
+  if (!id || !productId || !variantName.trim() || !price) {
+    return { error: 'Variant ID, Product ID, Name, and Price are required' }
   }
+
+  const { data: existingVariants, error: existingError } = await supabase
+    .from('product_variants')
+    .select('id, variant_name')
+    .eq('product_id', productId)
+
+  if (existingError) {
+    return { error: existingError.message }
+  }
+
+  const currentVariant = (existingVariants || []).find(
+    (variant: ProductVariantIdentity) => variant.id === id
+  )
+
+  if (!currentVariant) {
+    return { error: 'Variant not found' }
+  }
+
+  const oldVariantName = normalizeVariantName(currentVariant.variant_name)
+  const newVariantName = normalizeVariantName(variantName)
+  const duplicateIdsToDelete = (existingVariants || [])
+    .filter((variant: ProductVariantIdentity) => {
+      if (variant.id === id) return false
+
+      const normalizedVariantName = normalizeVariantName(variant.variant_name)
+      return normalizedVariantName === oldVariantName || normalizedVariantName === newVariantName
+    })
+    .map((variant: ProductVariantIdentity) => variant.id)
 
   const { error } = await supabase
     .from('product_variants')
     .update({
-      variant_name: variantName,
+      variant_name: variantName.trim(),
       price: parseFloat(price),
       original_price: originalPrice ? parseFloat(originalPrice) : null,
       stock_quantity: parseInt(stockQuantity || '0', 10),
       is_active: isActive,
     })
     .eq('id', id)
+    .eq('product_id', productId)
 
   if (error) {
     return { error: error.message }
   }
 
-  revalidatePath(`/admin/products/${productId}/edit`)
+  if (duplicateIdsToDelete.length > 0) {
+    const { error: deleteError } = await supabase
+      .from('product_variants')
+      .delete()
+      .in('id', duplicateIdsToDelete)
+
+    if (deleteError) {
+      return { error: deleteError.message }
+    }
+  }
+
+  await revalidateProductVariantPaths(supabase, productId)
   return { success: true }
 }
 
@@ -586,13 +766,41 @@ export async function deleteProductVariant(
   if (admin.ok === false) return { error: admin.error }
   const supabase = admin.adminClient
 
-  const { error } = await supabase.from('product_variants').delete().eq('id', id)
+  const { data: existingVariants, error: existingError } = await supabase
+    .from('product_variants')
+    .select('id, variant_name')
+    .eq('product_id', productId)
+
+  if (existingError) {
+    return { error: existingError.message }
+  }
+
+  const currentVariant = (existingVariants || []).find(
+    (variant: ProductVariantIdentity) => variant.id === id
+  )
+
+  if (!currentVariant) {
+    return { success: true }
+  }
+
+  const normalizedVariantName = normalizeVariantName(currentVariant.variant_name)
+  const variantIdsToDelete = (existingVariants || [])
+    .filter(
+      (variant: ProductVariantIdentity) =>
+        normalizeVariantName(variant.variant_name) === normalizedVariantName
+    )
+    .map((variant: ProductVariantIdentity) => variant.id)
+
+  const { error } = await supabase
+    .from('product_variants')
+    .delete()
+    .in('id', variantIdsToDelete)
 
   if (error) {
     return { error: error.message }
   }
 
-  revalidatePath(`/admin/products/${productId}/edit`)
+  await revalidateProductVariantPaths(supabase, productId)
   return { success: true }
 }
 

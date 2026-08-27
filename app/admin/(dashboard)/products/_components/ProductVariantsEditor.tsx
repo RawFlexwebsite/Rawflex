@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import { Plus, Trash2, Edit2, Check, X, Loader2 } from 'lucide-react'
-import { createProductVariant, updateProductVariant, deleteProductVariant, bulkCreateProductVariants } from '@/actions/products'
+import { updateProductVariant, deleteProductVariant, bulkCreateProductVariants } from '@/actions/products'
 
 type Variant = {
   id: string
@@ -24,6 +24,22 @@ type BulkVariantForm = {
 }
 
 const STANDARD_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+
+function normalizeName(value: string): string {
+  return value.trim().replace(/\s+/g, ' ').toLowerCase()
+}
+
+function variantBelongsToColor(variantName: string, colorName: string): boolean {
+  const normalizedVariantName = normalizeName(variantName)
+  const normalizedColorName = normalizeName(colorName)
+
+  return (
+    normalizedVariantName === normalizedColorName ||
+    normalizedVariantName.startsWith(`${normalizedColorName} -`) ||
+    normalizedVariantName.startsWith(`${normalizedColorName} /`) ||
+    normalizedVariantName.startsWith(`${normalizedColorName} `)
+  )
+}
 
 export function ProductVariantsEditor({
   productId,
@@ -57,7 +73,7 @@ export function ProductVariantsEditor({
       if (isAdding) {
         setActiveTab('General')
       } else {
-        setActiveTab(productColors[0])
+        setActiveTab('All')
       }
     } else {
       setActiveTab('All')
@@ -68,10 +84,7 @@ export function ProductVariantsEditor({
   const displayedVariants = variants.filter(v => {
     if (activeTab === 'All') return true
     
-    const variantNameLower = v.variant_name.toLowerCase().trim()
-    
-    // Check if it matches the selected color tab
-    return variantNameLower.includes(activeTab.toLowerCase().trim())
+    return variantBelongsToColor(v.variant_name, activeTab)
   })
 
   // Single Edit Form State
@@ -104,10 +117,7 @@ export function ProductVariantsEditor({
   const handleApplyToAllColors = () => {
     // Get general template rows (rows that do not contain any of the color names)
     const generalRows = bulkData.filter(row => {
-      const nameLower = row.variant_name.toLowerCase().trim()
-      return !productColors.some(color => 
-        nameLower.includes(color.toLowerCase().trim())
-      )
+      return !productColors.some(color => variantBelongsToColor(row.variant_name, color))
     })
 
     // Filter out template rows that are empty (no price filled)
@@ -137,10 +147,7 @@ export function ProductVariantsEditor({
     setBulkData(prev => {
       // Remove any existing rows that start with color names to avoid duplicates
       const filteredPrev = prev.filter(r => {
-        const nameLower = r.variant_name.toLowerCase().trim()
-        return !productColors.some(color => 
-          nameLower.startsWith(color.toLowerCase().trim())
-        )
+        return !productColors.some(color => variantBelongsToColor(r.variant_name, color))
       })
       return [...filteredPrev, ...newCombinations]
     })
@@ -197,7 +204,11 @@ export function ProductVariantsEditor({
   const handleDelete = (id: string) => {
     if (confirm('Are you sure you want to delete this size option?')) {
       startTransition(async () => {
-        await deleteProductVariant(id, productId)
+        const result = await deleteProductVariant(id, productId)
+
+        if (result.error) {
+          alert(result.error)
+        }
       })
     }
   }
@@ -215,7 +226,12 @@ export function ProductVariantsEditor({
 
       if (editingId) {
         fd.append('id', editingId)
-        await updateProductVariant({}, fd)
+        const result = await updateProductVariant({}, fd)
+
+        if (result.error) {
+          alert(result.error)
+          return
+        }
       }
       resetForm()
     })
@@ -232,8 +248,15 @@ export function ProductVariantsEditor({
       return
     }
 
+    const colorSpecificRows = validRows.filter(row =>
+      productColors.some(color => variantBelongsToColor(row.variant_name, color))
+    )
+    const rowsToSave = productColors.length > 0 && colorSpecificRows.length > 0
+      ? colorSpecificRows
+      : validRows
+
     startTransition(async () => {
-      const formattedVariants = validRows.map(r => ({
+      const formattedVariants = rowsToSave.map(r => ({
         variant_name: r.variant_name,
         price: parseFloat(r.price),
         original_price: r.original_price ? parseFloat(r.original_price) : null,
@@ -241,7 +264,13 @@ export function ProductVariantsEditor({
         is_active: r.is_active
       }))
       
-      await bulkCreateProductVariants(productId, formattedVariants)
+      const result = await bulkCreateProductVariants(productId, formattedVariants)
+
+      if (result.error) {
+        alert(result.error)
+        return
+      }
+
       resetForm()
     })
   }
@@ -266,6 +295,20 @@ export function ProductVariantsEditor({
       {/* Color Filter Tabs */}
       {productColors.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 border-b border-cream-line pb-3">
+          {!isAdding && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('All')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                activeTab === 'All'
+                  ? 'bg-panel text-ink'
+                  : 'text-ink/60 hover:bg-panel2'
+              }`}
+            >
+              All Sizes ({variants.length})
+            </button>
+          )}
+
           {isAdding && (
             <button
               type="button"
@@ -282,8 +325,8 @@ export function ProductVariantsEditor({
           
           {productColors.map((color) => {
             const count = isAdding
-              ? bulkData.filter(v => v.variant_name.toLowerCase().includes(color.toLowerCase().trim())).length
-              : variants.filter(v => v.variant_name.toLowerCase().includes(color.toLowerCase().trim())).length
+              ? bulkData.filter(v => variantBelongsToColor(v.variant_name, color)).length
+              : variants.filter(v => variantBelongsToColor(v.variant_name, color)).length
             return (
               <button
                 key={color}
@@ -436,15 +479,10 @@ export function ProductVariantsEditor({
             {/* Rows */}
             {bulkData.filter(row => {
               if (activeTab === 'General') {
-                // Template sizes that don't contain any of the color names
-                const nameLower = row.variant_name.toLowerCase().trim()
-                return !productColors.some(color => 
-                  nameLower.includes(color.toLowerCase().trim())
-                )
+                return !productColors.some(color => variantBelongsToColor(row.variant_name, color))
               }
               if (activeTab === 'All') return true
-              const nameLower = row.variant_name.toLowerCase().trim()
-              return nameLower.includes(activeTab.toLowerCase().trim())
+              return variantBelongsToColor(row.variant_name, activeTab)
             }).map((row) => (
               <div key={row.id} className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-panel p-3 md:p-2 rounded-lg border border-cream-line shadow-sm items-center">
                 <div className="md:col-span-3">

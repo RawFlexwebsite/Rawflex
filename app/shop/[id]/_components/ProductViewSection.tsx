@@ -15,6 +15,7 @@ type ProductVariant = {
   price: number
   original_price: number | null
   stock_quantity: number
+  is_active?: boolean
 }
 
 type ProductViewSectionProps = {
@@ -126,6 +127,7 @@ export default function ProductViewSection({
             image_url: images[0]?.image_url || '/image.png',
             category_name: categoryName,
             variants: variants,
+            colorNames: uniqueColors.map(color => color.name),
             sizeChart: sizeChart,
           }}
           selectedColor={selectedColor}

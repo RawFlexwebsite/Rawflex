@@ -7,6 +7,7 @@ import BestSellersLookbook from "@/components/BestSellersLookbook";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { selectDisplayVariant } from "@/lib/productVariants";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -153,7 +154,7 @@ export default async function Home() {
 
   const formatProducts = (rows: any[]) =>
     (rows || []).map((p: any) => {
-      const variant = p.product_variants?.[0];
+      const variant = selectDisplayVariant(p.product_variants);
       const price = variant?.price || p.price || 0;
       const original = variant?.original_price || p.oldPrice || null;
       return {

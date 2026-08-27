@@ -14,6 +14,7 @@ export type ProductVariant = {
   price: number
   original_price: number | null
   stock_quantity: number
+  is_active?: boolean
 }
 
 type ProductItem = {
@@ -22,10 +23,39 @@ type ProductItem = {
   image_url: string
   category_name?: string
   variants: ProductVariant[]
+  colorNames: string[]
   sizeChart?: {
     imageUrl: string
     title: string
   } | null
+}
+
+function normalizeName(value: string): string {
+  return value.trim().replace(/\s+/g, ' ').toLowerCase()
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function variantBelongsToColor(variantName: string, colorName: string): boolean {
+  const normalizedVariantName = normalizeName(variantName)
+  const normalizedColorName = normalizeName(colorName)
+
+  return (
+    normalizedVariantName === normalizedColorName ||
+    normalizedVariantName.startsWith(`${normalizedColorName} -`) ||
+    normalizedVariantName.startsWith(`${normalizedColorName} /`) ||
+    normalizedVariantName.startsWith(`${normalizedColorName} `)
+  )
+}
+
+function preferAvailableVariant(existing: ProductVariant, candidate: ProductVariant): ProductVariant {
+  if (existing.stock_quantity <= 0 && candidate.stock_quantity > 0) {
+    return candidate
+  }
+
+  return existing
 }
 
 export default function ProductDetailActions({ product, selectedColor = null }: { product: ProductItem, selectedColor?: string | null }) {
@@ -38,18 +68,50 @@ export default function ProductDetailActions({ product, selectedColor = null }: 
   )
   const [showSizeChart, setShowSizeChart] = useState(false)
 
+  const getDisplayName = React.useCallback((variantName: string) => {
+    if (!selectedColor) return variantName.trim()
+
+    const colorName = selectedColor.trim()
+    const regex = new RegExp(`^${escapeRegExp(colorName)}\\s*(?:[-/|:]|\\s)\\s*`, 'i')
+    const clean = variantName.replace(regex, '').trim()
+
+    return clean || variantName.trim()
+  }, [selectedColor])
+
   // Filter variants based on selectedColor if they are named like "Color - Size" or "Color Size"
   const filteredVariants = React.useMemo(() => {
-    if (!selectedColor) return product.variants
+    const activeVariants = product.variants.filter(variant => variant.is_active !== false)
+    const dedupeVariants = (variants: ProductVariant[]) => {
+      const byDisplayName = new Map<string, ProductVariant>()
 
-    const colorLower = selectedColor.toLowerCase().trim()
-    const matching = product.variants.filter(v => 
-      v.variant_name.toLowerCase().includes(colorLower)
+      for (const variant of variants) {
+        const displayName = getDisplayName(variant.variant_name)
+        const normalizedDisplayName = normalizeName(displayName)
+        const existingVariant = byDisplayName.get(normalizedDisplayName)
+
+        byDisplayName.set(
+          normalizedDisplayName,
+          existingVariant ? preferAvailableVariant(existingVariant, variant) : variant
+        )
+      }
+
+      return Array.from(byDisplayName.values())
+    }
+
+    if (!selectedColor) return dedupeVariants(activeVariants)
+
+    const matching = activeVariants.filter(variant =>
+      variantBelongsToColor(variant.variant_name, selectedColor)
     )
 
-    if (matching.length > 0) return matching
-    return product.variants
-  }, [product.variants, selectedColor])
+    if (matching.length > 0) return dedupeVariants(matching)
+
+    const unscopedVariants = activeVariants.filter(variant =>
+      !product.colorNames.some(colorName => variantBelongsToColor(variant.variant_name, colorName))
+    )
+
+    return dedupeVariants(unscopedVariants.length > 0 ? unscopedVariants : activeVariants)
+  }, [getDisplayName, product.colorNames, product.variants, selectedColor])
 
   // Automatically update selected variant when the filtered variants change (e.g., when switching colors)
   React.useEffect(() => {
@@ -63,18 +125,6 @@ export default function ProductDetailActions({ product, selectedColor = null }: 
       setSelectedVariant(null)
     }
   }, [filteredVariants])
-
-  // Get clean display name for the variant button (e.g., "Black - M" -> "M")
-  const getDisplayName = (variantName: string) => {
-    if (!selectedColor) return variantName
-    const colorLower = selectedColor.toLowerCase().trim()
-    if (variantName.toLowerCase().includes(colorLower)) {
-      const regex = new RegExp(colorLower + '\\s*[-/|:\\s]*\\s*', 'i')
-      const clean = variantName.replace(regex, '').trim()
-      return clean || variantName
-    }
-    return variantName
-  }
 
   // Use the selected variant price, or fallback to 0 (which shouldn't happen)
   const currentPrice = selectedVariant ? selectedVariant.price : 0

@@ -3,6 +3,7 @@ import Footer from '@/components/Footer'
 import ShopGrid from './_components/ShopGrid'
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from '@/lib/supabase/admin'
+import { selectDisplayVariant } from '@/lib/productVariants'
 
 export const metadata = {
   title: 'Shop Collection | RAWFLEX',
@@ -68,21 +69,25 @@ export default async function ShopPage({
     return colorNameField.split(',').map(c => ({ name: c.trim(), hex: '#E6DAC4' })).filter(c => c.name)
   }
 
-  const products = (productsData || []).map((p: any) => ({
-    id: p.id,
-    variant_id: p.product_variants?.[0]?.id || null,
-    name: p.name,
-    slug: p.slug,
-    category_id: p.category_id,
-    is_active: p.is_active,
-    image_url: p.product_images?.[0]?.image_url || p.featured_image_url || "/image.png",
-    price: p.product_variants?.[0]?.price || p.price || 0,
-    oldPrice: p.product_variants?.[0]?.original_price || p.oldPrice || undefined,
-    badge: p.badge,
-    rating: p.rating || 5,
-    colors: parseProductColors(p.color_name),
-    colorCount: p.color_group_id ? colorGroupCounts[p.color_group_id] || 1 : 1,
-  }));
+  const products = (productsData || []).map((p: any) => {
+    const variant = selectDisplayVariant(p.product_variants)
+
+    return {
+      id: p.id,
+      variant_id: variant?.id || null,
+      name: p.name,
+      slug: p.slug,
+      category_id: p.category_id,
+      is_active: p.is_active,
+      image_url: p.product_images?.[0]?.image_url || p.featured_image_url || "/image.png",
+      price: variant?.price || p.price || 0,
+      oldPrice: variant?.original_price || p.oldPrice || undefined,
+      badge: p.badge,
+      rating: p.rating || 5,
+      colors: parseProductColors(p.color_name),
+      colorCount: p.color_group_id ? colorGroupCounts[p.color_group_id] || 1 : 1,
+    }
+  });
 
   const allProducts = products;
 
