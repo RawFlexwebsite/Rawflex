@@ -15,9 +15,10 @@ interface ProductFormProps {
   product?: Product
   categories: Category[]
   otherProducts?: OtherProduct[]
+  onColorsChange?: (colorName: string) => void
 }
 
-export default function ProductForm({ product, categories, otherProducts = [] }: ProductFormProps) {
+export default function ProductForm({ product, categories, otherProducts = [], onColorsChange }: ProductFormProps) {
   const isEditing = !!product
   const action = isEditing ? updateProduct : createProduct
 
@@ -70,12 +71,16 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
     if (colorsList.some(c => c.name.toLowerCase() === name.toLowerCase())) {
       return
     }
-    setColorsList([...colorsList, { name, hex: colorInputHex }])
+    const nextColors = [...colorsList, { name, hex: colorInputHex }]
+    setColorsList(nextColors)
+    onColorsChange?.(JSON.stringify(nextColors))
     setColorInputName('')
   }
 
   const handleRemoveColor = (nameToRemove: string) => {
-    setColorsList(colorsList.filter(c => c.name !== nameToRemove))
+    const nextColors = colorsList.filter(c => c.name !== nameToRemove)
+    setColorsList(nextColors)
+    onColorsChange?.(JSON.stringify(nextColors))
   }
 
   return (
@@ -383,7 +388,7 @@ export default function ProductForm({ product, categories, otherProducts = [] }:
             <h2 className="text-base font-semibold text-ink">Product Colors</h2>
             <p className="text-xs text-ink/40 -mt-3">
               Add the colors available for this product. 
-              <strong> Click "Update Product" to save the product and generate these tabs for image uploads below.</strong>
+              <strong> Click "{isEditing ? 'Update Product' : 'Create Product'}" to save the product and generate these tabs for image uploads below.</strong>
             </p>
 
             <div className="space-y-4">

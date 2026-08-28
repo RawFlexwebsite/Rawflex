@@ -51,20 +51,35 @@ export default function ProductViewSection({
     uniqueColors.length > 0 ? uniqueColors[0].name : null
   )
 
-  // Filter gallery images:
-  // Show images matching the selected color, OR images that have NO color assigned (common fallback images)
-  const filteredImages = images.filter((img) => {
-    if (!selectedColor) return true
-    return !img.color_name || img.color_name.toLowerCase().trim() === selectedColor.toLowerCase().trim()
-  }).map((img) => img.image_url)
+  const displayImages = React.useMemo(() => {
+    if (!selectedColor) {
+      return images.map(img => img.image_url)
+    }
 
-  // Ensure we have at least one image to display
-  const displayImages = filteredImages.length > 0 ? filteredImages : (images.map(img => img.image_url) || ['/image.png'])
+    const normalizedSelectedColor = selectedColor.toLowerCase().trim()
+    const colorImages = images.filter(
+      img => img.color_name?.toLowerCase().trim() === normalizedSelectedColor
+    )
+
+    if (colorImages.length > 0) {
+      return colorImages.map(img => img.image_url)
+    }
+
+    const defaultImages = images.filter(img => !img.color_name)
+
+    if (defaultImages.length > 0) {
+      return defaultImages.map(img => img.image_url)
+    }
+
+    return images.map(img => img.image_url)
+  }, [images, selectedColor])
+
+  const galleryImages = displayImages.length > 0 ? displayImages : ['/image.png']
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-start">
       {/* Left: Product Image Gallery */}
-      <ProductGallery images={displayImages} productName={product.name} badge={product.badge || undefined} />
+      <ProductGallery images={galleryImages} productName={product.name} badge={product.badge || undefined} />
 
       {/* Right: Product Details & Purchase Form */}
       <div className="space-y-6">
@@ -124,7 +139,7 @@ export default function ProductViewSection({
           product={{
             id: product.id,
             name: product.name,
-            image_url: images[0]?.image_url || '/image.png',
+            image_url: galleryImages[0],
             category_name: categoryName,
             variants: variants,
             colorNames: uniqueColors.map(color => color.name),

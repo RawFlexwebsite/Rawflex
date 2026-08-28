@@ -52,8 +52,34 @@ type ProductVariantIdentity = {
   variant_name: string
 }
 
+type ProductColorInput = {
+  name: string
+  hex?: string
+}
+
 function normalizeVariantName(name: string): string {
   return name.trim().replace(/\s+/g, ' ').toLowerCase()
+}
+
+function parseProductColorNames(colorName: string | null): string[] {
+  if (!colorName) return []
+
+  try {
+    if (colorName.startsWith('[')) {
+      const parsed = JSON.parse(colorName) as ProductColorInput[]
+
+      return parsed
+        .map(color => color.name?.trim())
+        .filter((name): name is string => Boolean(name))
+    }
+  } catch (error) {
+    return []
+  }
+
+  return colorName
+    .split(',')
+    .map(color => color.trim())
+    .filter(Boolean)
 }
 
 function uniqueVariantsByName(variants: ProductVariantInput[]): ProductVariantInput[] {
@@ -70,7 +96,27 @@ function uniqueVariantsByName(variants: ProductVariantInput[]): ProductVariantIn
   return Array.from(byName.values())
 }
 
-async function revalidateProductVariantPaths(
+function createDefaultSizeVariants(basePrice: number, colorNames: string[]): ProductVariantInput[] {
+  const sizes = [
+    { variant_name: 'S', price: basePrice, original_price: null, stock_quantity: 0, is_active: true },
+    { variant_name: 'M', price: basePrice, original_price: null, stock_quantity: 0, is_active: true },
+    { variant_name: 'L', price: basePrice, original_price: null, stock_quantity: 0, is_active: true },
+    { variant_name: 'XL', price: basePrice, original_price: null, stock_quantity: 0, is_active: true },
+  ]
+
+  if (colorNames.length === 0) {
+    return sizes
+  }
+
+  return colorNames.flatMap(colorName =>
+    sizes.map(size => ({
+      ...size,
+      variant_name: `${colorName} - ${size.variant_name}`,
+    }))
+  )
+}
+
+async function revalidateProductPaths(
   supabase: Awaited<ReturnType<typeof createClient>>,
   productId: string
 ) {
@@ -198,20 +244,15 @@ export async function createProduct(
     })
   }
 
-  // Create standard size variants so they show on frontend immediately
   const basePrice = parseFloat(price)
-  const sizeVariants = [
-    { variant_name: 'M', price: basePrice, original_price: null, stock_quantity: 10, is_active: true },
-    { variant_name: 'L', price: basePrice, original_price: null, stock_quantity: 15, is_active: true },
-    { variant_name: 'XL', price: basePrice, original_price: null, stock_quantity: 8, is_active: true },
-    { variant_name: 'XXL', price: basePrice, original_price: null, stock_quantity: 5, is_active: true },
-  ]
+  const colorNames = parseProductColorNames(colorName)
+  const sizeVariants = createDefaultSizeVariants(basePrice, colorNames)
 
   await supabase.from('product_variants').insert(
     sizeVariants.map(v => ({ product_id: id, ...v }))
   )
 
-  revalidatePath('/admin/products')
+  await revalidateProductPaths(supabase, id)
   redirect(`/admin/products/${product.id}/edit`)
 }
 
@@ -291,8 +332,7 @@ export async function updateProduct(
     .eq('product_id', id)
     .eq('variant_name', 'Default')
 
-  revalidatePath('/admin/products')
-  revalidatePath(`/admin/products/${id}/edit`)
+  await revalidateProductPaths(supabase, id)
   redirect(`/admin/products/${id}/edit`)
 }
 
@@ -395,7 +435,7 @@ export async function addProductImage(
       .eq('id', productId)
   }
 
-  revalidatePath(`/admin/products/${productId}/edit`)
+  await revalidateProductPaths(supabase, productId)
   return { success: true }
 }
 
@@ -454,7 +494,7 @@ export async function deleteProductImage(imageId: string, productId: string): Pr
     }
   }
 
-  revalidatePath(`/admin/products/${productId}/edit`)
+  await revalidateProductPaths(supabase, productId)
   return { success: true }
 }
 
@@ -475,7 +515,7 @@ export async function setFeaturedImage(
     return { error: error.message }
   }
 
-  revalidatePath(`/admin/products/${productId}/edit`)
+  await revalidateProductPaths(supabase, productId)
   return { success: true }
 }
 
@@ -495,7 +535,7 @@ export async function reorderProductImages(
       .eq('product_id', productId)
   }
 
-  revalidatePath(`/admin/products/${productId}/edit`)
+  await revalidateProductPaths(supabase, productId)
   return { success: true }
 }
 
@@ -516,7 +556,7 @@ export async function updateProductImageColor(
     return { error: error.message }
   }
 
-  revalidatePath(`/admin/products/${productId}/edit`)
+  await revalidateProductPaths(supabase, productId)
   return { success: true }
 }
 
@@ -596,7 +636,7 @@ export async function createProductVariant(
     }
   }
 
-  await revalidateProductVariantPaths(supabase, productId)
+  await revalidateProductPaths(supabase, productId)
   return { success: true }
 }
 
@@ -675,7 +715,7 @@ export async function bulkCreateProductVariants(
     }
   }
 
-  await revalidateProductVariantPaths(supabase, productId)
+  await revalidateProductPaths(supabase, productId)
   return { success: true }
 }
 
@@ -754,7 +794,7 @@ export async function updateProductVariant(
     }
   }
 
-  await revalidateProductVariantPaths(supabase, productId)
+  await revalidateProductPaths(supabase, productId)
   return { success: true }
 }
 
@@ -800,7 +840,7 @@ export async function deleteProductVariant(
     return { error: error.message }
   }
 
-  await revalidateProductVariantPaths(supabase, productId)
+  await revalidateProductPaths(supabase, productId)
   return { success: true }
 }
 

@@ -3,7 +3,7 @@
 import { useState, useTransition, useRef, useEffect } from 'react'
 import { CldUploadWidget } from 'next-cloudinary'
 import { Plus, X, Star, Loader2 } from 'lucide-react'
-import { addProductImage, deleteProductImage, setFeaturedImage } from '@/actions/products'
+import { addProductImage, deleteProductImage, setFeaturedImage, updateProductImageColor } from '@/actions/products'
 import Image from 'next/image'
 
 type ProductImage = {
@@ -44,7 +44,11 @@ export function ProductImagesEditor({
       startTransition(async () => {
         const currentActiveTab = activeTabRef.current
         const uploadColor = currentActiveTab === 'All' || currentActiveTab === 'Default' ? null : currentActiveTab
-        await addProductImage(product.id, result.info.secure_url, uploadColor, result.info.public_id || null)
+        const response = await addProductImage(product.id, result.info.secure_url, uploadColor, result.info.public_id || null)
+
+        if (response.error) {
+          alert(response.error)
+        }
       })
     }
   }
@@ -52,21 +56,34 @@ export function ProductImagesEditor({
   const handleDelete = (imageId: string) => {
     if (confirm('Are you sure you want to delete this image?')) {
       startTransition(async () => {
-        await deleteProductImage(imageId, product.id)
+        const response = await deleteProductImage(imageId, product.id)
+
+        if (response.error) {
+          alert(response.error)
+        }
       })
     }
   }
 
   const handleSetFeatured = (imageUrl: string) => {
     startTransition(async () => {
-      await setFeaturedImage(product.id, imageUrl)
+      const response = await setFeaturedImage(product.id, imageUrl)
+
+      if (response.error) {
+        alert(response.error)
+      }
     })
   }
 
+  const handleImageColorChange = (imageId: string, colorName: string) => {
+    startTransition(async () => {
+      const response = await updateProductImageColor(imageId, product.id, colorName)
 
-
-
-
+      if (response.error) {
+        alert(response.error)
+      }
+    })
+  }
   // Derive tabs from product.color_name (JSON or legacy comma-separated)
   const productColors = (() => {
     if (!product.color_name) return []
@@ -79,6 +96,13 @@ export function ProductImagesEditor({
     return product.color_name.split(',').map(c => ({ name: c.trim(), hex: '#E6DAC4' })).filter(c => c.name)
   })()
   const allColorTabs = productColors
+
+  useEffect(() => {
+    if (activeTab === 'All' || activeTab === 'Default') return
+    if (allColorTabs.some(color => color.name === activeTab)) return
+
+    setActiveTab('All')
+  }, [activeTab, allColorTabs])
 
   // Filter images for grid display
   const displayedImages = images.filter(img => {
@@ -116,7 +140,7 @@ export function ProductImagesEditor({
                 ) : (
                   <Plus className="w-4 h-4 mr-2" />
                 )}
-                Upload Image
+                {activeTab === 'All' || activeTab === 'Default' ? 'Upload Image' : `Upload ${activeTab} Image`}
               </button>
             )
           }}
@@ -221,7 +245,24 @@ export function ProductImagesEditor({
                 </div>
               </div>
 
-
+              <div className="border-t border-cream-line bg-panel p-3">
+                <label className="block text-[10px] font-semibold uppercase tracking-wider text-ink/50">
+                  Color
+                </label>
+                <select
+                  value={img.color_name || ''}
+                  onChange={(event) => handleImageColorChange(img.id, event.target.value)}
+                  disabled={isPending}
+                  className="mt-1.5 w-full rounded-md border border-cream-line bg-cream-deep px-2 py-1.5 text-xs font-semibold text-ink focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                >
+                  <option value="">Default / all colors</option>
+                  {allColorTabs.map(colorObj => (
+                    <option key={colorObj.name} value={colorObj.name}>
+                      {colorObj.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           )
         })}
