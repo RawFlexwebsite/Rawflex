@@ -13,43 +13,102 @@ export const metadata: Metadata = {
   title: 'Dashboard',
 }
 
-async function getStats() {
-  const admin = await requireAdmin()
-  if (admin.ok === false) {
-    return { totalOrders: 0, totalRevenue: 0, totalCustomers: 0, totalProducts: 0, recentOrders: [] }
+type RecentOrder = {
+  id: string
+  order_number: string | null
+  total_amount: number | string | null
+  order_status: string | null
+  payment_status: string | null
+  created_at: string | null
+}
+
+type AdminStats = {
+  totalOrders: number
+  totalRevenue: number
+  totalCustomers: number
+  totalProducts: number
+  recentOrders: RecentOrder[]
+  loadError: boolean
+}
+
+function emptyStats(loadError: boolean): AdminStats {
+  return {
+    totalOrders: 0,
+    totalRevenue: 0,
+    totalCustomers: 0,
+    totalProducts: 0,
+    recentOrders: [],
+    loadError,
   }
-  const supabase = admin.adminClient
+}
 
-  const [ordersRes, customersRes, productsRes, recentOrdersRes] =
-    await Promise.all([
-      supabase
-        .from('orders')
-        .select('id, total_amount', { count: 'exact', head: false }),
-      supabase
-        .from('profiles')
-        .select('id', { count: 'exact', head: true })
-        .eq('role', 'customer'),
-      supabase
-        .from('products')
-        .select('id', { count: 'exact', head: true }),
-      supabase
-        .from('orders')
-        .select('id, order_number, total_amount, order_status, payment_status, created_at')
-        .order('created_at', { ascending: false })
-        .limit(5),
-    ])
+function formatOrderDate(value: string | null) {
+  if (!value) return 'Unknown'
 
-  const totalOrders = ordersRes.count || 0
-  const totalRevenue =
-    ordersRes.data?.reduce(
-      (sum, order) => sum + (Number(order.total_amount) || 0),
-      0
-    ) || 0
-  const totalCustomers = customersRes.count || 0
-  const totalProducts = productsRes.count || 0
-  const recentOrders = recentOrdersRes.data || []
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'Unknown'
 
-  return { totalOrders, totalRevenue, totalCustomers, totalProducts, recentOrders }
+  return date.toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+async function getStats() {
+  try {
+    const admin = await requireAdmin()
+    if (admin.ok === false) {
+      return emptyStats(false)
+    }
+    const supabase = admin.adminClient
+
+    const [ordersRes, customersRes, productsRes, recentOrdersRes] =
+      await Promise.all([
+        supabase
+          .from('orders')
+          .select('id, total_amount', { count: 'exact', head: false }),
+        supabase
+          .from('profiles')
+          .select('id', { count: 'exact', head: true })
+          .eq('role', 'customer'),
+        supabase
+          .from('products')
+          .select('id', { count: 'exact', head: true }),
+        supabase
+          .from('orders')
+          .select('id, order_number, total_amount, order_status, payment_status, created_at')
+          .order('created_at', { ascending: false })
+          .limit(5),
+      ])
+
+    const queryErrors = [
+      ordersRes.error,
+      customersRes.error,
+      productsRes.error,
+      recentOrdersRes.error,
+    ].filter(Boolean)
+
+    if (queryErrors.length > 0) {
+      console.error('Admin dashboard stats failed:', queryErrors)
+      return emptyStats(true)
+    }
+
+    const totalOrders = ordersRes.count || 0
+    const totalRevenue =
+      ordersRes.data?.reduce(
+        (sum, order) => sum + (Number(order.total_amount) || 0),
+        0
+      ) || 0
+    const totalCustomers = customersRes.count || 0
+    const totalProducts = productsRes.count || 0
+    const recentOrders = recentOrdersRes.data || []
+
+    return { totalOrders, totalRevenue, totalCustomers, totalProducts, recentOrders, loadError: false }
+  } catch (error) {
+    console.error('Admin dashboard failed to load stats:', error)
+    return emptyStats(true)
+  }
 }
 
 const statusColors: Record<string, string> = {
@@ -61,7 +120,7 @@ const statusColors: Record<string, string> = {
 }
 
 export default async function AdminDashboardPage() {
-  const { totalOrders, totalRevenue, totalCustomers, totalProducts, recentOrders } =
+  const { totalOrders, totalRevenue, totalCustomers, totalProducts, recentOrders, loadError } =
     await getStats()
 
   const statCards = [
@@ -104,6 +163,12 @@ export default async function AdminDashboardPage() {
           Welcome back! Here&apos;s what&apos;s happening with your store.
         </p>
       </div>
+
+      {loadError && (
+        <div className="rounded-xl border border-amber-300/40 bg-amber-100/10 px-4 py-3 text-sm text-ink/80">
+          Dashboard stats are temporarily unavailable. Check the production Supabase env vars and database tables if this keeps happening.
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -177,7 +242,7 @@ export default async function AdminDashboardPage() {
                     className="hover:bg-panel/50 transition-colors"
                   >
                     <td className="px-6 py-3.5 text-sm font-medium text-ink">
-                      #{order.order_number}
+                      #{order.order_number || order.id}
                     </td>
                     <td className="px-6 py-3.5 text-sm text-ink/80">
                       ₹{Number(order.total_amount).toLocaleString('en-IN')}
@@ -185,11 +250,11 @@ export default async function AdminDashboardPage() {
                     <td className="px-6 py-3.5">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium capitalize ${
-                          statusColors[order.order_status] ||
+                          statusColors[order.order_status || ''] ||
                           'bg-cream-deep text-ink/80'
                         }`}
                       >
-                        {order.order_status}
+                        {order.order_status || 'unknown'}
                       </span>
                     </td>
                     <td className="px-6 py-3.5">
@@ -200,15 +265,11 @@ export default async function AdminDashboardPage() {
                             : 'bg-yellow-100 text-yellow-700'
                         }`}
                       >
-                        {order.payment_status}
+                        {order.payment_status || 'unknown'}
                       </span>
                     </td>
                     <td className="px-6 py-3.5 text-sm text-ink/60">
-                      {new Date(order.created_at).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
+                      {formatOrderDate(order.created_at)}
                     </td>
                   </tr>
                 ))}
