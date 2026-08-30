@@ -38,6 +38,9 @@ Rawflex.env
 # vercel
 .vercel
 
+# local Firebase project binding
+.firebaserc
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

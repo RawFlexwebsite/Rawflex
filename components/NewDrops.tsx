@@ -67,13 +67,13 @@ export default function NewDrops({
               const price = p.sale_price && p.sale_price < p.price ? p.sale_price : p.price;
               return (
                 <div key={p.id} className="group overflow-hidden rounded-md border border-white/10 hover:border-[#D4A82C]/50 transition-colors">
-                  <Link href={`/shop/${p.slug || p.id}`} className="relative block aspect-[4/5] overflow-hidden bg-[#EDEAE4]">
+                  <Link href={`/shop/${p.slug || p.id}`} className="relative block aspect-[3/4] overflow-hidden bg-[#EDEAE4]">
                     <Image
                       src={p.image_url}
                       alt={p.name}
                       fill
                       sizes="(max-width: 1024px) 50vw, 300px"
-                      className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                      className="object-fill"
                     />
                     <span className="absolute top-3 left-3 px-2 py-1 bg-[#D4A82C] text-[#0a0909] text-[10px] font-bold uppercase tracking-wider">
                       New

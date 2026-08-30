@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import { RotateCcw, X, ZoomIn, ZoomOut } from 'lucide-react'
 
 type ProductGalleryProps = {
   images: string[]
@@ -17,8 +18,11 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
     transform: 'scale(1)'
   })
   const [isZooming, setIsZooming] = useState(false)
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+  const [lightboxZoom, setLightboxZoom] = useState(1)
   const pointerStartX = useRef<number | null>(null)
   const pointerDeltaX = useRef(0)
+  const didDrag = useRef(false)
 
   // Ensure we have at least one image to display
   const displayImages = images.length > 0 ? images : ['/image.png']
@@ -28,7 +32,33 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
     setActiveIndex(0)
     setDragOffset(0)
     setIsZooming(false)
+    setIsLightboxOpen(false)
+    setLightboxZoom(1)
   }, [images])
+
+  useEffect(() => {
+    if (!isLightboxOpen) return
+
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsLightboxOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = originalOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isLightboxOpen])
+
+  useEffect(() => {
+    setLightboxZoom(1)
+  }, [activeIndex])
 
   const showPrevious = () => {
     setActiveIndex(index => (index === 0 ? displayImages.length - 1 : index - 1))
@@ -60,6 +90,8 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
   }
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    didDrag.current = false
+
     if (!hasMultipleImages) return
 
     pointerStartX.current = e.clientX
@@ -74,6 +106,11 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
 
     const deltaX = e.clientX - pointerStartX.current
     pointerDeltaX.current = deltaX
+
+    if (Math.abs(deltaX) > 8) {
+      didDrag.current = true
+    }
+
     setDragOffset(deltaX)
   }
 
@@ -115,6 +152,21 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
     })
   }
 
+  const openMobileLightbox = () => {
+    if (window.innerWidth >= 768 || didDrag.current) return
+
+    setLightboxZoom(1)
+    setIsLightboxOpen(true)
+  }
+
+  const zoomOut = () => {
+    setLightboxZoom(value => Math.max(1, Number((value - 0.5).toFixed(1))))
+  }
+
+  const zoomIn = () => {
+    setLightboxZoom(value => Math.min(4, Number((value + 0.5).toFixed(1))))
+  }
+
   return (
     <div className="flex flex-col md:flex-row gap-4">
       
@@ -135,7 +187,7 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
                 width={80}
                 height={110}
                 sizes="90px"
-                className="object-cover"
+                className="h-full w-full object-fill"
               />
             </button>
           ))}
@@ -151,6 +203,7 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
+        onClick={openMobileLightbox}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -166,7 +219,7 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
                 fill
                 sizes="(max-width: 768px) 100vw, 640px"
                 style={activeIndex === index ? zoomStyle : undefined}
-                className={`object-cover object-center transition-transform ease-out ${isZooming && activeIndex === index ? 'duration-100' : 'duration-300'}`}
+                className={`object-fill transition-transform ease-out ${isZooming && activeIndex === index ? 'duration-100' : 'duration-300'}`}
                 priority={index === 0}
                 draggable={false}
               />
@@ -181,7 +234,10 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
                 <button
                   key={index}
                   type="button"
-                  onClick={() => setActiveIndex(index)}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setActiveIndex(index)
+                  }}
                   aria-label={`Show image ${index + 1}`}
                   className={`h-2 rounded-full transition-all ${
                     activeIndex === index ? 'w-5 bg-white' : 'w-2 bg-white/45 hover:bg-white/75'
@@ -197,7 +253,87 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
             {badge}
           </span>
         )}
+
+        <span className="pointer-events-none absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur md:hidden" aria-hidden="true">
+          <ZoomIn className="h-5 w-5" />
+        </span>
       </div>
+
+      {isLightboxOpen && (
+        <div
+          className="fixed inset-0 z-[100000] bg-black md:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${productName} image viewer`}
+        >
+          <div className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between border-b border-white/10 bg-black/80 px-4 py-3 backdrop-blur">
+            <span className="max-w-[70vw] truncate text-sm font-semibold text-white">
+              {activeIndex + 1} / {displayImages.length}
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsLightboxOpen(false)}
+              aria-label="Close image viewer"
+              title="Close"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="h-full w-full overflow-auto px-4 pb-24 pt-16">
+            <div
+              className="relative flex min-h-full min-w-full items-center justify-center"
+              style={{
+                height: `${lightboxZoom * 100}%`,
+                width: `${lightboxZoom * 100}%`,
+              }}
+            >
+              <Image
+                src={displayImages[activeIndex]}
+                alt={`${productName} - enlarged image ${activeIndex + 1}`}
+                fill
+                sizes="100vw"
+                className="object-contain"
+                priority
+                draggable={false}
+              />
+            </div>
+          </div>
+
+          <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-black/80 p-2 backdrop-blur">
+            <button
+              type="button"
+              onClick={zoomOut}
+              aria-label="Zoom out"
+              title="Zoom out"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-black disabled:opacity-40"
+              disabled={lightboxZoom <= 1}
+            >
+              <ZoomOut className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setLightboxZoom(1)}
+              aria-label="Reset zoom"
+              title="Reset zoom"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 text-white"
+            >
+              <RotateCcw className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={zoomIn}
+              aria-label="Zoom in"
+              title="Zoom in"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-black disabled:opacity-40"
+              disabled={lightboxZoom >= 4}
+            >
+              <ZoomIn className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   )

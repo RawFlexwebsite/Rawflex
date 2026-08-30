@@ -67,13 +67,13 @@ export default function Products({
               <Reveal key={p.id} delay={(i % 5) as any} className="flex-none w-[calc(50%-0.5rem)] md:w-[calc(33.333%-1rem)] lg:w-[calc(20%-1.2rem)]">
                 <Link href={`/shop/${p.id}`} className="block">
                   <div className="lift group bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-md hover:shadow-lg border border-[#E6DAC4] h-full flex flex-col">
-                    <div className="relative aspect-[4/5] overflow-hidden bg-[#F0EAE0]">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-[#F0EAE0]">
                       <Image
                         src={p.image_url}
                         alt={p.name}
                         fill
                         sizes="(max-width: 768px) 50vw, 280px"
-                        className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                        className="object-fill"
                       />
                       {p.badge && (
                         <span className="absolute top-3 left-3 bg-[#D2A546] text-[#080909] text-[9px] md:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-sm">

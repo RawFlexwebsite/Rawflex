@@ -7,10 +7,39 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { createSignedRawflexSession, rawflexSessionCookieNames, type RawflexSession } from '@/lib/auth/session'
 import { sendTransactionalEmail } from '@/lib/email'
+import { getFirebaseAdminAuth } from '@/lib/firebase/admin'
 
 export type AuthResult = {
   error?: string
   success?: boolean
+}
+
+type SupabaseAuthUserWithPhone = {
+  id: string
+  email?: string | null
+  phone?: string | null
+}
+
+function getErrorDetails(error: unknown) {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      cause: error.cause,
+    }
+  }
+
+  if (error && typeof error === 'object') {
+    const record = error as Record<string, unknown>
+    return {
+      message: record.message,
+      code: record.code,
+      details: record.details,
+      hint: record.hint,
+    }
+  }
+
+  return { message: String(error) }
 }
 
 async function setRawflexSessionCookie(session: RawflexSession) {
@@ -40,6 +69,66 @@ async function clearRawflexSessionCookie() {
 
   cookieStore.set(rawflexSessionCookieNames.session, '', options)
   cookieStore.set(rawflexSessionCookieNames.signature, '', options)
+}
+
+function getPhoneDigits(phone: string): string {
+  return phone.replace(/\D/g, '')
+}
+
+function getLocalPhoneNumber(phone: string): string {
+  const digits = getPhoneDigits(phone)
+  return digits.length > 10 ? digits.slice(-10) : digits
+}
+
+function getPhoneSearchValues(phone: string): string[] {
+  const digits = getPhoneDigits(phone)
+  const localPhone = getLocalPhoneNumber(phone)
+  const values = new Set<string>([phone, digits, localPhone])
+
+  if (localPhone.length === 10) {
+    values.add(`+91${localPhone}`)
+    values.add(`91${localPhone}`)
+  }
+
+  return Array.from(values).filter(Boolean)
+}
+
+function getPhoneOnlyEmail(phone: string): string {
+  return `phone-${getPhoneDigits(phone)}@phone.rawflex.local`
+}
+
+function isPhoneOnlyEmail(email: string | null | undefined): boolean {
+  return Boolean(email?.endsWith('@phone.rawflex.local'))
+}
+
+async function findSupabaseAuthUserByPhone(adminAuth: ReturnType<typeof createAdminClient>['auth']['admin'], phoneValues: string[]) {
+  let page = 1
+  const perPage = 1000
+
+  while (page <= 10) {
+    const { data, error } = await adminAuth.listUsers({ page, perPage })
+    if (error) {
+      throw error
+    }
+
+    const users = data.users as SupabaseAuthUserWithPhone[]
+    const matchingUser = users.find((user) => {
+      const authPhone = user.phone
+      return Boolean(authPhone && phoneValues.includes(authPhone))
+    })
+
+    if (matchingUser) {
+      return matchingUser
+    }
+
+    if (data.users.length < perPage) {
+      return null
+    }
+
+    page += 1
+  }
+
+  return null
 }
 
 export async function login(
@@ -380,6 +469,124 @@ export async function verifyEmailOtp(
   redirect(redirectTo && redirectTo.startsWith('/') ? redirectTo : '/')
 }
 
+export async function verifyPhoneOtp(
+  firebaseIdToken: string,
+  mode: 'LOGIN' | 'REGISTER',
+  redirectTo?: string,
+  fullName?: string
+): Promise<AuthResult> {
+  if (!firebaseIdToken) {
+    return { error: 'Phone verification token is required' }
+  }
+
+  let verifiedPhone = ''
+
+  try {
+    const decodedToken = await getFirebaseAdminAuth().verifyIdToken(firebaseIdToken)
+    verifiedPhone = decodedToken.phone_number || ''
+  } catch (error: any) {
+    console.error('Firebase phone token verification failed:', error)
+    return { error: 'Phone verification failed. Please request a new OTP.' }
+  }
+
+  if (!verifiedPhone) {
+    return { error: 'Firebase did not return a verified phone number.' }
+  }
+
+  const adminSupabase = createAdminClient()
+  const adminAuth = adminSupabase.auth.admin
+  const phoneValues = getPhoneSearchValues(verifiedPhone)
+  const localPhone = getLocalPhoneNumber(verifiedPhone)
+
+  const { data: profiles, error: profileError } = await adminSupabase
+    .from('profiles')
+    .select('*')
+    .in('phone', phoneValues)
+    .limit(1)
+
+  if (profileError) {
+    console.error('Phone profile lookup failed:', getErrorDetails(profileError))
+    return { error: 'Unable to check this phone number. Please try again.' }
+  }
+
+  let finalProfile = profiles?.[0] || null
+  let authUser = null
+
+  if (!finalProfile) {
+    try {
+      authUser = await findSupabaseAuthUserByPhone(adminAuth, phoneValues)
+    } catch (error: any) {
+      console.error('Phone auth user lookup failed:', getErrorDetails(error))
+      return { error: 'Unable to check this phone account. Please try again.' }
+    }
+  }
+
+  if (mode === 'LOGIN' && !finalProfile && !authUser) {
+    return { error: 'User does not exist, first create an account' }
+  }
+
+  if (!finalProfile) {
+    const nameToUse = fullName?.trim() || 'Customer'
+    let userId = authUser?.id
+    let profileEmail = authUser?.email || getPhoneOnlyEmail(verifiedPhone)
+
+    if (!authUser) {
+      const { data: newUser, error: createError } = await adminAuth.createUser({
+        email: profileEmail,
+        email_confirm: true,
+        phone: verifiedPhone,
+        phone_confirm: true,
+        user_metadata: {
+          full_name: nameToUse,
+          phone: localPhone,
+          role: 'customer',
+          login_provider: 'firebase_phone',
+        },
+      })
+
+      if (createError || !newUser?.user) {
+        console.error('Phone auth user creation failed:', createError)
+        return { error: createError?.message || 'Failed to create phone account.' }
+      }
+
+      userId = newUser.user.id
+      profileEmail = newUser.user.email || profileEmail
+    }
+
+    const { data: insertedProfile, error: insertError } = await adminSupabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        email: profileEmail,
+        full_name: nameToUse,
+        phone: localPhone,
+        role: 'customer',
+      })
+      .select('*')
+      .single()
+
+    if (insertError || !insertedProfile) {
+      console.error('Phone profile creation failed:', getErrorDetails(insertError))
+      return { error: insertError?.message || 'Failed to create customer profile.' }
+    }
+
+    finalProfile = insertedProfile
+  }
+
+  await setRawflexSessionCookie({
+    id: finalProfile.id,
+    email: finalProfile.email,
+    full_name: finalProfile.full_name,
+    role: finalProfile.role,
+  })
+
+  revalidatePath('/', 'layout')
+  if (redirectTo === 'NO_REDIRECT') {
+    return { success: true }
+  }
+  redirect(redirectTo && redirectTo.startsWith('/') ? redirectTo : '/')
+}
+
 function getAdminEmails(): string[] {
   const emails = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || ''
   return emails.split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
@@ -548,7 +755,7 @@ export async function getCurrentUserForClient() {
   return {
     user: {
       id: user.id,
-      email: user.email || null,
+      email: isPhoneOnlyEmail(user.email) ? null : user.email || null,
       full_name: (user.user_metadata?.full_name as string | undefined) || null,
       role: (user.user_metadata?.role as string | undefined) || null,
     },
@@ -580,10 +787,12 @@ export async function getCurrentCustomerProfileForClient() {
     .limit(1)
     .maybeSingle()
 
+  const profileEmail = profileData?.email || user.email || ''
+
   return {
     profile: {
       fullName: profileData?.full_name || user.user_metadata?.full_name || '',
-      email: user.email || profileData?.email || '',
+      email: isPhoneOnlyEmail(profileEmail) ? '' : profileEmail,
       phone: addressData?.phone || profileData?.phone || '',
       alternatePhone: addressData?.alternate_phone || '',
       street: addressData?.address_line_1 || '',

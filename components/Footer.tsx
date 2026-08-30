@@ -105,23 +105,25 @@ export default function Footer() {
   return (
     <footer className="relative bg-[#0a0909] pb-8 pt-3">
       <div className="max-w-wrap mx-auto px-4 sm:px-5 md:px-8">
-        <section className="border border-[#D4A82C]/30 bg-[#090a09] px-4 sm:px-5 py-4 sm:py-5 md:px-8 md:py-5 lg:px-10 shadow-[0_0_0_1px_rgba(212,168,44,0.08)]">
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 justify-between">
-            <div className="flex items-center gap-4 sm:gap-5 text-center sm:text-left">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center text-[#D4A82C] md:h-14 md:w-14">
-                <Mail className="h-10 w-10 stroke-[1.6] md:h-11 md:w-11" />
+        <section className="border border-[#D4A82C]/30 bg-[#090a09] px-4 sm:px-5 py-5 sm:py-5 md:px-8 md:py-5 lg:px-10 shadow-[0_0_0_1px_rgba(212,168,44,0.08)]">
+          <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-6 justify-between">
+
+            {/* Icon + heading — always in a row, compact on mobile */}
+            <div className="flex items-center gap-3 sm:gap-5 w-full sm:w-auto">
+              <div className="flex h-9 w-9 sm:h-12 sm:w-12 md:h-14 md:w-14 shrink-0 items-center justify-center text-[#D4A82C]">
+                <Mail className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 stroke-[1.5]" />
               </div>
               <div>
-                <h2 className="font-display text-xl sm:text-2xl md:text-3xl font-black uppercase leading-none text-white">
+                <h2 className="font-display text-base sm:text-2xl md:text-3xl font-black uppercase leading-tight text-white">
                   Be the first to know
                 </h2>
-                <p className="mt-2 text-xs sm:text-sm font-semibold text-white/55">
-                  New drops, exclusive offers & more.
+                <p className="mt-1 text-[11px] sm:text-sm font-semibold text-white/55">
+                  New drops, exclusive offers &amp; more.
                 </p>
               </div>
             </div>
 
-            <form className="flex min-w-0 flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto flex-1 justify-center" onSubmit={handleSubmit}>
+            <form className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto sm:flex-1 sm:justify-center" onSubmit={handleSubmit}>
               <input
                 type="email"
                 name="email"

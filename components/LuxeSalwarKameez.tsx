@@ -49,13 +49,13 @@ export default function LuxeSalwarKameez({ products = [] }: { products?: Product
           {products.slice(0, 10).map((p, i) => (
             <Reveal key={p.id} delay={(i % 5) as any} className="flex-none w-[calc(50%-0.5rem)] md:w-[calc(33.333%-1rem)] lg:w-[calc(20%-1.2rem)]">
               <div className="lift group bg-panel rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-cream-line/80 h-full flex flex-col">
-                <div className="relative aspect-[4/5] overflow-hidden bg-cream-deep/20">
+                <div className="relative aspect-[3/4] overflow-hidden bg-cream-deep/20">
                   <Image
                     src={p.image_url}
                     alt={p.name}
                     fill
                     sizes="(max-width: 768px) 50vw, 280px"
-                    className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                    className="object-fill"
                   />
                   {p.badge && (
                     <span className="absolute top-3 left-3 bg-emerald text-cream text-[9px] md:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-sm">

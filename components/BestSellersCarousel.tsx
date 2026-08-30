@@ -104,13 +104,13 @@ export default function BestSellersCarousel({
                 data-card
                 className="snap-start shrink-0 w-[220px] md:w-[260px] group block bg-panel rounded-2xl overflow-hidden border border-cream-line hover:border-gold/50 transition-colors"
               >
-                <div className="relative aspect-[4/5] overflow-hidden bg-cream-deep">
+                <div className="relative aspect-[3/4] overflow-hidden bg-cream-deep">
                   <Image
                     src={p.image_url}
                     alt={p.name}
                     fill
                     sizes="260px"
-                    className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.05]"
+                    className="object-fill"
                   />
                   <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#080909]/70 backdrop-blur-sm border border-gold/40 text-gold text-[9px] font-bold uppercase tracking-wider">
                     Bestseller
