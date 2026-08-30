@@ -7,7 +7,6 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { createSignedRawflexSession, rawflexSessionCookieNames, type RawflexSession } from '@/lib/auth/session'
 import { sendTransactionalEmail } from '@/lib/email'
-import { getFirebaseAdminAuth } from '@/lib/firebase/admin'
 
 export type AuthResult = {
   error?: string
@@ -18,6 +17,18 @@ type SupabaseAuthUserWithPhone = {
   id: string
   email?: string | null
   phone?: string | null
+}
+
+type FirebaseLookupUser = {
+  localId?: string
+  phoneNumber?: string
+}
+
+type FirebaseLookupResponse = {
+  users?: FirebaseLookupUser[]
+  error?: {
+    message?: string
+  }
 }
 
 function getErrorDetails(error: unknown) {
@@ -129,6 +140,43 @@ async function findSupabaseAuthUserByPhone(adminAuth: ReturnType<typeof createAd
   }
 
   return null
+}
+
+async function getVerifiedFirebasePhoneNumber(firebaseIdToken: string) {
+  const useEmulator =
+    process.env.NEXT_PUBLIC_USE_FIREBASE_AUTH_EMULATOR === 'true' ||
+    Boolean(process.env.FIREBASE_AUTH_EMULATOR_HOST)
+
+  if (useEmulator && process.env.NODE_ENV !== 'production') {
+    const { getFirebaseAdminAuth } = await import('@/lib/firebase/admin')
+    const decodedToken = await getFirebaseAdminAuth().verifyIdToken(firebaseIdToken)
+    return decodedToken.phone_number || ''
+  }
+
+  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY
+  if (!apiKey) {
+    throw new Error('Firebase API key is not configured.')
+  }
+
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ idToken: firebaseIdToken }),
+      cache: 'no-store',
+    }
+  )
+
+  const result = (await response.json()) as FirebaseLookupResponse
+
+  if (!response.ok || result.error) {
+    throw new Error(result.error?.message || 'Firebase token lookup failed.')
+  }
+
+  return result.users?.[0]?.phoneNumber || ''
 }
 
 export async function login(
@@ -482,8 +530,7 @@ export async function verifyPhoneOtp(
   let verifiedPhone = ''
 
   try {
-    const decodedToken = await getFirebaseAdminAuth().verifyIdToken(firebaseIdToken)
-    verifiedPhone = decodedToken.phone_number || ''
+    verifiedPhone = await getVerifiedFirebasePhoneNumber(firebaseIdToken)
   } catch (error: any) {
     console.error('Firebase phone token verification failed:', error)
     return { error: 'Phone verification failed. Please request a new OTP.' }
