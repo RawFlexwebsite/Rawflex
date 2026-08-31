@@ -1,21 +1,17 @@
 import { v2 as cloudinary } from 'cloudinary'
 import { requireAdmin } from '@/lib/adminAuth'
 
-const ALLOWED_SIGN_PARAMS = new Set([
-  'timestamp',
-  'folder',
-  'public_id',
-  'upload_preset',
-  'tags',
-  'context',
-  'source',
-  'use_filename',
-  'unique_filename',
-  'overwrite',
-  'resource_type',
-  'type',
-  'access_mode',
-])
+type CloudinarySignParam = string | number | boolean | string[]
+
+function normalizeSignParams(paramsToSign: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(paramsToSign).filter(([, value]) => {
+      if (value === null || typeof value === 'undefined') return false
+      if (Array.isArray(value)) return value.every(item => typeof item === 'string')
+      return ['string', 'number', 'boolean'].includes(typeof value)
+    })
+  ) as Record<string, CloudinarySignParam>
+}
 
 export async function POST(request: Request) {
   const admin = await requireAdmin()
@@ -29,9 +25,7 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Invalid signing parameters' }, { status: 400 })
   }
 
-  const sanitizedParams = Object.fromEntries(
-    Object.entries(paramsToSign).filter(([key]) => ALLOWED_SIGN_PARAMS.has(key))
-  ) as Record<string, string | number>
+  const sanitizedParams = normalizeSignParams(paramsToSign as Record<string, unknown>)
 
   const timestamp = Number(sanitizedParams.timestamp)
   const nowSeconds = Math.floor(Date.now() / 1000)
@@ -44,7 +38,12 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Uploads must target a rawflex folder' }, { status: 400 })
   }
 
-  if (!process.env.CLOUDINARY_API_SECRET) {
+  const resourceType = String(sanitizedParams.resource_type || 'image')
+  if (resourceType !== 'image') {
+    return Response.json({ error: 'Only image uploads are allowed' }, { status: 400 })
+  }
+
+  if (!process.env.CLOUDINARY_API_SECRET || !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || !process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY) {
     return Response.json({ error: 'Cloudinary is not configured' }, { status: 500 })
   }
 

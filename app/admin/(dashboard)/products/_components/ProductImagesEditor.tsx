@@ -21,6 +21,21 @@ type Product = {
   color_name?: string | null
 }
 
+function getCloudinaryErrorMessage(error: unknown) {
+  if (!error || typeof error !== 'object') {
+    return 'Image upload failed. Please try again.'
+  }
+
+  const record = error as Record<string, any>
+  return (
+    record?.statusText ||
+    record?.message ||
+    record?.info?.message ||
+    record?.error?.message ||
+    'Image upload failed. Please try again.'
+  )
+}
+
 export function ProductImagesEditor({
   product,
   images,
@@ -39,7 +54,6 @@ export function ProductImagesEditor({
   }, [activeTab])
 
   const handleUploadSuccess = (result: any) => {
-    setUploading(false)
     if (result.info && result.info.secure_url) {
       startTransition(async () => {
         const currentActiveTab = activeTabRef.current
@@ -51,6 +65,11 @@ export function ProductImagesEditor({
         }
       })
     }
+  }
+
+  const handleUploadError = (error: unknown) => {
+    setUploading(false)
+    alert(getCloudinaryErrorMessage(error))
   }
 
   const handleDelete = (imageId: string) => {
@@ -119,12 +138,17 @@ export function ProductImagesEditor({
           signatureEndpoint="/api/cloudinary/sign"
           onSuccess={handleUploadSuccess}
           onOpen={() => setUploading(true)}
+          onError={handleUploadError}
+          onQueuesEnd={() => setUploading(false)}
+          onAbort={() => setUploading(false)}
+          onClose={() => setUploading(false)}
           options={{
             multiple: true,
             maxFiles: 5,
             folder: "rawflex/products",
             resourceType: "image",
-            clientAllowedFormats: ["jpg", "jpeg", "png", "webp"]
+            clientAllowedFormats: ["jpg", "jpeg", "png", "webp"],
+            maxFileSize: 10 * 1024 * 1024,
           }}
         >
           {({ open }) => {
