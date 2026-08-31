@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 
 interface NewDropProduct {
@@ -19,6 +18,11 @@ interface NewDropProduct {
 
 function formatINR(n: number) {
   return `₹${n.toLocaleString("en-IN")}`;
+}
+
+function handleProductImageError(event: React.SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.onerror = null;
+  event.currentTarget.src = "/image.png";
 }
 
 export default function NewDrops({
@@ -68,12 +72,12 @@ export default function NewDrops({
               return (
                 <div key={p.id} className="group overflow-hidden rounded-md border border-white/10 hover:border-[#D4A82C]/50 transition-colors">
                   <Link href={`/shop/${p.slug || p.id}`} className="relative block aspect-[3/4] overflow-hidden bg-[#EDEAE4]">
-                    <Image
+                    <img
                       src={p.image_url}
                       alt={p.name}
-                      fill
-                      sizes="(max-width: 1024px) 50vw, 300px"
-                      className="object-fill"
+                      loading="lazy"
+                      onError={handleProductImageError}
+                      className="absolute inset-0 h-full w-full object-fill"
                     />
                     <span className="absolute top-3 left-3 px-2 py-1 bg-[#D4A82C] text-[#0a0909] text-[10px] font-bold uppercase tracking-wider">
                       New

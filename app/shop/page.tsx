@@ -79,7 +79,7 @@ export default async function ShopPage({
       slug: p.slug,
       category_id: p.category_id,
       is_active: p.is_active,
-      image_url: p.product_images?.[0]?.image_url || p.featured_image_url || "/image.png",
+      image_url: p.featured_image_url || p.product_images?.[0]?.image_url || "/image.png",
       price: variant?.price || p.price || 0,
       oldPrice: variant?.original_price || p.oldPrice || undefined,
       badge: p.badge,

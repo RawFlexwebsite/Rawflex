@@ -165,7 +165,7 @@ export default async function Home() {
         name: p.name,
         price,
         sale_price: original && original > price ? original : null,
-        image_url: p.product_images?.[0]?.image_url || p.featured_image_url || "/image.png",
+        image_url: p.featured_image_url || p.product_images?.[0]?.image_url || "/image.png",
         badge: p.badge || "New",
         rating: p.rating || 4.9,
         review_count: p.review_count || 24,

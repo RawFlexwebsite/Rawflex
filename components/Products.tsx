@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import Image from "next/image";
 import Reveal from "./Reveal";
 import { useCart } from "@/context/CartContext";
 
@@ -27,6 +26,11 @@ interface Category {
 
 function formatINR(n: number) {
   return `₹${n.toLocaleString("en-IN")}`;
+}
+
+function handleProductImageError(event: React.SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.onerror = null;
+  event.currentTarget.src = "/image.png";
 }
 
 export default function Products({
@@ -68,12 +72,12 @@ export default function Products({
                 <Link href={`/shop/${p.id}`} className="block">
                   <div className="lift group bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-md hover:shadow-lg border border-[#E6DAC4] h-full flex flex-col">
                     <div className="relative aspect-[3/4] overflow-hidden bg-[#F0EAE0]">
-                      <Image
+                      <img
                         src={p.image_url}
                         alt={p.name}
-                        fill
-                        sizes="(max-width: 768px) 50vw, 280px"
-                        className="object-fill"
+                        loading="lazy"
+                        onError={handleProductImageError}
+                        className="absolute inset-0 h-full w-full object-fill"
                       />
                       {p.badge && (
                         <span className="absolute top-3 left-3 bg-[#D2A546] text-[#080909] text-[9px] md:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-sm">

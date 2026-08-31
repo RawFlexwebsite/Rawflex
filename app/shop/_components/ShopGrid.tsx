@@ -1,11 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ShoppingBag, ArrowRight } from 'lucide-react'
 
 type Product = {
   id: string
@@ -31,6 +29,11 @@ type ShopGridProps = {
   initialProducts: Product[]
   categories: Category[]
   selectedCategory: string
+}
+
+function handleProductImageError(event: React.SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.onerror = null
+  event.currentTarget.src = '/image.png'
 }
 
 export default function ShopGrid({ initialProducts, categories, selectedCategory }: ShopGridProps) {
@@ -176,12 +179,12 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
                 return (
                   <div key={p.id} className="lift group bg-panel rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-cream-line/80 flex flex-col">
                     <Link href={`/shop/${p.id}`} className="relative aspect-[3/4] overflow-hidden block bg-cream-deep/20">
-                      <Image
+                      <img
                         src={p.image_url}
                         alt={p.name}
-                        fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-fill"
+                        loading="lazy"
+                        onError={handleProductImageError}
+                        className="absolute inset-0 h-full w-full object-fill"
                       />
                       {p.badge && (
                         <span className="absolute top-3 left-3 bg-emerald text-cream text-[9px] md:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-sm">

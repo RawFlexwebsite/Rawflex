@@ -2,7 +2,6 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 
 interface BestSeller {
   id: string;
@@ -33,6 +32,11 @@ function Stars({ rating = 4.9 }: { rating?: number }) {
       ))}
     </div>
   );
+}
+
+function handleProductImageError(event: React.SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.onerror = null;
+  event.currentTarget.src = "/image.png";
 }
 
 export default function BestSellersCarousel({
@@ -105,12 +109,12 @@ export default function BestSellersCarousel({
                 className="snap-start shrink-0 w-[220px] md:w-[260px] group block bg-panel rounded-2xl overflow-hidden border border-cream-line hover:border-gold/50 transition-colors"
               >
                 <div className="relative aspect-[3/4] overflow-hidden bg-cream-deep">
-                  <Image
+                  <img
                     src={p.image_url}
                     alt={p.name}
-                    fill
-                    sizes="260px"
-                    className="object-fill"
+                    loading="lazy"
+                    onError={handleProductImageError}
+                    className="absolute inset-0 h-full w-full object-fill"
                   />
                   <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#080909]/70 backdrop-blur-sm border border-gold/40 text-gold text-[9px] font-bold uppercase tracking-wider">
                     Bestseller

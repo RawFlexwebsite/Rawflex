@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Reveal from "./Reveal";
 import { useCart } from "@/context/CartContext";
 
@@ -19,6 +18,11 @@ interface Product {
 
 function formatINR(n: number) {
   return `₹${n.toLocaleString("en-IN")}`;
+}
+
+function handleProductImageError(event: React.SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.onerror = null;
+  event.currentTarget.src = "/image.png";
 }
 
 export default function LuxeSalwarKameez({ products = [] }: { products?: Product[] }) {
@@ -50,12 +54,12 @@ export default function LuxeSalwarKameez({ products = [] }: { products?: Product
             <Reveal key={p.id} delay={(i % 5) as any} className="flex-none w-[calc(50%-0.5rem)] md:w-[calc(33.333%-1rem)] lg:w-[calc(20%-1.2rem)]">
               <div className="lift group bg-panel rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-cream-line/80 h-full flex flex-col">
                 <div className="relative aspect-[3/4] overflow-hidden bg-cream-deep/20">
-                  <Image
+                  <img
                     src={p.image_url}
                     alt={p.name}
-                    fill
-                    sizes="(max-width: 768px) 50vw, 280px"
-                    className="object-fill"
+                    loading="lazy"
+                    onError={handleProductImageError}
+                    className="absolute inset-0 h-full w-full object-fill"
                   />
                   {p.badge && (
                     <span className="absolute top-3 left-3 bg-emerald text-cream text-[9px] md:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-sm">
