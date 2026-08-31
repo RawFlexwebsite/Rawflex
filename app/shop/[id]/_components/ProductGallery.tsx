@@ -1,13 +1,22 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
-import { RotateCcw, X, ZoomIn, ZoomOut } from 'lucide-react'
+import { X } from 'lucide-react'
 
 type ProductGalleryProps = {
   images: string[]
   productName: string
   badge?: string
+}
+
+type Point = {
+  x: number
+  y: number
+}
+
+function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.onerror = null
+  event.currentTarget.src = '/image.png'
 }
 
 export default function ProductGallery({ images, productName, badge }: ProductGalleryProps) {
@@ -20,9 +29,19 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
   const [isZooming, setIsZooming] = useState(false)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const [lightboxZoom, setLightboxZoom] = useState(1)
+  const [lightboxPan, setLightboxPan] = useState<Point>({ x: 0, y: 0 })
   const pointerStartX = useRef<number | null>(null)
   const pointerDeltaX = useRef(0)
   const didDrag = useRef(false)
+  const lightboxPointers = useRef(new Map<number, { x: number; y: number }>())
+  const pinchStartDistance = useRef<number | null>(null)
+  const pinchStartZoom = useRef(1)
+  const pinchStartPan = useRef<Point>({ x: 0, y: 0 })
+  const pinchStartFocal = useRef<Point | null>(null)
+  const singlePointerStart = useRef<Point | null>(null)
+  const singlePointerStartPan = useRef<Point>({ x: 0, y: 0 })
+  const didLightboxMove = useRef(false)
+  const lastTapAt = useRef(0)
 
   // Ensure we have at least one image to display
   const displayImages = images.length > 0 ? images : ['/image.png']
@@ -34,6 +53,7 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
     setIsZooming(false)
     setIsLightboxOpen(false)
     setLightboxZoom(1)
+    setLightboxPan({ x: 0, y: 0 })
   }, [images])
 
   useEffect(() => {
@@ -58,6 +78,8 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
 
   useEffect(() => {
     setLightboxZoom(1)
+    setLightboxPan({ x: 0, y: 0 })
+    lightboxPointers.current.clear()
   }, [activeIndex])
 
   const showPrevious = () => {
@@ -156,15 +178,144 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
     if (window.innerWidth >= 768 || didDrag.current) return
 
     setLightboxZoom(1)
+    setLightboxPan({ x: 0, y: 0 })
     setIsLightboxOpen(true)
   }
 
-  const zoomOut = () => {
-    setLightboxZoom(value => Math.max(1, Number((value - 0.5).toFixed(1))))
+  const applyLightboxTransform = (zoom: number, pan: Point) => {
+    const nextZoom = Math.min(4, Math.max(1, Number(zoom.toFixed(2))))
+
+    if (nextZoom <= 1.01) {
+      setLightboxZoom(1)
+      setLightboxPan({ x: 0, y: 0 })
+      return
+    }
+
+    setLightboxZoom(nextZoom)
+    setLightboxPan(pan)
   }
 
-  const zoomIn = () => {
-    setLightboxZoom(value => Math.min(4, Number((value + 0.5).toFixed(1))))
+  const getLightboxPointerDistance = () => {
+    const points = Array.from(lightboxPointers.current.values())
+    if (points.length < 2) return null
+
+    const [first, second] = points
+    return Math.hypot(second.x - first.x, second.y - first.y)
+  }
+
+  const getLightboxPointerMidpoint = () => {
+    const points = Array.from(lightboxPointers.current.values())
+    if (points.length < 2) return null
+
+    const [first, second] = points
+    return {
+      x: (first.x + second.x) / 2,
+      y: (first.y + second.y) / 2,
+    }
+  }
+
+  const getFocalPoint = (point: Point, target: HTMLDivElement) => {
+    const rect = target.getBoundingClientRect()
+    return {
+      x: point.x - rect.left - rect.width / 2,
+      y: point.y - rect.top - rect.height / 2,
+    }
+  }
+
+  const handleLightboxPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    lightboxPointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    event.currentTarget.setPointerCapture(event.pointerId)
+    didLightboxMove.current = false
+
+    const distance = getLightboxPointerDistance()
+    if (distance) {
+      pinchStartDistance.current = distance
+      pinchStartZoom.current = lightboxZoom
+      pinchStartPan.current = lightboxPan
+      const midpoint = getLightboxPointerMidpoint()
+      pinchStartFocal.current = midpoint ? getFocalPoint(midpoint, event.currentTarget) : null
+      return
+    }
+
+    singlePointerStart.current = { x: event.clientX, y: event.clientY }
+    singlePointerStartPan.current = lightboxPan
+  }
+
+  const handleLightboxPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!lightboxPointers.current.has(event.pointerId)) return
+
+    event.preventDefault()
+    lightboxPointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+
+    if (lightboxPointers.current.size === 1 && lightboxZoom > 1 && singlePointerStart.current) {
+      const deltaX = event.clientX - singlePointerStart.current.x
+      const deltaY = event.clientY - singlePointerStart.current.y
+
+      if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+        didLightboxMove.current = true
+      }
+
+      setLightboxPan({
+        x: singlePointerStartPan.current.x + deltaX,
+        y: singlePointerStartPan.current.y + deltaY,
+      })
+      return
+    }
+
+    const distance = getLightboxPointerDistance()
+    const midpoint = getLightboxPointerMidpoint()
+    if (!distance || !midpoint || !pinchStartDistance.current || !pinchStartFocal.current) return
+
+    const nextZoom = pinchStartZoom.current * (distance / pinchStartDistance.current)
+    const zoomRatio = nextZoom / pinchStartZoom.current
+    const currentFocal = getFocalPoint(midpoint, event.currentTarget)
+
+    didLightboxMove.current = true
+    applyLightboxTransform(nextZoom, {
+      x: currentFocal.x - zoomRatio * (pinchStartFocal.current.x - pinchStartPan.current.x),
+      y: currentFocal.y - zoomRatio * (pinchStartFocal.current.y - pinchStartPan.current.y),
+    })
+  }
+
+  const handleLightboxPointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    lightboxPointers.current.delete(event.pointerId)
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+
+    if (lightboxPointers.current.size < 2) {
+      pinchStartDistance.current = null
+      pinchStartZoom.current = lightboxZoom
+      pinchStartPan.current = lightboxPan
+      pinchStartFocal.current = null
+    }
+
+    const remainingPoint = Array.from(lightboxPointers.current.values())[0]
+    singlePointerStart.current = remainingPoint || null
+    singlePointerStartPan.current = lightboxPan
+  }
+
+  const handleLightboxDoubleTap = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (didLightboxMove.current) return
+
+    const now = Date.now()
+    const elapsed = now - lastTapAt.current
+    lastTapAt.current = now
+
+    if (elapsed > 300) return
+
+    if (lightboxZoom > 1) {
+      applyLightboxTransform(1, { x: 0, y: 0 })
+      return
+    }
+
+    const nextZoom = 2.5
+    const focal = getFocalPoint({ x: event.clientX, y: event.clientY }, event.currentTarget)
+    applyLightboxTransform(nextZoom, {
+      x: focal.x * (1 - nextZoom),
+      y: focal.y * (1 - nextZoom),
+    })
   }
 
   return (
@@ -181,12 +332,11 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
                 activeIndex === index ? "border-emerald shadow-md" : "border-transparent opacity-50 hover:opacity-100"
               }`}
             >
-              <Image
+              <img
                 src={img}
                 alt={`Thumbnail ${index + 1}`}
-                width={80}
-                height={110}
-                sizes="90px"
+                loading={index === 0 ? 'eager' : 'lazy'}
+                onError={handleImageError}
                 className="h-full w-full object-fill"
               />
             </button>
@@ -213,14 +363,13 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
         >
           {displayImages.map((img, index) => (
             <div key={`${img}-${index}`} className="relative h-full min-w-full">
-              <Image
+              <img
                 src={img}
                 alt={`${productName} - Image ${index + 1}`}
-                fill
-                sizes="(max-width: 768px) 100vw, 640px"
                 style={activeIndex === index ? zoomStyle : undefined}
-                className={`object-fill transition-transform ease-out ${isZooming && activeIndex === index ? 'duration-100' : 'duration-300'}`}
-                priority={index === 0}
+                loading={index === 0 ? 'eager' : 'lazy'}
+                onError={handleImageError}
+                className={`absolute inset-0 h-full w-full object-fill transition-transform ease-out ${isZooming && activeIndex === index ? 'duration-100' : 'duration-300'}`}
                 draggable={false}
               />
             </div>
@@ -254,9 +403,6 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
           </span>
         )}
 
-        <span className="pointer-events-none absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur md:hidden" aria-hidden="true">
-          <ZoomIn className="h-5 w-5" />
-        </span>
       </div>
 
       {isLightboxOpen && (
@@ -281,56 +427,29 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
             </button>
           </div>
 
-          <div className="h-full w-full overflow-auto px-4 pb-24 pt-16">
+          <div
+            className="h-full w-full touch-none overflow-hidden px-4 pb-12 pt-16"
+            onPointerDown={handleLightboxPointerDown}
+            onPointerMove={handleLightboxPointerMove}
+            onPointerUp={handleLightboxPointerEnd}
+            onPointerCancel={handleLightboxPointerEnd}
+            onClick={handleLightboxDoubleTap}
+          >
             <div
-              className="relative flex min-h-full min-w-full items-center justify-center"
+              className="relative flex h-full w-full items-center justify-center"
               style={{
-                height: `${lightboxZoom * 100}%`,
-                width: `${lightboxZoom * 100}%`,
+                transform: `translate3d(${lightboxPan.x}px, ${lightboxPan.y}px, 0) scale(${lightboxZoom})`,
+                transformOrigin: 'center center',
               }}
             >
-              <Image
+              <img
                 src={displayImages[activeIndex]}
                 alt={`${productName} - enlarged image ${activeIndex + 1}`}
-                fill
-                sizes="100vw"
-                className="object-contain"
-                priority
+                onError={handleImageError}
+                className="absolute inset-0 h-full w-full object-contain"
                 draggable={false}
               />
             </div>
-          </div>
-
-          <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-black/80 p-2 backdrop-blur">
-            <button
-              type="button"
-              onClick={zoomOut}
-              aria-label="Zoom out"
-              title="Zoom out"
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-black disabled:opacity-40"
-              disabled={lightboxZoom <= 1}
-            >
-              <ZoomOut className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setLightboxZoom(1)}
-              aria-label="Reset zoom"
-              title="Reset zoom"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 text-white"
-            >
-              <RotateCcw className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={zoomIn}
-              aria-label="Zoom in"
-              title="Zoom in"
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-black disabled:opacity-40"
-              disabled={lightboxZoom >= 4}
-            >
-              <ZoomIn className="h-5 w-5" />
-            </button>
           </div>
         </div>
       )}
