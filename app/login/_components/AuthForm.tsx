@@ -104,15 +104,15 @@ function getFirebasePhoneErrorMessage(error: any, isPhoneEmulatorEnabled: boolea
   }
 
   if (error?.code === 'auth/unauthorized-domain') {
-    return 'This domain is not authorized in Firebase Authentication. Add it under Authentication settings.'
+    return 'This domain is not authorized in Firebase Authentication. Add it under Authentication → Settings → Authorized domains.'
   }
 
   if (error?.code === 'auth/too-many-requests') {
     return 'Firebase has temporarily blocked OTP requests from this device or phone number. Try again later or use a Firebase test phone number.'
   }
 
-  if (error?.code === 'auth/invalid-app-credential') {
-    return `Invalid Firebase app credentials (${error.code}). Verify in Firebase Console: 1) Web app exists with matching API key, project ID, app ID. 2) Phone auth enabled. 3) Domain authorized. 4) API key not restricted in Google Cloud Console. Current config: API Key=${process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.slice(0,10)}..., Project=${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}, App=${process.env.NEXT_PUBLIC_FIREBASE_APP_ID}`
+  if (error?.code === 'auth/invalid-app-credential' || error?.code === 'auth/captcha-check-failed') {
+    return 'reCAPTCHA verification failed. Make sure this domain is added to Firebase Authorized Domains and the reCAPTCHA Enterprise site key. Then refresh and try again.'
   }
 
   return error?.message || 'Failed to send phone OTP. Please try again.'
@@ -164,24 +164,20 @@ export default function AuthForm({
     try {
       recaptchaVerifier.current?.clear()
     } catch (_) {
-      // ignore errors during cleanup
+      // ignore errors during cleanup — the widget may already be gone
     }
     recaptchaVerifier.current = null
-    // Remove only the inner mount node so the outer host div stays in the DOM
     document.getElementById(`${recaptchaContainerId}-inner`)?.remove()
   }
 
-  const getRecaptchaVerifier = () => {
-    if (recaptchaVerifier.current) {
-      return recaptchaVerifier.current
-    }
-
+  // Builds a brand-new RecaptchaVerifier every time, waits for the widget
+  // to fully render, then returns it. Always call clearRecaptchaVerifier()
+  // before this to avoid stale widget references.
+  const buildRecaptchaVerifier = async (): Promise<RecaptchaVerifier> => {
     const host = document.getElementById(recaptchaContainerId)
-    if (!host) {
-      throw new Error('reCAPTCHA host element not found.')
-    }
+    if (!host) throw new Error('reCAPTCHA host element not found.')
 
-    // Remove any stale inner mount before creating a fresh one
+    // Mount a fresh inner div so the previous iframe is completely gone
     document.getElementById(`${recaptchaContainerId}-inner`)?.remove()
     const inner = document.createElement('div')
     inner.id = `${recaptchaContainerId}-inner`
@@ -189,11 +185,15 @@ export default function AuthForm({
 
     const auth = getFirebaseAuth()
     auth.languageCode = 'en'
-    recaptchaVerifier.current = new RecaptchaVerifier(auth, inner.id, {
-      size: 'invisible',
-    })
 
-    return recaptchaVerifier.current
+    const verifier = new RecaptchaVerifier(auth, inner.id, { size: 'invisible' })
+    recaptchaVerifier.current = verifier
+
+    // Explicitly render and wait — prevents the "null style" crash that
+    // occurs when signInWithPhoneNumber tries to use an un-rendered widget
+    await verifier.render()
+
+    return verifier
   }
 
   const requestEmailOtp = (parsed: Extract<ParsedIdentifier, { channel: 'EMAIL' }>) => {
@@ -220,13 +220,12 @@ export default function AuthForm({
     startTransition(async () => {
       try {
         const auth = getFirebaseAuth()
-        
-        // Verify Firebase app is properly initialized
-        if (!auth.app) {
-          throw new Error('Firebase app not initialized')
-        }
-        
-        const verifier = getRecaptchaVerifier()
+
+        // Always tear down the previous verifier before building a new one
+        // so there are no stale widget references
+        clearRecaptchaVerifier()
+        const verifier = await buildRecaptchaVerifier()
+
         const confirmation = await signInWithPhoneNumber(auth, parsed.phone, verifier)
 
         setConfirmationResult(confirmation)
