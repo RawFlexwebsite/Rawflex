@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState, useTransition } from 'react'
 import { sendEmailOtp, verifyEmailOtp, verifyPhoneOtp } from '@/actions/auth'
 import { createClient } from '@/lib/supabase/client'
 import { getFirebaseAuth, isFirebaseClientConfigured } from '@/lib/firebase/client'
+import { isFirebaseAuthEmulatorEnabled } from '@/lib/firebase/emulator'
 import {
   ConfirmationResult,
   RecaptchaVerifier,
@@ -89,6 +90,34 @@ function getMaskedIdentifier(parsed: ParsedIdentifier): string {
   return parsed.email
 }
 
+function getFirebasePhoneErrorMessage(error: any, isPhoneEmulatorEnabled: boolean): string {
+  if (error?.code === 'auth/network-request-failed' && isPhoneEmulatorEnabled) {
+    return 'Firebase Auth Emulator is enabled, but the emulator is not reachable. Turn it off for real SMS OTP.'
+  }
+
+  if (error?.code === 'auth/billing-not-enabled') {
+    return 'Firebase is blocking SMS because billing is not active for this Firebase project. Confirm the same project is upgraded to Blaze and has an active Cloud Billing account.'
+  }
+
+  if (error?.code === 'auth/operation-not-allowed') {
+    return 'Phone sign-in is not enabled for this Firebase project. Enable the Phone provider in Firebase Authentication.'
+  }
+
+  if (error?.code === 'auth/unauthorized-domain') {
+    return 'This domain is not authorized in Firebase Authentication. Add it under Authentication settings.'
+  }
+
+  if (error?.code === 'auth/too-many-requests') {
+    return 'Firebase has temporarily blocked OTP requests from this device or phone number. Try again later or use a Firebase test phone number.'
+  }
+
+  if (error?.code === 'auth/invalid-app-credential') {
+    return `Invalid Firebase app credentials (${error.code}). Verify in Firebase Console: 1) Web app exists with matching API key, project ID, app ID. 2) Phone auth enabled. 3) Domain authorized. 4) API key not restricted in Google Cloud Console. Current config: API Key=${process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.slice(0,10)}..., Project=${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}, App=${process.env.NEXT_PUBLIC_FIREBASE_APP_ID}`
+  }
+
+  return error?.message || 'Failed to send phone OTP. Please try again.'
+}
+
 export default function AuthForm({
   redirectTo,
   initialError,
@@ -111,7 +140,7 @@ export default function AuthForm({
 
   const parsedIdentifier = parseIdentifier(identifier)
   const selectedChannel = parsedIdentifier?.channel || null
-  const isPhoneEmulatorEnabled = process.env.NEXT_PUBLIC_USE_FIREBASE_AUTH_EMULATOR === 'true'
+  const isPhoneEmulatorEnabled = isFirebaseAuthEmulatorEnabled()
 
   useEffect(() => {
     if (resendTimer <= 0) {
@@ -127,19 +156,40 @@ export default function AuthForm({
 
   useEffect(() => {
     return () => {
-      recaptchaVerifier.current?.clear()
-      recaptchaVerifier.current = null
+      clearRecaptchaVerifier()
     }
   }, [])
+
+  const clearRecaptchaVerifier = () => {
+    try {
+      recaptchaVerifier.current?.clear()
+    } catch (_) {
+      // ignore errors during cleanup
+    }
+    recaptchaVerifier.current = null
+    // Remove only the inner mount node so the outer host div stays in the DOM
+    document.getElementById(`${recaptchaContainerId}-inner`)?.remove()
+  }
 
   const getRecaptchaVerifier = () => {
     if (recaptchaVerifier.current) {
       return recaptchaVerifier.current
     }
 
+    const host = document.getElementById(recaptchaContainerId)
+    if (!host) {
+      throw new Error('reCAPTCHA host element not found.')
+    }
+
+    // Remove any stale inner mount before creating a fresh one
+    document.getElementById(`${recaptchaContainerId}-inner`)?.remove()
+    const inner = document.createElement('div')
+    inner.id = `${recaptchaContainerId}-inner`
+    host.appendChild(inner)
+
     const auth = getFirebaseAuth()
     auth.languageCode = 'en'
-    recaptchaVerifier.current = new RecaptchaVerifier(auth, recaptchaContainerId, {
+    recaptchaVerifier.current = new RecaptchaVerifier(auth, inner.id, {
       size: 'invisible',
     })
 
@@ -170,6 +220,12 @@ export default function AuthForm({
     startTransition(async () => {
       try {
         const auth = getFirebaseAuth()
+        
+        // Verify Firebase app is properly initialized
+        if (!auth.app) {
+          throw new Error('Firebase app not initialized')
+        }
+        
         const verifier = getRecaptchaVerifier()
         const confirmation = await signInWithPhoneNumber(auth, parsed.phone, verifier)
 
@@ -179,10 +235,14 @@ export default function AuthForm({
         setResendTimer(60)
         setSuccess(`A 6-digit verification code has been sent to ${getMaskedIdentifier(parsed)}`)
       } catch (phoneError: any) {
-        console.error('Firebase phone OTP send failed:', phoneError)
-        recaptchaVerifier.current?.clear()
-        recaptchaVerifier.current = null
-        setError(phoneError?.message || 'Failed to send phone OTP. Please try again.')
+        console.error('Firebase phone OTP send failed:', {
+          code: phoneError?.code,
+          message: phoneError?.message,
+          name: phoneError?.name,
+          stack: phoneError?.stack,
+        })
+        clearRecaptchaVerifier()
+        setError(getFirebasePhoneErrorMessage(phoneError, isPhoneEmulatorEnabled))
       }
     })
   }

@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { createSignedRawflexSession, rawflexSessionCookieNames, type RawflexSession } from '@/lib/auth/session'
 import { sendTransactionalEmail } from '@/lib/email'
+import { isFirebaseAuthEmulatorEnabled } from '@/lib/firebase/emulator'
 
 export type AuthResult = {
   error?: string
@@ -143,11 +144,7 @@ async function findSupabaseAuthUserByPhone(adminAuth: ReturnType<typeof createAd
 }
 
 async function getVerifiedFirebasePhoneNumber(firebaseIdToken: string) {
-  const useEmulator =
-    process.env.NEXT_PUBLIC_USE_FIREBASE_AUTH_EMULATOR === 'true' ||
-    Boolean(process.env.FIREBASE_AUTH_EMULATOR_HOST)
-
-  if (useEmulator && process.env.NODE_ENV !== 'production') {
+  if (isFirebaseAuthEmulatorEnabled()) {
     const { getFirebaseAdminAuth } = await import('@/lib/firebase/admin')
     const decodedToken = await getFirebaseAdminAuth().verifyIdToken(firebaseIdToken)
     return decodedToken.phone_number || ''

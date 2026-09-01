@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 
@@ -67,15 +68,18 @@ export default function NewDrops({
 
           {/* Product cards */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-            {items.map((p) => {
+            {items.map((p, index) => {
               const price = p.sale_price && p.sale_price < p.price ? p.sale_price : p.price;
               return (
                 <div key={p.id} className="group overflow-hidden rounded-md border border-white/10 hover:border-[#D4A82C]/50 transition-colors">
                   <Link href={`/shop/${p.slug || p.id}`} className="relative block aspect-[3/4] overflow-hidden bg-[#EDEAE4]">
-                    <img
+                    <Image
                       src={p.image_url}
                       alt={p.name}
-                      loading="lazy"
+                      fill
+                      sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+                      priority={index < 2}
+                      loading={index < 2 ? undefined : "lazy"}
                       onError={handleProductImageError}
                       className="absolute inset-0 h-full w-full object-fill"
                     />

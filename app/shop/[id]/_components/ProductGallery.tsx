@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { X } from 'lucide-react'
 
 type ProductGalleryProps = {
@@ -332,9 +333,11 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
                 activeIndex === index ? "border-emerald shadow-md" : "border-transparent opacity-50 hover:opacity-100"
               }`}
             >
-              <img
+              <Image
                 src={img}
                 alt={`Thumbnail ${index + 1}`}
+                fill
+                sizes="90px"
                 loading={index === 0 ? 'eager' : 'lazy'}
                 onError={handleImageError}
                 className="h-full w-full object-fill"
@@ -363,11 +366,14 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
         >
           {displayImages.map((img, index) => (
             <div key={`${img}-${index}`} className="relative h-full min-w-full">
-              <img
+              <Image
                 src={img}
                 alt={`${productName} - Image ${index + 1}`}
+                fill
+                sizes="(min-width: 768px) 640px, 100vw"
+                priority={index === 0}
                 style={activeIndex === index ? zoomStyle : undefined}
-                loading={index === 0 ? 'eager' : 'lazy'}
+                loading={index === 0 ? undefined : 'lazy'}
                 onError={handleImageError}
                 className={`absolute inset-0 h-full w-full object-fill transition-transform ease-out ${isZooming && activeIndex === index ? 'duration-100' : 'duration-300'}`}
                 draggable={false}
@@ -442,9 +448,11 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
                 transformOrigin: 'center center',
               }}
             >
-              <img
+              <Image
                 src={displayImages[activeIndex]}
                 alt={`${productName} - enlarged image ${activeIndex + 1}`}
+                fill
+                sizes="100vw"
                 onError={handleImageError}
                 className="absolute inset-0 h-full w-full object-contain"
                 draggable={false}

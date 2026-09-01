@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -174,15 +175,18 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-              {filteredProducts.map((p) => {
+              {filteredProducts.map((p, index) => {
                 const catName = categories.find(c => c.id === p.category_id)?.name || p.category_id
                 return (
                   <div key={p.id} className="lift group bg-panel rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-cream-line/80 flex flex-col">
                     <Link href={`/shop/${p.id}`} className="relative aspect-[3/4] overflow-hidden block bg-cream-deep/20">
-                      <img
+                      <Image
                         src={p.image_url}
                         alt={p.name}
-                        loading="lazy"
+                        fill
+                        sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
+                        priority={index < 4}
+                        loading={index < 4 ? undefined : 'lazy'}
                         onError={handleProductImageError}
                         className="absolute inset-0 h-full w-full object-fill"
                       />
