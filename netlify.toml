@@ -1,0 +1,52 @@
+# ──────────────────────────────────────────────
+#  Rawflex — Netlify Configuration
+#  Next.js 15 (App Router) on Netlify
+# ──────────────────────────────────────────────
+
+[build]
+  command   = "npm run build"
+  publish   = ".next"
+
+# Next.js plugin — handles SSR, API routes, Image optimisation
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# ──────────────────────────────────────────────
+#  Environment — Node version
+# ──────────────────────────────────────────────
+[build.environment]
+  NODE_VERSION = "20"
+
+# ──────────────────────────────────────────────
+#  Headers — security + cache
+# ──────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options        = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy        = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ──────────────────────────────────────────────
+#  Redirects
+#  Next.js plugin handles most routing, but we
+#  add explicit rules for safety.
+# ──────────────────────────────────────────────
+
+# API routes → handled by Next.js plugin (no redirect needed)
+# Keep a catch-all SPA fallback so deep links never 404
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+  force  = false        # only fires when no file/plugin route matches
