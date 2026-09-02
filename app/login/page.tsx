@@ -52,7 +52,7 @@ export default async function LoginPage({
           <div className="relative mx-auto grid min-h-[calc(100vh-100px)] w-full max-w-wrap grid-cols-1 items-stretch px-4 py-8 md:min-h-[calc(100vh-110px)] md:px-7 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:py-12 xl:gap-16">
             <section className="relative hidden min-h-[620px] overflow-hidden rounded-[28px] border border-gold/15 bg-panel shadow-[0_30px_100px_-45px_rgba(0,0,0,1)] lg:block">
               <Image
-                src="/OVERSIZED_person.png"
+                src="/OVERSIZED_person.webp"
                 alt="RAWFLEX oversized black tee editorial"
                 fill
                 priority

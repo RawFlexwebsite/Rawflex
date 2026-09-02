@@ -12,9 +12,10 @@ export default function PakistaniEditBanner() {
           {/* Left Column: Premium Model Image with Rounded Corners */}
           <div className="relative w-full h-[400px] md:h-[500px] lg:h-[560px] rounded-[32px] overflow-hidden shadow-soft border border-gold/20 order-2 lg:order-1 bg-cream-deep">
             <Image
-              src="/OVERSIZED..png"
+              src="/OVERSIZED..webp"
               alt="The Acid Wash Edit - Limited Drop"
               fill
+              priority
               sizes="(max-width: 1024px) 100vw, 550px"
               className="object-cover object-center transition-all duration-700 hover:scale-[1.03]"
             />

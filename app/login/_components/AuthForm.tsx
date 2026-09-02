@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState, useTransition } from 'react'
-import { sendEmailOtp, verifyEmailOtp, verifyPhoneOtp } from '@/actions/auth'
+import { sendEmailOtp, verifyEmailOtp, verifyPhoneOtp, checkPhoneExists } from '@/actions/auth'
 import { createClient } from '@/lib/supabase/client'
 import { getFirebaseAuth, isFirebaseClientConfigured } from '@/lib/firebase/client'
 import { isFirebaseAuthEmulatorEnabled } from '@/lib/firebase/emulator'
@@ -170,14 +170,26 @@ export default function AuthForm({
     document.getElementById(`${recaptchaContainerId}-inner`)?.remove()
   }
 
-  // Builds a brand-new RecaptchaVerifier every time, waits for the widget
-  // to fully render, then returns it. Always call clearRecaptchaVerifier()
-  // before this to avoid stale widget references.
+  // Builds a RecaptchaVerifier, reusing existing one if valid to avoid
+  // slow re-rendering on every OTP request
   const buildRecaptchaVerifier = async (): Promise<RecaptchaVerifier> => {
     const host = document.getElementById(recaptchaContainerId)
     if (!host) throw new Error('reCAPTCHA host element not found.')
 
-    // Mount a fresh inner div so the previous iframe is completely gone
+    // Reuse existing verifier if it has a rendered widget
+    if (recaptchaVerifier.current) {
+      try {
+        // Check if the widget is already rendered by trying to get its widget ID
+        const widgetId = (recaptchaVerifier.current as any).widgetId
+        if (widgetId !== undefined && widgetId !== null) {
+          return recaptchaVerifier.current
+        }
+      } catch (_) {
+        // Verifier exists but not properly rendered, will rebuild
+      }
+    }
+
+    // Clear any stale inner div
     document.getElementById(`${recaptchaContainerId}-inner`)?.remove()
     const inner = document.createElement('div')
     inner.id = `${recaptchaContainerId}-inner`
@@ -221,9 +233,8 @@ export default function AuthForm({
       try {
         const auth = getFirebaseAuth()
 
-        // Always tear down the previous verifier before building a new one
-        // so there are no stale widget references
-        clearRecaptchaVerifier()
+        // Reuse existing verifier if valid, otherwise build new one
+        // Only clear on error to avoid slow re-rendering
         const verifier = await buildRecaptchaVerifier()
 
         const confirmation = await signInWithPhoneNumber(auth, parsed.phone, verifier)
@@ -240,6 +251,7 @@ export default function AuthForm({
           name: phoneError?.name,
           stack: phoneError?.stack,
         })
+        // Clear verifier only on error to force fresh one next time
         clearRecaptchaVerifier()
         setError(getFirebasePhoneErrorMessage(phoneError, isPhoneEmulatorEnabled))
       }
@@ -265,6 +277,23 @@ export default function AuthForm({
 
     if (parsed.channel === 'EMAIL') {
       requestEmailOtp(parsed)
+      return
+    }
+
+    // For phone OTP in LOGIN mode, check if user exists first
+    if (mode === 'LOGIN' && parsed.channel === 'PHONE') {
+      startTransition(async () => {
+        const res = await checkPhoneExists(parsed.phone)
+        if (res?.error) {
+          setError(res.error)
+          return
+        }
+        if (!res.exists) {
+          setError(res.message || 'This phone number is not registered. Please register first.')
+          return
+        }
+        requestPhoneOtp(parsed)
+      })
       return
     }
 

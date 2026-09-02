@@ -48,7 +48,7 @@ const DEFAULT_HERO_LEFT_TEXT = {
 };
 
 const DEFAULT_OVERSIZED_SECTION = {
-  background_image_url: "/OVERSIZED..png",
+  background_image_url: "/OVERSIZED..webp",
   headline_top: "OVERSIZED.",
   headline_accent: "ALWAYS.",
   subtitle: "Relaxed fit. Maximum impact.",

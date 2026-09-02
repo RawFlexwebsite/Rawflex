@@ -42,7 +42,7 @@ const FALLBACK_SLIDES: HeroSlide[] = [
     subtitle: "Oversized silhouettes. Premium fabrics.",
     button_text: "SHOP NOW",
     button_link: "/shop",
-    image_url: "/hero-img.png",
+    image_url: "/hero-img.webp",
   },
   {
     title: "LIMITED DROP '24",
@@ -149,7 +149,7 @@ export default function Hero({
         style={{ right: "27%", top: "120px", width: "40%" }}
       >
         <Image
-          src="/hero-parts.png"
+          src="/hero-parts.webp"
           alt="Model wearing RAWFLEX oversized tee"
           fill
           priority
@@ -226,19 +226,19 @@ export default function Hero({
             </div>
           </div>
 
-          {/* ── Mobile model image ── */}
-          <div className="lg:hidden w-screen -mx-5 mt-4 pointer-events-none relative overflow-hidden">
-            <Image
-              src="/hero-parts.png"
-              alt="Model wearing RAWFLEX oversized tee"
-              width={800}
-              height={1060}
-              priority
-              sizes="100vw"
-              style={{ width: "100%", height: "auto", display: "block", transform: "translateX(12%)" }}
-            />
-            <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#0a0909] to-transparent" />
-          </div>
+{/* ── Mobile model image ── */}
+           <div className="lg:hidden w-screen -mx-5 mt-4 pointer-events-none relative overflow-hidden">
+             <Image
+               src="/hero-parts.webp"
+               alt="Model wearing RAWFLEX oversized tee"
+               width={800}
+               height={1060}
+               priority
+               sizes="100vw"
+               style={{ width: "100%", height: "auto", display: "block", transform: "translateX(12%)" }}
+             />
+             <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#0a0909] to-transparent" />
+           </div>
 
           {/* ── RIGHT: Two slide cards + nav ── */}
           <div className="hidden lg:flex flex-col gap-5 w-[290px] xl:w-[320px]">

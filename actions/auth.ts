@@ -14,6 +14,12 @@ export type AuthResult = {
   success?: boolean
 }
 
+export type PhoneCheckResult = {
+  error?: string
+  exists?: boolean
+  message?: string
+}
+
 type SupabaseAuthUserWithPhone = {
   id: string
   email?: string | null
@@ -368,6 +374,43 @@ export async function sendEmailOtp(
     console.error('Email Send Error:', e)
     return { error: 'Failed to send verification email: ' + e.message }
   }
+}
+
+export async function checkPhoneExists(phone: string): Promise<PhoneCheckResult> {
+  if (!phone) {
+    return { error: 'Phone number is required' }
+  }
+
+  const adminSupabase = createAdminClient()
+  const phoneValues = getPhoneSearchValues(phone)
+
+  const { data: profiles, error: profileError } = await adminSupabase
+    .from('profiles')
+    .select('id')
+    .in('phone', phoneValues)
+    .limit(1)
+
+  if (profileError) {
+    console.error('Phone profile lookup failed:', getErrorDetails(profileError))
+    return { error: 'Unable to check this phone number. Please try again.' }
+  }
+
+  if (profiles && profiles.length > 0) {
+    return { exists: true }
+  }
+
+  try {
+    const adminAuth = adminSupabase.auth.admin
+    const authUser = await findSupabaseAuthUserByPhone(adminAuth, phoneValues)
+    if (authUser) {
+      return { exists: true }
+    }
+  } catch (error) {
+    console.error('Phone auth user lookup failed:', getErrorDetails(error))
+    return { error: 'Unable to check this phone account. Please try again.' }
+  }
+
+  return { exists: false, message: 'This phone number is not registered. Please register first.' }
 }
 
 export async function verifyEmailOtp(

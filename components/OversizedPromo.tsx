@@ -12,7 +12,7 @@ type OversizedSectionSettings = {
 };
 
 const DEFAULT_SETTINGS: OversizedSectionSettings = {
-  background_image_url: "/OVERSIZED..png",
+  background_image_url: "/OVERSIZED..webp",
   headline_top: "Oversized.",
   headline_accent: "Always.",
   subtitle: "Relaxed fit. Maximum impact.",
@@ -32,17 +32,17 @@ export default function OversizedPromo({
         {/* ── MOBILE layout ── */}
         <div className="block sm:hidden border border-[#D4A82C]/40 bg-[#0b0b0a] overflow-hidden shadow-[0_0_0_1px_rgba(212,168,44,0.08),0_22px_70px_-36px_rgba(212,168,44,0.45)]">
 
-          {/* Person image only — natural height, no blank space */}
-          <div className="relative w-full pt-5 px-2">
-            <Image
-              src="/OVERSIZED_person.png"
-              alt="Model wearing an oversized black RAWFLEX tee"
-              width={800}
-              height={900}
-              sizes="100vw"
-              style={{ width: "100%", height: "auto", display: "block" }}
-              priority
-            />
+{/* Person image only — natural height, no blank space */}
+           <div className="relative w-full pt-5 px-2">
+             <Image
+               src="/OVERSIZED_person.webp"
+               alt="Model wearing an oversized black RAWFLEX tee"
+               width={800}
+               height={900}
+               sizes="100vw"
+               style={{ width: "100%", height: "auto", display: "block" }}
+               priority
+             />
             {/* fade bottom into text */}
             <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0b0b0a] to-transparent" />
           </div>
@@ -80,7 +80,7 @@ export default function OversizedPromo({
           <div className="absolute inset-0 z-[1] bg-gradient-to-t from-[#0a0909]/35 via-transparent to-[#0a0909]/10" />
           <div className="absolute inset-x-0 bottom-0 z-[2] h-[45%] sm:left-3 sm:h-[76%] md:left-8 md:h-[90%] lg:left-8 lg:h-[100%] lg:w-[46%]">
             <Image
-              src="/OVERSIZED_person.png"
+              src="/OVERSIZED_person.webp"
               alt="Model wearing an oversized black RAWFLEX tee"
               fill
               sizes="(max-width: 1024px) 60vw, 720px"
