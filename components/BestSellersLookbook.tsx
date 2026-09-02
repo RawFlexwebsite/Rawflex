@@ -113,14 +113,14 @@ function LookbookCard({
   const shopHref = "/shop";
 
   return (
-    <div className="group relative min-w-0 overflow-hidden border border-white/10 bg-[#11110f] transition-colors hover:border-[#D4A82C]/50">
-      <div className="relative aspect-[4/5] w-full overflow-hidden">
+    <div className="group relative min-w-0">
+      <div className="relative aspect-[2/3] w-full overflow-hidden">
         <Image
           src={item.image_url}
           alt={`RAWFLEX lookbook style ${index + 1}`}
           fill
-          sizes="(max-width: 639px) calc(100vw - 40px), (max-width: 1023px) 50vw, 25vw"
-          className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+          sizes="(max-width: 639px) calc(100vw - 40px), (max-width: 1023px) 50vw, 20vw"
+          className="object-cover object-center"
         />
       </div>
       <Link
@@ -211,8 +211,8 @@ export default function BestSellersLookbook({
           <div className="mt-10 md:mt-12 lg:mt-14">
             <SectionTitle title="Lookbook" href="/shop" label="View All Looks" />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {lookbookItems.slice(0, 4).map((item, index) => (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              {lookbookItems.slice(0, 5).map((item, index) => (
                 <LookbookCard key={item.id} item={item} index={index} />
               ))}
             </div>
