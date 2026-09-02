@@ -56,6 +56,7 @@ export default async function LoginPage({
                 alt="RAWFLEX oversized black tee editorial"
                 fill
                 priority
+                unoptimized
                 sizes="(min-width: 1024px) 52vw, 100vw"
                 className="object-cover object-[12%_50%]"
               />

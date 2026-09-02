@@ -140,6 +140,7 @@ export default function Header() {
               alt="RAWFLEX Logo"
               width={72}
               height={72}
+              unoptimized
               className="object-contain w-[64px] h-[64px]"
               priority
             />
@@ -175,6 +176,7 @@ export default function Header() {
               alt="RAWFLEX Logo"
               width={96}
               height={96}
+              unoptimized
               className="object-contain md:w-[80px] md:h-[80px] lg:w-[96px] lg:h-[96px]"
               priority
             />

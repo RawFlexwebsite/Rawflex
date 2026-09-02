@@ -77,6 +77,10 @@ function slideLines(slide: HeroSlide) {
   };
 }
 
+function isLocalPublicImage(src?: string | null) {
+  return !!src && src.startsWith("/");
+}
+
 export default function Hero({
   slides = [],
   backgroundImages = [],
@@ -153,6 +157,7 @@ export default function Hero({
           alt="Model wearing RAWFLEX oversized tee"
           fill
           priority
+          unoptimized
           sizes="40vw"
           className="object-contain object-bottom"
         />
@@ -234,6 +239,7 @@ export default function Hero({
                width={800}
                height={1060}
                priority
+               unoptimized
                sizes="100vw"
                style={{ width: "100%", height: "auto", display: "block", transform: "translateX(12%)" }}
              />
@@ -252,6 +258,7 @@ export default function Hero({
                   src={cardA.image_url || "/hero-img.png"}
                   alt={a.line1}
                   fill
+                  unoptimized={isLocalPublicImage(cardA.image_url || "/hero-img.png")}
                   sizes="112px"
                   className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                 />
@@ -282,6 +289,7 @@ export default function Hero({
                   src={cardB.image_url || "/hero-img.png"}
                   alt={b.line1}
                   fill
+                  unoptimized={isLocalPublicImage(cardB.image_url || "/hero-img.png")}
                   sizes="112px"
                   className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                 />
@@ -347,6 +355,7 @@ export default function Hero({
                   src={slide.image_url || "/hero-img.png"}
                   alt={s.line1}
                   fill
+                  unoptimized={isLocalPublicImage(slide.image_url || "/hero-img.png")}
                   sizes="50vw"
                   className="object-cover object-center"
                 />
