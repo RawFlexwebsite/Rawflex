@@ -113,16 +113,16 @@ function LookbookCard({
   const shopHref = "/shop";
 
   return (
-    <div className="group relative inline-block">
-      <Image
-        src={item.image_url}
-        alt={`RAWFLEX lookbook style ${index + 1}`}
-        width={400}
-        height={500}
-        sizes="(max-width: 640px) 78vw, (max-width: 1024px) 48vw, (max-width: 1280px) 30vw, 280px"
-        className="object-contain object-center transition-transform duration-700 group-hover:scale-105"
-        style={{ objectFit: 'contain' }}
-      />
+    <div className="group relative min-w-0 overflow-hidden border border-white/10 bg-[#11110f] transition-colors hover:border-[#D4A82C]/50">
+      <div className="relative aspect-[4/5] w-full overflow-hidden">
+        <Image
+          src={item.image_url}
+          alt={`RAWFLEX lookbook style ${index + 1}`}
+          fill
+          sizes="(max-width: 639px) calc(100vw - 40px), (max-width: 1023px) 50vw, 25vw"
+          className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+        />
+      </div>
       <Link
         href={shopHref}
         className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full border border-[#D4A82C]/60 bg-[#0a0909]/80 text-[#D4A82C] hover:bg-[#D4A82C] hover:text-[#0a0909] transition-colors"
@@ -211,7 +211,7 @@ export default function BestSellersLookbook({
           <div className="mt-10 md:mt-12 lg:mt-14">
             <SectionTitle title="Lookbook" href="/shop" label="View All Looks" />
 
-            <div className="flex flex-wrap gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {lookbookItems.slice(0, 4).map((item, index) => (
                 <LookbookCard key={item.id} item={item} index={index} />
               ))}
