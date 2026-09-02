@@ -34,6 +34,15 @@ type SmsOtpRequestOptions = CredentialRequestOptions & {
   signal: AbortSignal
 }
 
+type RecaptchaWindow = Window & {
+  grecaptcha?: {
+    reset?: (widgetId?: number) => void
+    enterprise?: {
+      reset?: (widgetId?: number) => void
+    }
+  }
+}
+
 type ParsedIdentifier =
   | { channel: 'EMAIL'; email: string }
   | { channel: 'PHONE'; phone: string; localPhone: string }
@@ -122,7 +131,7 @@ function getFirebasePhoneErrorMessage(error: any, isPhoneEmulatorEnabled: boolea
   }
 
   if (error?.code === 'auth/invalid-app-credential' || error?.code === 'auth/captcha-check-failed') {
-    return 'reCAPTCHA verification failed. Make sure this domain is added to Firebase Authorized Domains and the reCAPTCHA Enterprise site key. Then refresh and try again.'
+    return 'reCAPTCHA could not validate this app. Confirm rawflex.in is in Firebase Authentication Authorized Domains and the deployed site uses the current Firebase web app configuration, then refresh and try again.'
   }
 
   return error?.message || 'Failed to send phone OTP. Please try again.'
@@ -148,6 +157,11 @@ export default function AuthForm({
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
   const recaptchaVerifier = useRef<RecaptchaVerifier | null>(null)
   const recaptchaBuildPromise = useRef<Promise<RecaptchaVerifier> | null>(null)
+  const recaptchaWidgetId = useRef<number | null>(null)
+  const otpRequestInFlight = useRef(false)
+  const otpForm = useRef<HTMLFormElement | null>(null)
+  const otpCodeToAutoSubmit = useRef<string | null>(null)
+  const webOtpAbortController = useRef<AbortController | null>(null)
 
   const parsedIdentifier = parseIdentifier(identifier)
   const selectedChannel = parsedIdentifier?.channel || null
@@ -177,11 +191,9 @@ export default function AuthForm({
     }
     recaptchaVerifier.current = null
     recaptchaBuildPromise.current = null
-    document.getElementById(`${recaptchaContainerId}-inner`)?.remove()
+    recaptchaWidgetId.current = null
   }, [])
 
-  // Builds a RecaptchaVerifier, reusing existing one if valid to avoid
-  // slow re-rendering on every OTP request
   const buildRecaptchaVerifier = useCallback(async (): Promise<RecaptchaVerifier> => {
     const host = document.getElementById(recaptchaContainerId)
     if (!host) throw new Error('reCAPTCHA host element not found.')
@@ -196,17 +208,12 @@ export default function AuthForm({
 
     const buildPromise = (async () => {
       try {
-        document.getElementById(`${recaptchaContainerId}-inner`)?.remove()
-        const inner = document.createElement('div')
-        inner.id = `${recaptchaContainerId}-inner`
-        host.appendChild(inner)
-
         const auth = getFirebaseAuth()
         auth.languageCode = 'en'
 
-        const verifier = new RecaptchaVerifier(auth, inner.id, { size: 'invisible' })
+        const verifier = new RecaptchaVerifier(auth, host, { size: 'invisible' })
         recaptchaVerifier.current = verifier
-        await verifier.render()
+        recaptchaWidgetId.current = await verifier.render()
         return verifier
       } catch (buildError) {
         clearRecaptchaVerifier()
@@ -220,11 +227,73 @@ export default function AuthForm({
     return buildPromise
   }, [clearRecaptchaVerifier])
 
+  const resetRecaptchaVerifier = useCallback(async () => {
+    const verifier = recaptchaVerifier.current
+    if (!verifier) {
+      return
+    }
+
+    const widgetId = recaptchaWidgetId.current ?? await verifier.render()
+    recaptchaWidgetId.current = widgetId
+    const recaptchaApi = (window as RecaptchaWindow).grecaptcha
+
+    if (recaptchaApi?.enterprise?.reset) {
+      recaptchaApi.enterprise.reset(widgetId)
+      return
+    }
+
+    recaptchaApi?.reset?.(widgetId)
+  }, [])
+
+  const stopWebOtpListener = useCallback(() => {
+    webOtpAbortController.current?.abort()
+    webOtpAbortController.current = null
+  }, [])
+
+  const startWebOtpListener = useCallback(() => {
+    if (!('OTPCredential' in window) || !navigator.credentials) {
+      return
+    }
+
+    stopWebOtpListener()
+    const abortController = new AbortController()
+    webOtpAbortController.current = abortController
+
+    void navigator.credentials
+      .get({
+        otp: { transport: ['sms'] },
+        signal: abortController.signal,
+      } as SmsOtpRequestOptions)
+      .then((credential) => {
+        const code = (credential as SmsOtpCredential | null)?.code
+          ?.replace(/\D/g, '')
+          .slice(0, 6)
+
+        if (code?.length === 6) {
+          otpCodeToAutoSubmit.current = code
+          setOtpCode(code)
+        }
+      })
+      .catch((credentialError: unknown) => {
+        if (credentialError instanceof DOMException && credentialError.name === 'AbortError') {
+          return
+        }
+
+        // Browsers without a compatible SMS format can still use manual entry.
+      })
+      .finally(() => {
+        if (webOtpAbortController.current === abortController) {
+          webOtpAbortController.current = null
+        }
+      })
+  }, [stopWebOtpListener])
+
   useEffect(() => {
     return () => {
+      stopWebOtpListener()
       clearRecaptchaVerifier()
     }
-  }, [clearRecaptchaVerifier])
+  }, [clearRecaptchaVerifier, stopWebOtpListener])
 
   useEffect(() => {
     if (!isFirebaseClientConfigured()) {
@@ -249,39 +318,16 @@ export default function AuthForm({
   useEffect(() => {
     if (
       !otpSent ||
-      activeIdentifier?.channel !== 'PHONE' ||
-      !('OTPCredential' in window) ||
-      !navigator.credentials
+      isBusy ||
+      otpCode.length !== 6 ||
+      otpCodeToAutoSubmit.current !== otpCode
     ) {
       return
     }
 
-    const abortController = new AbortController()
-
-    void navigator.credentials
-      .get({
-        otp: { transport: ['sms'] },
-        signal: abortController.signal,
-      } as SmsOtpRequestOptions)
-      .then((credential) => {
-        const code = (credential as SmsOtpCredential | null)?.code
-          ?.replace(/\D/g, '')
-          .slice(0, 6)
-
-        if (code?.length === 6) {
-          setOtpCode(code)
-        }
-      })
-      .catch((credentialError: unknown) => {
-        if (credentialError instanceof DOMException && credentialError.name === 'AbortError') {
-          return
-        }
-
-        // Browsers without a compatible SMS format can still use manual entry.
-      })
-
-    return () => abortController.abort()
-  }, [activeIdentifier, otpSent])
+    otpCodeToAutoSubmit.current = null
+    otpForm.current?.requestSubmit()
+  }, [isBusy, otpCode, otpSent])
 
   const requestEmailOtp = async (parsed: Extract<ParsedIdentifier, { channel: 'EMAIL' }>) => {
     const res = await sendEmailOtp(parsed.email, mode, otpFullName.trim())
@@ -303,6 +349,7 @@ export default function AuthForm({
     }
 
     try {
+      startWebOtpListener()
       const auth = getFirebaseAuth()
       const recaptchaConfigPromise = prepareFirebasePhoneAuth()
       const verifierPromise = buildRecaptchaVerifier()
@@ -313,29 +360,37 @@ export default function AuthForm({
 
       const confirmation = await signInWithPhoneNumber(auth, parsed.phone, verifier)
 
-      clearRecaptchaVerifier()
+      try {
+        await resetRecaptchaVerifier()
+      } catch (resetError) {
+        console.error('Firebase reCAPTCHA post-send reset failed:', resetError)
+      }
+
       setConfirmationResult(confirmation)
       setActiveIdentifier(parsed)
       setOtpSent(true)
       setResendTimer(60)
       setSuccess(`A 6-digit verification code has been sent to ${getMaskedIdentifier(parsed)}`)
-
-      void buildRecaptchaVerifier().catch(() => {
-        // Resend retries setup if background preparation fails.
-      })
     } catch (phoneError: any) {
+      stopWebOtpListener()
       console.error('Firebase phone OTP send failed:', {
         code: phoneError?.code,
         message: phoneError?.message,
         name: phoneError?.name,
       })
-      clearRecaptchaVerifier()
+
+      try {
+        await resetRecaptchaVerifier()
+      } catch (resetError) {
+        console.error('Firebase reCAPTCHA reset failed:', resetError)
+      }
+
       setError(getFirebasePhoneErrorMessage(phoneError, isPhoneEmulatorEnabled))
     }
   }
 
   const requestOtp = async () => {
-    if (isBusy) {
+    if (isBusy || otpRequestInFlight.current) {
       return
     }
 
@@ -344,6 +399,7 @@ export default function AuthForm({
     setError('')
     setSuccess('')
     setOtpCode('')
+    otpCodeToAutoSubmit.current = null
 
     if (!parsed) {
       setError('Enter a valid email address or Indian phone number.')
@@ -355,6 +411,7 @@ export default function AuthForm({
       return
     }
 
+    otpRequestInFlight.current = true
     setOperation('REQUEST_OTP')
     try {
       if (parsed.channel === 'EMAIL') {
@@ -366,6 +423,7 @@ export default function AuthForm({
       console.error('OTP request failed:', requestError)
       setError('Unable to send the verification code. Please try again.')
     } finally {
+      otpRequestInFlight.current = false
       setOperation(null)
     }
   }
@@ -465,6 +523,7 @@ export default function AuthForm({
       return
     }
 
+    stopWebOtpListener()
     setOperation('VERIFY_OTP')
     try {
       if (activeIdentifier.channel === 'PHONE') {
@@ -489,13 +548,15 @@ export default function AuthForm({
     setOtpCode('')
     setActiveIdentifier(null)
     setConfirmationResult(null)
+    otpCodeToAutoSubmit.current = null
+    stopWebOtpListener()
     setError('')
     setSuccess('')
   }
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div id={recaptchaContainerId} className="sr-only" />
+      <div id={recaptchaContainerId} />
 
       <div className="grid grid-cols-2 rounded-2xl border border-white/10 bg-[#080909] p-1">
         {(['LOGIN', 'REGISTER'] as AuthMode[]).map((option) => (
@@ -641,7 +702,7 @@ export default function AuthForm({
           </div>
         </form>
       ) : (
-        <form onSubmit={handleVerifyOtp} className="space-y-4">
+        <form ref={otpForm} onSubmit={handleVerifyOtp} className="space-y-4">
           <div>
             <div className="mb-2 flex items-center justify-between gap-3">
               <label htmlFor="otp_code" className="block text-xs font-bold uppercase tracking-[0.14em] text-ink/48">
@@ -654,6 +715,8 @@ export default function AuthForm({
                   setOtpCode('')
                   setActiveIdentifier(null)
                   setConfirmationResult(null)
+                  otpCodeToAutoSubmit.current = null
+                  stopWebOtpListener()
                   setError('')
                   setSuccess('')
                 }}
@@ -675,7 +738,11 @@ export default function AuthForm({
                 maxLength={6}
                 autoComplete="one-time-code"
                 value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                onChange={(e) => {
+                  const code = e.target.value.replace(/\D/g, '').slice(0, 6)
+                  otpCodeToAutoSubmit.current = code.length === 6 ? code : null
+                  setOtpCode(code)
+                }}
                 className={`${fieldClassName} text-center text-lg tracking-[0.38em]`}
                 placeholder="123456"
               />
