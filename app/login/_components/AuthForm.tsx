@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useEffect, useRef, useState, useTransition } from 'react'
-import { sendEmailOtp, verifyEmailOtp, verifyPhoneOtp, checkPhoneExists } from '@/actions/auth'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { sendEmailOtp, verifyEmailOtp, verifyPhoneOtp, checkPhoneExists, type PhoneCheckResult } from '@/actions/auth'
 import { createClient } from '@/lib/supabase/client'
-import { getFirebaseAuth, isFirebaseClientConfigured } from '@/lib/firebase/client'
+import { getFirebaseAuth, isFirebaseClientConfigured, prepareFirebasePhoneAuth } from '@/lib/firebase/client'
 import { isFirebaseAuthEmulatorEnabled } from '@/lib/firebase/emulator'
 import {
   ConfirmationResult,
@@ -23,6 +23,7 @@ import {
 
 type AuthMode = 'LOGIN' | 'REGISTER'
 type OtpChannel = 'EMAIL' | 'PHONE'
+type AuthOperation = 'REQUEST_OTP' | 'VERIFY_OTP' | 'GOOGLE' | null
 
 type ParsedIdentifier =
   | { channel: 'EMAIL'; email: string }
@@ -131,16 +132,21 @@ export default function AuthForm({
   const [activeIdentifier, setActiveIdentifier] = useState<ParsedIdentifier | null>(null)
   const [otpFullName, setOtpFullName] = useState('')
   const [otpCode, setOtpCode] = useState('')
-  const [pending, startTransition] = useTransition()
+  const [operation, setOperation] = useState<AuthOperation>(null)
   const [error, setError] = useState(initialError || '')
   const [success, setSuccess] = useState('')
   const [resendTimer, setResendTimer] = useState(0)
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
   const recaptchaVerifier = useRef<RecaptchaVerifier | null>(null)
+  const recaptchaBuildPromise = useRef<Promise<RecaptchaVerifier> | null>(null)
 
   const parsedIdentifier = parseIdentifier(identifier)
   const selectedChannel = parsedIdentifier?.channel || null
   const isPhoneEmulatorEnabled = isFirebaseAuthEmulatorEnabled()
+  const isBusy = operation !== null
+  const isOtpRequestPending = operation === 'REQUEST_OTP'
+  const isOtpVerificationPending = operation === 'VERIFY_OTP'
+  const isGooglePending = operation === 'GOOGLE'
 
   useEffect(() => {
     if (resendTimer <= 0) {
@@ -154,111 +160,153 @@ export default function AuthForm({
     return () => window.clearInterval(interval)
   }, [resendTimer])
 
+  const clearRecaptchaVerifier = useCallback(() => {
+    try {
+      recaptchaVerifier.current?.clear()
+    } catch (_) {
+      // The widget may already have been removed by Firebase.
+    }
+    recaptchaVerifier.current = null
+    recaptchaBuildPromise.current = null
+    document.getElementById(`${recaptchaContainerId}-inner`)?.remove()
+  }, [])
+
+  // Builds a RecaptchaVerifier, reusing existing one if valid to avoid
+  // slow re-rendering on every OTP request
+  const buildRecaptchaVerifier = useCallback(async (): Promise<RecaptchaVerifier> => {
+    const host = document.getElementById(recaptchaContainerId)
+    if (!host) throw new Error('reCAPTCHA host element not found.')
+
+    if (recaptchaBuildPromise.current) {
+      return recaptchaBuildPromise.current
+    }
+
+    if (recaptchaVerifier.current) {
+      return recaptchaVerifier.current
+    }
+
+    const buildPromise = (async () => {
+      try {
+        document.getElementById(`${recaptchaContainerId}-inner`)?.remove()
+        const inner = document.createElement('div')
+        inner.id = `${recaptchaContainerId}-inner`
+        host.appendChild(inner)
+
+        const auth = getFirebaseAuth()
+        auth.languageCode = 'en'
+
+        const verifier = new RecaptchaVerifier(auth, inner.id, { size: 'invisible' })
+        recaptchaVerifier.current = verifier
+        await verifier.render()
+        return verifier
+      } catch (buildError) {
+        clearRecaptchaVerifier()
+        throw buildError
+      } finally {
+        recaptchaBuildPromise.current = null
+      }
+    })()
+
+    recaptchaBuildPromise.current = buildPromise
+    return buildPromise
+  }, [clearRecaptchaVerifier])
+
   useEffect(() => {
     return () => {
       clearRecaptchaVerifier()
     }
+  }, [clearRecaptchaVerifier])
+
+  useEffect(() => {
+    if (!isFirebaseClientConfigured()) {
+      return
+    }
+
+    void prepareFirebasePhoneAuth().catch(() => {
+      // Phone submission retries this cached setup and reports any failure.
+    })
   }, [])
 
-  const clearRecaptchaVerifier = () => {
-    try {
-      recaptchaVerifier.current?.clear()
-    } catch (_) {
-      // ignore errors during cleanup — the widget may already be gone
-    }
-    recaptchaVerifier.current = null
-    document.getElementById(`${recaptchaContainerId}-inner`)?.remove()
-  }
-
-  // Builds a RecaptchaVerifier, reusing existing one if valid to avoid
-  // slow re-rendering on every OTP request
-  const buildRecaptchaVerifier = async (): Promise<RecaptchaVerifier> => {
-    const host = document.getElementById(recaptchaContainerId)
-    if (!host) throw new Error('reCAPTCHA host element not found.')
-
-    // Reuse existing verifier if it has a rendered widget
-    if (recaptchaVerifier.current) {
-      try {
-        // Check if the widget is already rendered by trying to get its widget ID
-        const widgetId = (recaptchaVerifier.current as any).widgetId
-        if (widgetId !== undefined && widgetId !== null) {
-          return recaptchaVerifier.current
-        }
-      } catch (_) {
-        // Verifier exists but not properly rendered, will rebuild
-      }
+  useEffect(() => {
+    if (selectedChannel !== 'PHONE' || !isFirebaseClientConfigured()) {
+      return
     }
 
-    // Clear any stale inner div
-    document.getElementById(`${recaptchaContainerId}-inner`)?.remove()
-    const inner = document.createElement('div')
-    inner.id = `${recaptchaContainerId}-inner`
-    host.appendChild(inner)
-
-    const auth = getFirebaseAuth()
-    auth.languageCode = 'en'
-
-    const verifier = new RecaptchaVerifier(auth, inner.id, { size: 'invisible' })
-    recaptchaVerifier.current = verifier
-
-    // Explicitly render and wait — prevents the "null style" crash that
-    // occurs when signInWithPhoneNumber tries to use an un-rendered widget
-    await verifier.render()
-
-    return verifier
-  }
-
-  const requestEmailOtp = (parsed: Extract<ParsedIdentifier, { channel: 'EMAIL' }>) => {
-    startTransition(async () => {
-      const res = await sendEmailOtp(parsed.email, mode, otpFullName.trim())
-      if (res?.error) {
-        setError(res.error)
-        return
-      }
-
-      setActiveIdentifier(parsed)
-      setOtpSent(true)
-      setResendTimer(60)
-      setSuccess(`A 6-digit verification code has been sent to ${parsed.email}`)
+    void buildRecaptchaVerifier().catch(() => {
+      // The request path retries setup and displays a useful Firebase error.
     })
+  }, [buildRecaptchaVerifier, selectedChannel])
+
+  const requestEmailOtp = async (parsed: Extract<ParsedIdentifier, { channel: 'EMAIL' }>) => {
+    const res = await sendEmailOtp(parsed.email, mode, otpFullName.trim())
+    if (res?.error) {
+      setError(res.error)
+      return
+    }
+
+    setActiveIdentifier(parsed)
+    setOtpSent(true)
+    setResendTimer(60)
+    setSuccess(`A 6-digit verification code has been sent to ${parsed.email}`)
   }
 
-  const requestPhoneOtp = (parsed: Extract<ParsedIdentifier, { channel: 'PHONE' }>) => {
+  const requestPhoneOtp = async (parsed: Extract<ParsedIdentifier, { channel: 'PHONE' }>) => {
     if (!isFirebaseClientConfigured()) {
       setError('Phone OTP is not configured yet. Add the Firebase web app environment variables first.')
       return
     }
 
-    startTransition(async () => {
-      try {
-        const auth = getFirebaseAuth()
+    try {
+      const auth = getFirebaseAuth()
+      const recaptchaConfigPromise = prepareFirebasePhoneAuth()
+      const verifierPromise = buildRecaptchaVerifier()
+      const phoneCheckPromise: Promise<PhoneCheckResult> = mode === 'LOGIN'
+        ? checkPhoneExists(parsed.phone)
+        : Promise.resolve({ exists: true })
+      const [, verifier, phoneCheck] = await Promise.all([
+        recaptchaConfigPromise,
+        verifierPromise,
+        phoneCheckPromise,
+      ])
 
-        // Reuse existing verifier if valid, otherwise build new one
-        // Only clear on error to avoid slow re-rendering
-        const verifier = await buildRecaptchaVerifier()
-
-        const confirmation = await signInWithPhoneNumber(auth, parsed.phone, verifier)
-
-        setConfirmationResult(confirmation)
-        setActiveIdentifier(parsed)
-        setOtpSent(true)
-        setResendTimer(60)
-        setSuccess(`A 6-digit verification code has been sent to ${getMaskedIdentifier(parsed)}`)
-      } catch (phoneError: any) {
-        console.error('Firebase phone OTP send failed:', {
-          code: phoneError?.code,
-          message: phoneError?.message,
-          name: phoneError?.name,
-          stack: phoneError?.stack,
-        })
-        // Clear verifier only on error to force fresh one next time
-        clearRecaptchaVerifier()
-        setError(getFirebasePhoneErrorMessage(phoneError, isPhoneEmulatorEnabled))
+      if (phoneCheck.error) {
+        setError(phoneCheck.error)
+        return
       }
-    })
+
+      if (!phoneCheck.exists) {
+        setError(phoneCheck.message || 'This phone number is not registered. Please register first.')
+        return
+      }
+
+      const confirmation = await signInWithPhoneNumber(auth, parsed.phone, verifier)
+
+      clearRecaptchaVerifier()
+      setConfirmationResult(confirmation)
+      setActiveIdentifier(parsed)
+      setOtpSent(true)
+      setResendTimer(60)
+      setSuccess(`A 6-digit verification code has been sent to ${getMaskedIdentifier(parsed)}`)
+
+      void buildRecaptchaVerifier().catch(() => {
+        // Resend retries setup if background preparation fails.
+      })
+    } catch (phoneError: any) {
+      console.error('Firebase phone OTP send failed:', {
+        code: phoneError?.code,
+        message: phoneError?.message,
+        name: phoneError?.name,
+      })
+      clearRecaptchaVerifier()
+      setError(getFirebasePhoneErrorMessage(phoneError, isPhoneEmulatorEnabled))
+    }
   }
 
-  const requestOtp = () => {
+  const requestOtp = async () => {
+    if (isBusy) {
+      return
+    }
+
     const parsed = parseIdentifier(identifier)
 
     setError('')
@@ -275,41 +323,36 @@ export default function AuthForm({
       return
     }
 
-    if (parsed.channel === 'EMAIL') {
-      requestEmailOtp(parsed)
-      return
+    setOperation('REQUEST_OTP')
+    try {
+      if (parsed.channel === 'EMAIL') {
+        await requestEmailOtp(parsed)
+      } else {
+        await requestPhoneOtp(parsed)
+      }
+    } catch (requestError) {
+      console.error('OTP request failed:', requestError)
+      setError('Unable to send the verification code. Please try again.')
+    } finally {
+      setOperation(null)
     }
-
-    // For phone OTP in LOGIN mode, check if user exists first
-    if (mode === 'LOGIN' && parsed.channel === 'PHONE') {
-      startTransition(async () => {
-        const res = await checkPhoneExists(parsed.phone)
-        if (res?.error) {
-          setError(res.error)
-          return
-        }
-        if (!res.exists) {
-          setError(res.message || 'This phone number is not registered. Please register first.')
-          return
-        }
-        requestPhoneOtp(parsed)
-      })
-      return
-    }
-
-    requestPhoneOtp(parsed)
   }
 
   const handleSendOtp = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    requestOtp()
+    void requestOtp()
   }
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
+    if (isBusy) {
+      return
+    }
+
     setError('')
     setSuccess('')
+    setOperation('GOOGLE')
 
-    startTransition(async () => {
+    try {
       const supabase = createClient()
       const nextPath = getSafeRedirectPath(redirectTo)
       const callbackUrl = new URL('/api/auth/callback', window.location.origin)
@@ -328,47 +371,54 @@ export default function AuthForm({
       if (googleError) {
         setError(googleError.message)
       }
-    })
+    } catch (googleError) {
+      console.error('Google sign-in failed:', googleError)
+      setError('Unable to continue with Google. Please try again.')
+    } finally {
+      setOperation(null)
+    }
   }
 
-  const verifyPhoneCode = (parsed: Extract<ParsedIdentifier, { channel: 'PHONE' }>) => {
+  const verifyPhoneCode = async (parsed: Extract<ParsedIdentifier, { channel: 'PHONE' }>) => {
     if (!confirmationResult) {
       setError('Please request a new phone OTP.')
       return
     }
 
-    startTransition(async () => {
-      try {
-        const credential = await confirmationResult.confirm(otpCode)
-        const firebaseIdToken = await credential.user.getIdToken()
-        const res = await verifyPhoneOtp(firebaseIdToken, mode, redirectTo, otpFullName.trim())
+    try {
+      const credential = await confirmationResult.confirm(otpCode)
+      const firebaseIdToken = await credential.user.getIdToken()
+      const res = await verifyPhoneOtp(firebaseIdToken, mode, redirectTo, otpFullName.trim())
 
-        if (res?.error) {
-          setConfirmationResult(null)
-          setOtpSent(false)
-          setOtpCode('')
-          setError(`${res.error} Please request a fresh phone OTP.`)
-          return
-        }
-
-        setSuccess(`Phone number ${getMaskedIdentifier(parsed)} verified.`)
-      } catch (phoneError: any) {
-        console.error('Firebase phone OTP verification failed:', phoneError)
-        if (phoneError?.code === 'auth/invalid-verification-id') {
-          setConfirmationResult(null)
-          setOtpSent(false)
-          setOtpCode('')
-          setError('This phone OTP session is no longer valid. Please request a fresh code.')
-          return
-        }
-
-        setError(phoneError?.message || 'Invalid phone OTP code.')
+      if (res?.error) {
+        setConfirmationResult(null)
+        setOtpSent(false)
+        setOtpCode('')
+        setError(`${res.error} Please request a fresh phone OTP.`)
+        return
       }
-    })
+
+      setSuccess(`Phone number ${getMaskedIdentifier(parsed)} verified.`)
+    } catch (phoneError: any) {
+      console.error('Firebase phone OTP verification failed:', phoneError)
+      if (phoneError?.code === 'auth/invalid-verification-id') {
+        setConfirmationResult(null)
+        setOtpSent(false)
+        setOtpCode('')
+        setError('This phone OTP session is no longer valid. Please request a fresh code.')
+        return
+      }
+
+      setError(phoneError?.message || 'Invalid phone OTP code.')
+    }
   }
 
-  const handleVerifyOtp = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleVerifyOtp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (isBusy) {
+      return
+    }
+
     setError('')
     setSuccess('')
 
@@ -382,17 +432,22 @@ export default function AuthForm({
       return
     }
 
-    if (activeIdentifier.channel === 'PHONE') {
-      verifyPhoneCode(activeIdentifier)
-      return
-    }
-
-    startTransition(async () => {
-      const res = await verifyEmailOtp(activeIdentifier.email, otpCode, redirectTo, otpFullName.trim())
-      if (res?.error) {
-        setError(res.error)
+    setOperation('VERIFY_OTP')
+    try {
+      if (activeIdentifier.channel === 'PHONE') {
+        await verifyPhoneCode(activeIdentifier)
+      } else {
+        const res = await verifyEmailOtp(activeIdentifier.email, otpCode, redirectTo, otpFullName.trim())
+        if (res?.error) {
+          setError(res.error)
+        }
       }
-    })
+    } catch (verificationError) {
+      console.error('OTP verification failed:', verificationError)
+      setError('Unable to verify the code. Please try again.')
+    } finally {
+      setOperation(null)
+    }
   }
 
   const switchMode = (nextMode: AuthMode) => {
@@ -415,6 +470,7 @@ export default function AuthForm({
             key={option}
             type="button"
             onClick={() => switchMode(option)}
+            disabled={isBusy}
             className={`h-10 rounded-xl text-xs font-extrabold uppercase tracking-[0.16em] transition-all duration-200 ${
               mode === option
                 ? 'bg-ink text-[#080909] shadow-[0_14px_34px_-22px_rgba(242,239,234,0.9)]'
@@ -501,9 +557,12 @@ export default function AuthForm({
             </p>
           </div>
 
-          <button type="submit" disabled={pending} className={`${primaryButtonClassName} mt-2`}>
-            {pending ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+          <button type="submit" disabled={isBusy} aria-busy={isOtpRequestPending} className={`${primaryButtonClassName} mt-2`}>
+            {isOtpRequestPending ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Sending OTP...</span>
+              </>
             ) : (
               <>
                 <span className="whitespace-nowrap">
@@ -523,11 +582,15 @@ export default function AuthForm({
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              disabled={pending}
+              disabled={isBusy}
+              aria-busy={isGooglePending}
               className={secondaryButtonClassName}
             >
-              {pending ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
+              {isGooglePending ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Connecting...</span>
+                </>
               ) : (
                 <>
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white">
@@ -583,9 +646,12 @@ export default function AuthForm({
             </div>
           </div>
 
-          <button type="submit" disabled={pending} className={`${primaryButtonClassName} mt-2`}>
-            {pending ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+          <button type="submit" disabled={isBusy} aria-busy={isOtpVerificationPending} className={`${primaryButtonClassName} mt-2`}>
+            {isOtpVerificationPending ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Verifying...</span>
+              </>
             ) : (
               <>
                 <span className="whitespace-nowrap">
@@ -598,8 +664,8 @@ export default function AuthForm({
 
           <button
             type="button"
-            onClick={requestOtp}
-            disabled={pending || resendTimer > 0}
+            onClick={() => void requestOtp()}
+            disabled={isBusy || resendTimer > 0}
             className="mx-auto block text-xs font-bold text-ink/45 underline underline-offset-4 transition-colors hover:text-gold disabled:cursor-not-allowed disabled:text-ink/25 disabled:no-underline"
           >
             {resendTimer > 0 ? `Resend code in ${resendTimer}s` : 'Resend verification code'}
