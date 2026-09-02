@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { cloudinaryLoaderFor } from "@/lib/cloudinaryImage";
 
 interface HeroSlide {
   id?: string;
@@ -134,6 +135,7 @@ export default function Hero({
               src={background.image_url}
               alt="Hero background"
               fill
+              loader={cloudinaryLoaderFor(background.image_url)}
               priority={i === 0}
               sizes="100vw"
               className={`object-cover object-center transition-opacity duration-700 ${
@@ -258,6 +260,7 @@ export default function Hero({
                   src={cardA.image_url || "/hero-img.png"}
                   alt={a.line1}
                   fill
+                  loader={cloudinaryLoaderFor(cardA.image_url)}
                   unoptimized={isLocalPublicImage(cardA.image_url || "/hero-img.png")}
                   sizes="112px"
                   className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
@@ -289,6 +292,7 @@ export default function Hero({
                   src={cardB.image_url || "/hero-img.png"}
                   alt={b.line1}
                   fill
+                  loader={cloudinaryLoaderFor(cardB.image_url)}
                   unoptimized={isLocalPublicImage(cardB.image_url || "/hero-img.png")}
                   sizes="112px"
                   className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
@@ -355,6 +359,7 @@ export default function Hero({
                   src={slide.image_url || "/hero-img.png"}
                   alt={s.line1}
                   fill
+                  loader={cloudinaryLoaderFor(slide.image_url)}
                   unoptimized={isLocalPublicImage(slide.image_url || "/hero-img.png")}
                   sizes="50vw"
                   className="object-cover object-center"

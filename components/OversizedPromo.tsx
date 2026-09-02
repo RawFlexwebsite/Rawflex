@@ -44,7 +44,6 @@ export default function OversizedPromo({
                sizes="100vw"
                unoptimized
                style={{ width: "100%", height: "auto", display: "block" }}
-               priority
              />
             {/* fade bottom into text */}
             <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0b0b0a] to-transparent" />

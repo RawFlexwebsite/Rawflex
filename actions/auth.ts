@@ -14,12 +14,6 @@ export type AuthResult = {
   success?: boolean
 }
 
-export type PhoneCheckResult = {
-  error?: string
-  exists?: boolean
-  message?: string
-}
-
 type SupabaseAuthUserWithPhone = {
   id: string
   email?: string | null
@@ -376,43 +370,6 @@ export async function sendEmailOtp(
   }
 }
 
-export async function checkPhoneExists(phone: string): Promise<PhoneCheckResult> {
-  if (!phone) {
-    return { error: 'Phone number is required' }
-  }
-
-  const adminSupabase = createAdminClient()
-  const phoneValues = getPhoneSearchValues(phone)
-
-  const { data: profiles, error: profileError } = await adminSupabase
-    .from('profiles')
-    .select('id')
-    .in('phone', phoneValues)
-    .limit(1)
-
-  if (profileError) {
-    console.error('Phone profile lookup failed:', getErrorDetails(profileError))
-    return { error: 'Unable to check this phone number. Please try again.' }
-  }
-
-  if (profiles && profiles.length > 0) {
-    return { exists: true }
-  }
-
-  try {
-    const adminAuth = adminSupabase.auth.admin
-    const authUser = await findSupabaseAuthUserByPhone(adminAuth, phoneValues)
-    if (authUser) {
-      return { exists: true }
-    }
-  } catch (error) {
-    console.error('Phone auth user lookup failed:', getErrorDetails(error))
-    return { error: 'Unable to check this phone account. Please try again.' }
-  }
-
-  return { exists: false, message: 'This phone number is not registered. Please register first.' }
-}
-
 export async function verifyEmailOtp(
   email: string,
   otp: string,
@@ -587,7 +544,7 @@ export async function verifyPhoneOtp(
 
   const { data: profiles, error: profileError } = await adminSupabase
     .from('profiles')
-    .select('*')
+    .select('id, email, full_name, role, phone')
     .in('phone', phoneValues)
     .limit(1)
 
@@ -597,47 +554,47 @@ export async function verifyPhoneOtp(
   }
 
   let finalProfile = profiles?.[0] || null
-  let authUser = null
 
-  if (!finalProfile) {
-    try {
-      authUser = await findSupabaseAuthUserByPhone(adminAuth, phoneValues)
-    } catch (error: any) {
-      console.error('Phone auth user lookup failed:', getErrorDetails(error))
-      return { error: 'Unable to check this phone account. Please try again.' }
-    }
-  }
-
-  if (mode === 'LOGIN' && !finalProfile && !authUser) {
+  if (mode === 'LOGIN' && !finalProfile) {
     return { error: 'User does not exist, first create an account' }
   }
 
   if (!finalProfile) {
     const nameToUse = fullName?.trim() || 'Customer'
-    let userId = authUser?.id
-    let profileEmail = authUser?.email || getPhoneOnlyEmail(verifiedPhone)
+    let profileEmail = getPhoneOnlyEmail(verifiedPhone)
+    const { data: newUser, error: createError } = await adminAuth.createUser({
+      email: profileEmail,
+      email_confirm: true,
+      phone: verifiedPhone,
+      phone_confirm: true,
+      user_metadata: {
+        full_name: nameToUse,
+        phone: localPhone,
+        role: 'customer',
+        login_provider: 'firebase_phone',
+      },
+    })
 
-    if (!authUser) {
-      const { data: newUser, error: createError } = await adminAuth.createUser({
-        email: profileEmail,
-        email_confirm: true,
-        phone: verifiedPhone,
-        phone_confirm: true,
-        user_metadata: {
-          full_name: nameToUse,
-          phone: localPhone,
-          role: 'customer',
-          login_provider: 'firebase_phone',
-        },
-      })
+    let userId = newUser?.user?.id
 
-      if (createError || !newUser?.user) {
+    if (createError || !userId) {
+      let existingAuthUser = null
+
+      try {
+        existingAuthUser = await findSupabaseAuthUserByPhone(adminAuth, phoneValues)
+      } catch (lookupError: any) {
+        console.error('Phone auth user recovery failed:', getErrorDetails(lookupError))
+      }
+
+      if (!existingAuthUser) {
         console.error('Phone auth user creation failed:', createError)
         return { error: createError?.message || 'Failed to create phone account.' }
       }
 
-      userId = newUser.user.id
-      profileEmail = newUser.user.email || profileEmail
+      userId = existingAuthUser.id
+      profileEmail = existingAuthUser.email || profileEmail
+    } else {
+      profileEmail = newUser.user?.email || profileEmail
     }
 
     const { data: insertedProfile, error: insertError } = await adminSupabase
@@ -667,10 +624,10 @@ export async function verifyPhoneOtp(
     role: finalProfile.role,
   })
 
-  revalidatePath('/', 'layout')
   if (redirectTo === 'NO_REDIRECT') {
     return { success: true }
   }
+  revalidatePath('/', 'layout')
   redirect(redirectTo && redirectTo.startsWith('/') ? redirectTo : '/')
 }
 

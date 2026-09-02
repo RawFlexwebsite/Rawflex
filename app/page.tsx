@@ -5,12 +5,10 @@ import OversizedPromo from "@/components/OversizedPromo";
 import NewDrops from "@/components/NewDrops";
 import BestSellersLookbook from "@/components/BestSellersLookbook";
 import Footer from "@/components/Footer";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { selectDisplayVariant } from "@/lib/productVariants";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 const PRODUCT_SELECT = `
   id, name, slug, category_id, is_featured, is_active, badge, rating, color_name,
@@ -83,8 +81,7 @@ function oversizedSectionSettings(settings: any) {
 }
 
 export default async function Home() {
-  const supabase = await createClient();
-  const adminSupabase = createAdminClient();
+  const supabase = createAdminClient();
 
   const [
     { data: categoriesData },
@@ -94,7 +91,7 @@ export default async function Home() {
     { data: homeBannerImagesData },
     { data: lookbookImagesData, error: lookbookImagesError },
   ] = await Promise.all([
-    adminSupabase.from("categories").select("*"),
+    supabase.from("categories").select("*"),
     supabase
       .from("products")
       .select(PRODUCT_SELECT)

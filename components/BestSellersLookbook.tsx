@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronRight, Star } from "lucide-react";
+import { cloudinaryLoaderFor } from "@/lib/cloudinaryImage";
 
 const BASE = "https://bwudwdyzqkvpbymheybq.supabase.co/storage/v1/object/public/rawflex";
 
@@ -119,6 +120,7 @@ function LookbookCard({
           src={item.image_url}
           alt={`RAWFLEX lookbook style ${index + 1}`}
           fill
+          loader={cloudinaryLoaderFor(item.image_url)}
           sizes="(max-width: 639px) calc(100vw - 40px), (max-width: 1023px) 50vw, 20vw"
           className="object-cover object-center"
         />
@@ -178,6 +180,7 @@ export default function BestSellersLookbook({
                       src={item.image}
                       alt={item.name}
                       fill
+                      loader={cloudinaryLoaderFor(item.image)}
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 220px"
                       className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
                     />

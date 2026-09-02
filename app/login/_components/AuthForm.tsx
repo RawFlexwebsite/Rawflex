@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { sendEmailOtp, verifyEmailOtp, verifyPhoneOtp, checkPhoneExists, type PhoneCheckResult } from '@/actions/auth'
+import { sendEmailOtp, verifyEmailOtp, verifyPhoneOtp } from '@/actions/auth'
 import { createClient } from '@/lib/supabase/client'
 import { getFirebaseAuth, isFirebaseClientConfigured, prepareFirebasePhoneAuth } from '@/lib/firebase/client'
 import { isFirebaseAuthEmulatorEnabled } from '@/lib/firebase/emulator'
@@ -24,6 +24,15 @@ import {
 type AuthMode = 'LOGIN' | 'REGISTER'
 type OtpChannel = 'EMAIL' | 'PHONE'
 type AuthOperation = 'REQUEST_OTP' | 'VERIFY_OTP' | 'GOOGLE' | null
+
+type SmsOtpCredential = Credential & {
+  code?: string
+}
+
+type SmsOtpRequestOptions = CredentialRequestOptions & {
+  otp: { transport: ['sms'] }
+  signal: AbortSignal
+}
 
 type ParsedIdentifier =
   | { channel: 'EMAIL'; email: string }
@@ -237,6 +246,43 @@ export default function AuthForm({
     })
   }, [buildRecaptchaVerifier, selectedChannel])
 
+  useEffect(() => {
+    if (
+      !otpSent ||
+      activeIdentifier?.channel !== 'PHONE' ||
+      !('OTPCredential' in window) ||
+      !navigator.credentials
+    ) {
+      return
+    }
+
+    const abortController = new AbortController()
+
+    void navigator.credentials
+      .get({
+        otp: { transport: ['sms'] },
+        signal: abortController.signal,
+      } as SmsOtpRequestOptions)
+      .then((credential) => {
+        const code = (credential as SmsOtpCredential | null)?.code
+          ?.replace(/\D/g, '')
+          .slice(0, 6)
+
+        if (code?.length === 6) {
+          setOtpCode(code)
+        }
+      })
+      .catch((credentialError: unknown) => {
+        if (credentialError instanceof DOMException && credentialError.name === 'AbortError') {
+          return
+        }
+
+        // Browsers without a compatible SMS format can still use manual entry.
+      })
+
+    return () => abortController.abort()
+  }, [activeIdentifier, otpSent])
+
   const requestEmailOtp = async (parsed: Extract<ParsedIdentifier, { channel: 'EMAIL' }>) => {
     const res = await sendEmailOtp(parsed.email, mode, otpFullName.trim())
     if (res?.error) {
@@ -260,24 +306,10 @@ export default function AuthForm({
       const auth = getFirebaseAuth()
       const recaptchaConfigPromise = prepareFirebasePhoneAuth()
       const verifierPromise = buildRecaptchaVerifier()
-      const phoneCheckPromise: Promise<PhoneCheckResult> = mode === 'LOGIN'
-        ? checkPhoneExists(parsed.phone)
-        : Promise.resolve({ exists: true })
-      const [, verifier, phoneCheck] = await Promise.all([
+      const [, verifier] = await Promise.all([
         recaptchaConfigPromise,
         verifierPromise,
-        phoneCheckPromise,
       ])
-
-      if (phoneCheck.error) {
-        setError(phoneCheck.error)
-        return
-      }
-
-      if (!phoneCheck.exists) {
-        setError(phoneCheck.message || 'This phone number is not registered. Please register first.')
-        return
-      }
 
       const confirmation = await signInWithPhoneNumber(auth, parsed.phone, verifier)
 
@@ -388,7 +420,7 @@ export default function AuthForm({
     try {
       const credential = await confirmationResult.confirm(otpCode)
       const firebaseIdToken = await credential.user.getIdToken()
-      const res = await verifyPhoneOtp(firebaseIdToken, mode, redirectTo, otpFullName.trim())
+      const res = await verifyPhoneOtp(firebaseIdToken, mode, 'NO_REDIRECT', otpFullName.trim())
 
       if (res?.error) {
         setConfirmationResult(null)
@@ -399,6 +431,7 @@ export default function AuthForm({
       }
 
       setSuccess(`Phone number ${getMaskedIdentifier(parsed)} verified.`)
+      window.location.assign(getSafeRedirectPath(redirectTo))
     } catch (phoneError: any) {
       console.error('Firebase phone OTP verification failed:', phoneError)
       if (phoneError?.code === 'auth/invalid-verification-id') {
@@ -634,7 +667,10 @@ export default function AuthForm({
               <input
                 id="otp_code"
                 type="text"
+                name="one-time-code"
                 inputMode="numeric"
+                pattern="[0-9]*"
+                enterKeyHint="done"
                 required
                 maxLength={6}
                 autoComplete="one-time-code"
