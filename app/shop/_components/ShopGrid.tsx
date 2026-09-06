@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { productLoaderFor } from '@/lib/cloudinaryImage'
 
 type Product = {
   id: string
@@ -33,8 +34,17 @@ type ShopGridProps = {
 }
 
 function handleProductImageError(event: React.SyntheticEvent<HTMLImageElement>) {
-  event.currentTarget.onerror = null
-  event.currentTarget.src = '/image.png'
+  const target = event.currentTarget
+  const src = target.src || ''
+  if (/_w(400|800|1200|1600)\.webp/.test(src)) {
+    const fallbackSrc = src.replace(/_w(400|800|1200|1600)\.webp/, '')
+    if (fallbackSrc !== src) {
+      target.src = fallbackSrc
+      return
+    }
+  }
+  target.onerror = null
+  target.src = '/image.png'
 }
 
 export default function ShopGrid({ initialProducts, categories, selectedCategory }: ShopGridProps) {
@@ -184,6 +194,7 @@ export default function ShopGrid({ initialProducts, categories, selectedCategory
                         src={p.image_url}
                         alt={p.name}
                         fill
+                        loader={productLoaderFor(p.image_url)}
                         sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
                         priority={index < 4}
                         loading={index < 4 ? undefined : 'lazy'}

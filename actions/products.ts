@@ -3,12 +3,95 @@
 import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { v2 as cloudinary } from 'cloudinary'
+import sharp from 'sharp'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export type ActionResult = {
   error?: string
   success?: boolean
+}
+
+const PRODUCT_IMAGE_VARIANT_WIDTHS = [400, 800, 1200, 1600] as const
+
+function extractCloudinaryPublicId(url: string): string | null {
+  if (!url || !url.startsWith('https://res.cloudinary.com/')) return null
+  const uploadIndex = url.indexOf('/image/upload/')
+  if (uploadIndex === -1) return null
+
+  let rest = url.slice(uploadIndex + '/image/upload/'.length)
+  // Strip inline transforms if any
+  if (rest.includes('/') && !rest.startsWith('v') && !rest.startsWith('rawflex/')) {
+    const firstSlash = rest.indexOf('/')
+    const segment = rest.slice(0, firstSlash)
+    if (segment.includes(',') || segment.startsWith('w_') || segment.startsWith('c_') || segment.startsWith('f_')) {
+      rest = rest.slice(firstSlash + 1)
+    }
+  }
+
+  // Strip version tag
+  rest = rest.replace(/^v\d+\//, '')
+  // Strip extension
+  const publicId = rest.replace(/\.[a-zA-Z0-9]+$/, '')
+  return publicId.replace(/_w(400|800|1200|1600)$/, '')
+}
+
+export async function processAndUploadProductImageVariants(
+  source: string | Buffer,
+  basePublicId: string
+): Promise<string[]> {
+  if (!configureCloudinary()) {
+    throw new Error('Cloudinary is not configured')
+  }
+
+  let inputBuffer: Buffer
+  if (typeof source === 'string') {
+    const response = await fetch(source)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image source for optimization: ${response.statusText}`)
+    }
+    const arrayBuffer = await response.arrayBuffer()
+    inputBuffer = Buffer.from(arrayBuffer)
+  } else {
+    inputBuffer = source
+  }
+
+  const uploadedUrls: string[] = []
+
+  // Approach A: Always generate all 4 filename slots (400, 800, 1200, 1600).
+  // With withoutEnlargement: true, sharp preserves aspect ratio and will NOT upscale small images,
+  // storing the largest available un-upscaled WebP at larger filename slots to guarantee zero 404s.
+  for (const width of PRODUCT_IMAGE_VARIANT_WIDTHS) {
+    // Rule 1, 3, 4: Scale proportionally, convert to WebP quality 82 from ORIGINAL buffer
+    const resizedBuffer = await sharp(inputBuffer)
+      .resize(width, null, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer()
+
+    const variantPublicId = `${basePublicId}_w${width}`
+
+    const result = await new Promise<any>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          public_id: variantPublicId,
+          format: 'webp',
+          resource_type: 'image',
+          overwrite: true,
+        },
+        (error, uploadResult) => {
+          if (error) reject(error)
+          else resolve(uploadResult)
+        }
+      )
+      uploadStream.end(resizedBuffer)
+    })
+
+    if (result?.secure_url) {
+      uploadedUrls.push(result.secure_url)
+    }
+  }
+
+  return uploadedUrls
 }
 
 function slugify(text: string): string {
@@ -187,6 +270,7 @@ export async function createProduct(
   const isActive = formData.get('is_active') === 'on'
   const isFeatured = formData.get('is_featured') === 'on'
   const imageUrl = formData.get('image_url') as string
+  const cloudinaryPublicId = formData.get('cloudinary_public_id') as string
   const price = formData.get('price') as string
   const useGlobalSizeChart = formData.get('use_global_size_chart') === 'true'
   const sizeChartImageUrl = formData.get('size_chart_image_url') as string
@@ -236,9 +320,19 @@ export async function createProduct(
 
   // Also add the image to product_images table so it appears in the gallery
   if (imageUrl) {
+    const finalPublicId = cloudinaryPublicId || extractCloudinaryPublicId(imageUrl)
+    if (imageUrl && finalPublicId && configureCloudinary()) {
+      try {
+        await processAndUploadProductImageVariants(imageUrl, finalPublicId)
+      } catch (e) {
+        console.error('Failed to generate product image WebP variants on createProduct:', e)
+      }
+    }
+
     await supabase.from('product_images').insert({
       product_id: id,
       image_url: imageUrl,
+      cloudinary_public_id: finalPublicId || null,
       sort_order: 0,
       color_name: null,
     })
@@ -404,6 +498,16 @@ export async function addProductImage(
   if (admin.ok === false) return { error: admin.error }
   const supabase = admin.adminClient
 
+  const finalPublicId = cloudinaryPublicId || extractCloudinaryPublicId(imageUrl)
+
+  if (imageUrl && finalPublicId && configureCloudinary()) {
+    try {
+      await processAndUploadProductImageVariants(imageUrl, finalPublicId)
+    } catch (e) {
+      console.error('Failed to generate product image WebP variants on addProductImage:', e)
+    }
+  }
+
   // Get max sort_order
   const { data: maxSort } = await supabase
     .from('product_images')
@@ -418,7 +522,7 @@ export async function addProductImage(
   const { error } = await supabase.from('product_images').insert({
     product_id: productId,
     image_url: imageUrl,
-    cloudinary_public_id: cloudinaryPublicId || null,
+    cloudinary_public_id: finalPublicId || null,
     sort_order: nextSort,
     color_name: colorName || null,
   })
@@ -451,13 +555,20 @@ export async function deleteProductImage(imageId: string, productId: string): Pr
     .eq('id', imageId)
     .single()
 
-  if (image?.cloudinary_public_id && !configureCloudinary()) {
+  const publicId = image?.cloudinary_public_id || (image?.image_url ? extractCloudinaryPublicId(image.image_url) : null)
+
+  if (publicId && !configureCloudinary()) {
     return { error: 'Cloudinary is not configured, so this image cannot be deleted safely.' }
   }
 
-  if (image?.cloudinary_public_id) {
+  if (publicId) {
     try {
-      await cloudinary.uploader.destroy(image.cloudinary_public_id, { resource_type: 'image' })
+      await cloudinary.uploader.destroy(publicId, { resource_type: 'image' })
+      for (const w of PRODUCT_IMAGE_VARIANT_WIDTHS) {
+        try {
+          await cloudinary.uploader.destroy(`${publicId}_w${w}`, { resource_type: 'image' })
+        } catch {}
+      }
     } catch (error: any) {
       return { error: error?.message || 'Failed to delete image from Cloudinary' }
     }

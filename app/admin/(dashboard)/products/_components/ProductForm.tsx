@@ -28,6 +28,7 @@ export default function ProductForm({ product, categories, otherProducts = [], o
   )
   const [pending, startTransition] = useTransition()
   const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [imageCloudinaryPublicId, setImageCloudinaryPublicId] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
 
   // Parse initial colors from JSON or legacy format
@@ -592,6 +593,7 @@ export default function ProductForm({ product, categories, otherProducts = [], o
               Product Image (Optional)
             </label>
             <input type="hidden" name="image_url" value={imageUrl || ''} />
+            <input type="hidden" name="cloudinary_public_id" value={imageCloudinaryPublicId || ''} />
             
             {imageUrl ? (
               <div className="relative w-full max-w-sm aspect-video rounded-xl border border-cream-line overflow-hidden bg-cream-deep">
@@ -603,7 +605,10 @@ export default function ProductForm({ product, categories, otherProducts = [], o
                 />
                 <button
                   type="button"
-                  onClick={() => setImageUrl(null)}
+                  onClick={() => {
+                    setImageUrl(null)
+                    setImageCloudinaryPublicId(null)
+                  }}
                   className="absolute top-2 right-2 p-1.5 bg-panel/90 hover:bg-panel2 text-ink/80 hover:text-red-600 rounded-lg shadow-sm backdrop-blur-sm transition-all"
                 >
                   <X className="w-4 h-4" />
@@ -620,6 +625,7 @@ export default function ProductForm({ product, categories, otherProducts = [], o
                 }}
                 onSuccess={(result: any) => {
                   setImageUrl(result.info.secure_url)
+                  setImageCloudinaryPublicId(result.info.public_id || null)
                   setIsUploading(false)
                 }}
                 onOpen={() => setIsUploading(true)}

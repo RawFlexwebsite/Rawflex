@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { X } from 'lucide-react'
+import { productLoaderFor } from '@/lib/cloudinaryImage'
 
 type ProductGalleryProps = {
   images: string[]
@@ -16,8 +17,17 @@ type Point = {
 }
 
 function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
-  event.currentTarget.onerror = null
-  event.currentTarget.src = '/image.png'
+  const target = event.currentTarget
+  const src = target.src || ''
+  if (/_w(400|800|1200|1600)\.webp/.test(src)) {
+    const fallbackSrc = src.replace(/_w(400|800|1200|1600)\.webp/, '')
+    if (fallbackSrc !== src) {
+      target.src = fallbackSrc
+      return
+    }
+  }
+  target.onerror = null
+  target.src = '/image.png'
 }
 
 export default function ProductGallery({ images, productName, badge }: ProductGalleryProps) {
@@ -337,6 +347,7 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
                 src={img}
                 alt={`Thumbnail ${index + 1}`}
                 fill
+                loader={productLoaderFor(img)}
                 sizes="90px"
                 loading={index === 0 ? 'eager' : 'lazy'}
                 onError={handleImageError}
@@ -370,6 +381,7 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
                 src={img}
                 alt={`${productName} - Image ${index + 1}`}
                 fill
+                loader={productLoaderFor(img)}
                 sizes="(min-width: 768px) 640px, 100vw"
                 priority={index === 0}
                 style={activeIndex === index ? zoomStyle : undefined}
@@ -452,6 +464,7 @@ export default function ProductGallery({ images, productName, badge }: ProductGa
                 src={displayImages[activeIndex]}
                 alt={`${productName} - enlarged image ${activeIndex + 1}`}
                 fill
+                loader={productLoaderFor(displayImages[activeIndex])}
                 sizes="100vw"
                 onError={handleImageError}
                 className="absolute inset-0 h-full w-full object-contain"
