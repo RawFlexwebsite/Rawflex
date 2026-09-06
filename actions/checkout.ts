@@ -78,45 +78,87 @@ async function getShippingSettings(supabase: any) {
   }
 }
 
-async function resolveVariant(supabase: any, item: CheckoutCartItem) {
-  if (item.variant_id && UUID_PATTERN.test(item.variant_id)) {
-    const { data: variant, error } = await supabase
-      .from('product_variants')
-      .select('id, product_id, variant_name, price, stock_quantity, is_active')
-      .eq('id', item.variant_id)
-      .maybeSingle()
-
-    if (error) throw new Error(error.message)
-    if (variant) return variant
-  }
-
-  const { data: fallbackVariant, error: fallbackError } = await supabase
-    .from('product_variants')
-    .select('id, product_id, variant_name, price, stock_quantity, is_active')
-    .eq('product_id', item.id)
-    .eq('is_active', true)
-    .order('price', { ascending: true })
-    .limit(1)
-    .maybeSingle()
-
-  if (fallbackError) throw new Error(fallbackError.message)
-  return fallbackVariant
-}
-
 async function resolveOrderItems(supabase: any, cartItems: CheckoutCartItem[]) {
   if (!cartItems.length) {
     return { error: 'Your cart is empty.', items: [] as ResolvedOrderItem[], subtotal: 0 }
   }
 
-  const grouped = new Map<string, ResolvedOrderItem>()
-
+  // 1. Validate initial cart item shape & quantities
   for (const item of cartItems) {
     const quantity = validQuantity(item.quantity)
     if (!item.id || !quantity) {
       return { error: 'Invalid cart item quantity.', items: [] as ResolvedOrderItem[], subtotal: 0 }
     }
+  }
 
-    const variant = await resolveVariant(supabase, item)
+  // 2. Collect direct variant IDs that match UUID pattern
+  const directVariantIds = new Set<string>()
+  for (const item of cartItems) {
+    if (item.variant_id && UUID_PATTERN.test(item.variant_id)) {
+      directVariantIds.add(item.variant_id)
+    }
+  }
+
+  // 3. Batched direct variant query
+  const variantsById = new Map<string, any>()
+  if (directVariantIds.size > 0) {
+    const { data: directVariants, error: directError } = await supabase
+      .from('product_variants')
+      .select('id, product_id, variant_name, price, stock_quantity, is_active')
+      .in('id', Array.from(directVariantIds))
+
+    if (directError) throw new Error(directError.message)
+    if (directVariants) {
+      for (const v of directVariants) {
+        variantsById.set(v.id, v)
+      }
+    }
+  }
+
+  // 4. Determine items requiring fallback variant query by product_id
+  const fallbackProductIds = new Set<string>()
+  for (const item of cartItems) {
+    const hasDirect = item.variant_id && UUID_PATTERN.test(item.variant_id) && variantsById.has(item.variant_id)
+    if (!hasDirect) {
+      fallbackProductIds.add(item.id)
+    }
+  }
+
+  // 5. Batched fallback variant query
+  const fallbackVariantByProductId = new Map<string, any>()
+  if (fallbackProductIds.size > 0) {
+    const { data: fallbackVariants, error: fallbackError } = await supabase
+      .from('product_variants')
+      .select('id, product_id, variant_name, price, stock_quantity, is_active')
+      .in('product_id', Array.from(fallbackProductIds))
+      .eq('is_active', true)
+
+    if (fallbackError) throw new Error(fallbackError.message)
+    if (fallbackVariants) {
+      const groupedByProduct = new Map<string, any[]>()
+      for (const v of fallbackVariants) {
+        const list = groupedByProduct.get(v.product_id) || []
+        list.push(v)
+        groupedByProduct.set(v.product_id, list)
+      }
+
+      for (const [productId, list] of groupedByProduct.entries()) {
+        list.sort((a, b) => Number(a.price) - Number(b.price))
+        fallbackVariantByProductId.set(productId, list[0])
+      }
+    }
+  }
+
+  // 6. Map variants for all items and collect product IDs
+  const resolvedVariants: Array<{ item: CheckoutCartItem; quantity: number; variant: any }> = []
+  const productIds = new Set<string>()
+
+  for (const item of cartItems) {
+    const quantity = validQuantity(item.quantity)!
+    const variant =
+      (item.variant_id && UUID_PATTERN.test(item.variant_id) && variantsById.get(item.variant_id)) ||
+      fallbackVariantByProductId.get(item.id)
+
     if (!variant || !variant.is_active) {
       return { error: 'One or more selected variants are no longer available.', items: [] as ResolvedOrderItem[], subtotal: 0 }
     }
@@ -125,13 +167,32 @@ async function resolveOrderItems(supabase: any, cartItems: CheckoutCartItem[]) {
       return { error: `${variant.variant_name || 'Selected variant'} does not have enough stock.`, items: [] as ResolvedOrderItem[], subtotal: 0 }
     }
 
-    const { data: product, error: productError } = await supabase
+    resolvedVariants.push({ item, quantity, variant })
+    productIds.add(variant.product_id)
+  }
+
+  // 7. Batched product query
+  const productsById = new Map<string, any>()
+  if (productIds.size > 0) {
+    const { data: products, error: productError } = await supabase
       .from('products')
       .select('id, name, is_active')
-      .eq('id', variant.product_id)
-      .single()
+      .in('id', Array.from(productIds))
 
-    if (productError || !product?.is_active) {
+    if (productError) throw new Error(productError.message)
+    if (products) {
+      for (const p of products) {
+        productsById.set(p.id, p)
+      }
+    }
+  }
+
+  // 8. Group variants, validate products and cumulative stock
+  const grouped = new Map<string, ResolvedOrderItem>()
+
+  for (const { quantity, variant } of resolvedVariants) {
+    const product = productsById.get(variant.product_id)
+    if (!product || !product.is_active) {
       return { error: 'One or more products are no longer available.', items: [] as ResolvedOrderItem[], subtotal: 0 }
     }
 

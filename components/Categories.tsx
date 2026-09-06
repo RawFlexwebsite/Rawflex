@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import Reveal from "./Reveal";
 
 interface Category {
@@ -16,7 +17,7 @@ export default function Categories({ categories = [] }: { categories?: Category[
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-2 md:gap-3">
           {categories.slice(0, 7).map((cat, i) => (
             <Reveal key={cat.id} delay={(i % 5) as any}>
-              <a
+              <Link
                 href={`/shop?category=${cat.id}`}
                 className="group relative block aspect-[10/19] overflow-hidden rounded-md border border-white/10 hover:border-[#D4A82C]/50 transition-colors"
               >
@@ -42,7 +43,7 @@ export default function Categories({ categories = [] }: { categories?: Category[
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </div>
-              </a>
+              </Link>
             </Reveal>
           ))}
         </div>

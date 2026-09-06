@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cloudinaryLoaderFor } from "@/lib/cloudinaryImage";
 
@@ -76,10 +77,6 @@ function slideLines(slide: HeroSlide) {
     label: slide.button_text || "VIEW",
     link: slide.button_link || "/shop",
   };
-}
-
-function isLocalPublicImage(src?: string | null) {
-  return !!src && src.startsWith("/");
 }
 
 export default function Hero({
@@ -159,7 +156,6 @@ export default function Hero({
           alt="Model wearing RAWFLEX oversized tee"
           fill
           priority
-          unoptimized
           sizes="40vw"
           className="object-contain object-bottom"
         />
@@ -215,7 +211,7 @@ export default function Hero({
 
             {/* CTA */}
             <div className="flex justify-start mt-5 lg:mt-9">
-              <a
+              <Link
                 href={leftText.button_link}
                 className="inline-flex items-center gap-2 border border-[#D4A82C] text-[#D4A82C] font-bold text-[10px] md:text-sm tracking-[0.18em] uppercase px-5 py-3 md:px-7 md:py-4 hover:bg-[#D4A82C] hover:text-[#0a0909] transition-all duration-300"
               >
@@ -229,7 +225,7 @@ export default function Hero({
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 12h15" />
                 </svg>
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -241,7 +237,6 @@ export default function Hero({
                width={800}
                height={1060}
                priority
-               unoptimized
                sizes="100vw"
                style={{ width: "100%", height: "auto", display: "block", transform: "translateX(12%)" }}
              />
@@ -251,7 +246,7 @@ export default function Hero({
           {/* ── RIGHT: Two slide cards + nav ── */}
           <div className="hidden lg:flex flex-col gap-5 w-[290px] xl:w-[320px]">
             {/* Slide Card A */}
-            <a
+            <Link
               href={a.link}
               className="group flex items-center gap-5 rounded-sm border border-white/15 bg-white/5 backdrop-blur-sm hover:border-[#D4A82C]/60 hover:bg-white/10 transition-all duration-300 overflow-hidden p-4"
             >
@@ -261,7 +256,6 @@ export default function Hero({
                   alt={a.line1}
                   fill
                   loader={cloudinaryLoaderFor(cardA.image_url)}
-                  unoptimized={isLocalPublicImage(cardA.image_url || "/hero-img.png")}
                   sizes="112px"
                   className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                 />
@@ -280,10 +274,10 @@ export default function Hero({
                   </svg>
                 </span>
               </div>
-            </a>
+            </Link>
 
             {/* Slide Card B */}
-            <a
+            <Link
               href={b.link}
               className="group flex items-center gap-5 rounded-sm border border-white/15 bg-white/5 backdrop-blur-sm hover:border-[#D4A82C]/60 hover:bg-white/10 transition-all duration-300 overflow-hidden p-4"
             >
@@ -293,7 +287,6 @@ export default function Hero({
                   alt={b.line1}
                   fill
                   loader={cloudinaryLoaderFor(cardB.image_url)}
-                  unoptimized={isLocalPublicImage(cardB.image_url || "/hero-img.png")}
                   sizes="112px"
                   className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                 />
@@ -312,7 +305,7 @@ export default function Hero({
                   </svg>
                 </span>
               </div>
-            </a>
+            </Link>
 
             {/* Slide counter + nav */}
             <div className="flex items-center justify-end gap-4 mt-1">
@@ -349,7 +342,7 @@ export default function Hero({
         {[cardA, cardB].map((slide) => {
           const s = slideLines(slide);
           return (
-            <a
+            <Link
               key={slide.id || s.line1}
               href={s.link}
               className="group block rounded-sm border border-white/10 bg-[#111]/80 overflow-hidden"
@@ -360,7 +353,6 @@ export default function Hero({
                   alt={s.line1}
                   fill
                   loader={cloudinaryLoaderFor(slide.image_url)}
-                  unoptimized={isLocalPublicImage(slide.image_url || "/hero-img.png")}
                   sizes="50vw"
                   className="object-cover object-center"
                 />
@@ -376,7 +368,7 @@ export default function Hero({
                   {s.label}
                 </p>
               </div>
-            </a>
+            </Link>
           );
         })}
 

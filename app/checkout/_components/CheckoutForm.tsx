@@ -416,12 +416,12 @@ export default function CheckoutForm({ shipping, isLoggedIn, hasCoupons = false 
             </svg>
             Confirm via WhatsApp
           </a>
-          <a
+          <Link
             href="/"
             className="w-full inline-flex items-center justify-center py-3 text-sm text-ink/60 hover:text-emerald font-semibold transition-colors"
           >
             Return to Store
-          </a>
+          </Link>
         </div>
       </div>
     )

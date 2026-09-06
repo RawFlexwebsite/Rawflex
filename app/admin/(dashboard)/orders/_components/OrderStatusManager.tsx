@@ -284,7 +284,7 @@ export function OrderStatusManager({
           <div>
             <label className="block text-xs font-semibold text-ink/70 mb-1">Length cm</label>
             <input
-              disabled={isPending || Boolean(initialShiprocket?.shiprocket_shipment_id)}
+              disabled={isPending}
               type="number"
               min="1"
               step="0.1"
@@ -296,7 +296,7 @@ export function OrderStatusManager({
           <div>
             <label className="block text-xs font-semibold text-ink/70 mb-1">Breadth cm</label>
             <input
-              disabled={isPending || Boolean(initialShiprocket?.shiprocket_shipment_id)}
+              disabled={isPending}
               type="number"
               min="1"
               step="0.1"
@@ -308,7 +308,7 @@ export function OrderStatusManager({
           <div>
             <label className="block text-xs font-semibold text-ink/70 mb-1">Height cm</label>
             <input
-              disabled={isPending || Boolean(initialShiprocket?.shiprocket_shipment_id)}
+              disabled={isPending}
               type="number"
               min="1"
               step="0.1"
@@ -320,7 +320,7 @@ export function OrderStatusManager({
           <div>
             <label className="block text-xs font-semibold text-ink/70 mb-1">Weight kg</label>
             <input
-              disabled={isPending || Boolean(initialShiprocket?.shiprocket_shipment_id)}
+              disabled={isPending}
               type="number"
               min="0.01"
               step="0.01"

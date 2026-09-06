@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { BadgePercent, Boxes, ShieldCheck, Truck } from 'lucide-react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -56,7 +57,6 @@ export default async function LoginPage({
                 alt="RAWFLEX oversized black tee editorial"
                 fill
                 priority
-                unoptimized
                 sizes="(min-width: 1024px) 52vw, 100vw"
                 className="object-cover object-[12%_50%]"
               />
@@ -135,13 +135,13 @@ export default async function LoginPage({
 
                 <p className="mx-auto mt-5 max-w-sm text-center text-[11px] leading-5 text-ink/30">
                   By continuing you agree to RAWFLEX&apos;s{' '}
-                  <a href="/policies/terms" className="underline underline-offset-2 transition-colors hover:text-gold/80">
+                  <Link href="/policies/terms" className="underline underline-offset-2 transition-colors hover:text-gold/80">
                     Terms
-                  </a>{' '}
+                  </Link>{' '}
                   and{' '}
-                  <a href="/policies/privacy" className="underline underline-offset-2 transition-colors hover:text-gold/80">
+                  <Link href="/policies/privacy" className="underline underline-offset-2 transition-colors hover:text-gold/80">
                     Privacy Policy
-                  </a>
+                  </Link>
                   .
                 </p>
               </div>

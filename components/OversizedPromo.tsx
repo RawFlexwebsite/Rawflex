@@ -25,8 +25,6 @@ export default function OversizedPromo({
 }: {
   settings?: OversizedSectionSettings;
 }) {
-  const isLocalBackgroundImage = settings.background_image_url.startsWith("/");
-
   return (
     <section className="relative bg-[#0a0909] py-4 md:py-5">
       <div className="max-w-wrap mx-auto px-5 md:px-8">
@@ -42,7 +40,6 @@ export default function OversizedPromo({
                width={800}
                height={900}
                sizes="100vw"
-               unoptimized
                style={{ width: "100%", height: "auto", display: "block" }}
              />
             {/* fade bottom into text */}
@@ -75,7 +72,6 @@ export default function OversizedPromo({
             src={settings.background_image_url}
             alt=""
             fill
-            unoptimized={isLocalBackgroundImage}
             sizes="1400px"
             className="z-0 object-cover object-center"
           />
@@ -86,7 +82,6 @@ export default function OversizedPromo({
               src="/OVERSIZED_person.webp"
               alt="Model wearing an oversized black RAWFLEX tee"
               fill
-              unoptimized
               sizes="(max-width: 1024px) 60vw, 720px"
               className="object-contain object-bottom sm:object-left-bottom"
             />
