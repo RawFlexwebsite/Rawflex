@@ -16,6 +16,7 @@ export default function PakistaniEditBanner() {
               alt="The Acid Wash Edit - Limited Drop"
               fill
               priority
+              unoptimized
               sizes="(max-width: 1024px) 100vw, 550px"
               className="object-cover object-center transition-all duration-700 hover:scale-[1.03]"
             />
@@ -29,6 +30,7 @@ export default function PakistaniEditBanner() {
                 src="/rawflex_logo.png"
                 alt="RAWFLEX Logo"
                 fill
+                unoptimized
                 className="object-contain"
               />
             </div>

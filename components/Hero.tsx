@@ -156,6 +156,7 @@ export default function Hero({
           alt="Model wearing RAWFLEX oversized tee"
           fill
           priority
+          unoptimized
           sizes="40vw"
           className="object-contain object-bottom"
         />
@@ -237,6 +238,7 @@ export default function Hero({
                width={800}
                height={1060}
                priority
+               unoptimized
                sizes="100vw"
                style={{ width: "100%", height: "auto", display: "block", transform: "translateX(12%)" }}
              />
@@ -256,6 +258,7 @@ export default function Hero({
                   alt={a.line1}
                   fill
                   loader={cloudinaryLoaderFor(cardA.image_url)}
+                  unoptimized={!cardA.image_url?.startsWith("https://res.cloudinary.com/")}
                   sizes="112px"
                   className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                 />
@@ -287,6 +290,7 @@ export default function Hero({
                   alt={b.line1}
                   fill
                   loader={cloudinaryLoaderFor(cardB.image_url)}
+                  unoptimized={!cardB.image_url?.startsWith("https://res.cloudinary.com/")}
                   sizes="112px"
                   className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                 />
@@ -353,6 +357,7 @@ export default function Hero({
                   alt={s.line1}
                   fill
                   loader={cloudinaryLoaderFor(slide.image_url)}
+                  unoptimized={!slide.image_url?.startsWith("https://res.cloudinary.com/")}
                   sizes="50vw"
                   className="object-cover object-center"
                 />

@@ -39,6 +39,7 @@ export default function OversizedPromo({
                alt="Model wearing an oversized black RAWFLEX tee"
                width={800}
                height={900}
+               unoptimized
                sizes="100vw"
                style={{ width: "100%", height: "auto", display: "block" }}
              />
@@ -72,6 +73,7 @@ export default function OversizedPromo({
             src={settings.background_image_url}
             alt=""
             fill
+            unoptimized={!settings.background_image_url?.startsWith("https://res.cloudinary.com/")}
             sizes="1400px"
             className="z-0 object-cover object-center"
           />
@@ -82,6 +84,7 @@ export default function OversizedPromo({
               src="/OVERSIZED_person.webp"
               alt="Model wearing an oversized black RAWFLEX tee"
               fill
+              unoptimized
               sizes="(max-width: 1024px) 60vw, 720px"
               className="object-contain object-bottom sm:object-left-bottom"
             />

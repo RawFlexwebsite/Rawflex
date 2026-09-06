@@ -2,6 +2,7 @@ import Image from "next/image";
 import Reveal from "./Reveal";
 import BotanicalDivider from "./BotanicalDivider";
 import { IconTulip } from "./Icons";
+import { cloudinaryLoaderFor } from "@/lib/cloudinaryImage";
 import {
   DEFAULT_ABOUT_SECTION,
   type AboutSectionSettings,
@@ -29,6 +30,8 @@ export default function Story({
                   src={settings.image_url}
                   alt="RAWFLEX streetwear in the wild"
                   fill
+                  loader={cloudinaryLoaderFor(settings.image_url)}
+                  unoptimized={!settings.image_url?.startsWith("https://res.cloudinary.com/")}
                   sizes="(max-width: 768px) 90vw, 460px"
                   className="object-cover"
                 />

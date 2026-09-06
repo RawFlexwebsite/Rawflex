@@ -152,6 +152,7 @@ export default function Header() {
               height={72}
               className="object-contain w-[64px] h-[64px]"
               priority
+              unoptimized
             />
           </Link>
 
@@ -187,6 +188,7 @@ export default function Header() {
               height={96}
               className="object-contain md:w-[80px] md:h-[80px] lg:w-[96px] lg:h-[96px]"
               priority
+              unoptimized
             />
           </Link>
 
